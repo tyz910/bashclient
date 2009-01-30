@@ -26,6 +26,7 @@ type
     AbyssBashNavBarGroupControl: TdxNavBarGroupControl;
     AbyssBestBashNavBarGroupControl: TdxNavBarGroupControl;
     AbyssTopBashNavBarGroupControl: TdxNavBarGroupControl;
+    procedure FormCreate(Sender: TObject);
   private
     { Private declarations }
   public
@@ -38,5 +39,18 @@ var
 implementation
 
 {$R *.dfm}
+
+procedure TMainForm.FormCreate(Sender: TObject);
+begin
+  // Меняем размер формы на более компактный.
+  MainForm.Width := 366;
+  MainForm.Height := 450;
+
+  // Переходим на BashTab
+  MainPageControl.TabIndex := 0;
+
+  // Убираем TestTab
+  //TestTabSheet.TabVisible := False;
+end;
 
 end.
