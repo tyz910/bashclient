@@ -1,8 +1,8 @@
 object MainForm: TMainForm
-  Left = 392
-  Top = 361
-  Width = 565
-  Height = 374
+  Left = 411
+  Top = 210
+  Width = 667
+  Height = 542
   Caption = 'bClient'
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
@@ -11,21 +11,22 @@ object MainForm: TMainForm
   Font.Name = 'MS Sans Serif'
   Font.Style = []
   OldCreateOrder = False
+  OnCreate = FormCreate
   PixelsPerInch = 96
   TextHeight = 13
   object TestStatusBar: TStatusBar
     Left = 0
-    Top = 321
-    Width = 557
+    Top = 489
+    Width = 659
     Height = 19
     Panels = <>
   end
   object MainPageControl: TPageControl
     Left = 0
     Top = 0
-    Width = 557
-    Height = 321
-    ActivePage = BashTabSheet
+    Width = 659
+    Height = 489
+    ActivePage = TestTabSheet
     Align = alClient
     Style = tsFlatButtons
     TabOrder = 1
@@ -34,8 +35,8 @@ object MainForm: TMainForm
       object BashNavBar: TdxNavBar
         Left = 0
         Top = 0
-        Width = 549
-        Height = 290
+        Width = 651
+        Height = 458
         Align = alClient
         ActiveGroupIndex = 0
         DefaultStyles.GroupHeader.BackColor = clBtnFace
@@ -103,16 +104,16 @@ object MainForm: TMainForm
         object MainBashNavBarGroupControl: TdxNavBarGroupControl
           Left = 0
           Top = 19
-          Width = 549
-          Height = 214
+          Width = 651
+          Height = 382
           TabOrder = 1
           GroupIndex = 0
           OriginalHeight = 41
         end
         object AbyssBestBashNavBarGroupControl: TdxNavBarGroupControl
           Left = 0
-          Top = 233
-          Width = 549
+          Top = 401
+          Width = 651
           Height = 19
           TabOrder = 3
           GroupIndex = 1
@@ -120,8 +121,8 @@ object MainForm: TMainForm
         end
         object AbyssTopBashNavBarGroupControl: TdxNavBarGroupControl
           Left = 0
-          Top = 252
-          Width = 549
+          Top = 420
+          Width = 651
           Height = 19
           TabOrder = 4
           GroupIndex = 2
@@ -129,8 +130,8 @@ object MainForm: TMainForm
         end
         object AbyssBashNavBarGroupControl: TdxNavBarGroupControl
           Left = 0
-          Top = 271
-          Width = 549
+          Top = 439
+          Width = 651
           Height = 19
           TabOrder = 2
           GroupIndex = 3
@@ -156,13 +157,14 @@ object MainForm: TMainForm
       object lbl1: TLabel
         Left = 0
         Top = 0
-        Width = 425
-        Height = 290
-        Align = alLeft
+        Width = 651
+        Height = 26
+        Align = alTop
         AutoSize = False
         Caption = 
           #1044#1083#1103' '#1088#1072#1079#1084#1077#1097#1077#1085#1080#1103' '#1074#1089#1087#1086#1084#1086#1075#1072#1090#1077#1083#1100#1085#1099#1093' '#1082#1086#1084#1087#1086#1085#1077#1085#1090#1086#1074' '#1080' '#1090#1077#1089#1090#1086#1074'. '#1042' '#1088#1077#1083#1080#1079' '#1074#1077#1088 +
           #1089#1080#1080' '#1091#1073#1088#1072#1090#1100'.'
+        WordWrap = True
       end
     end
   end
