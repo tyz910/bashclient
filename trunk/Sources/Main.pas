@@ -45,6 +45,8 @@ type
     ts1: TTabSheet;
     htmlvwr1: THTMLViewer;
     MainHtmlBrowser: THTMLViewer;
+    TestMemoMainTabSheet: TTabSheet;
+    TestMemo: TMemo;
     procedure FormCreate(Sender: TObject);
     procedure btn1Click(Sender: TObject);
     procedure FormShow(Sender: TObject);
@@ -53,16 +55,17 @@ type
       Shift: TShiftState; WheelDelta: Integer; MousePos: TPoint;
       var Handled: Boolean);
     procedure FormKeyPress(Sender: TObject; var Key: Char);
-    procedure MainHtmlBrowserKeyPress(Sender: TObject; var Key: Char);
-    procedure LogListBoxKeyPress(Sender: TObject; var Key: Char);
   private
     { Private declarations }
   public
     { Public declarations }
   end;
+type QuoteArray = array [0..100] of string;
 
 var
   MainForm: TMainForm;
+  CurrentMainQuotesArray: QuoteArray;
+  CurrentMainQuoteNumber: Integer;
 
 implementation
 
@@ -73,6 +76,7 @@ procedure WriteLog(Str: string);
 begin
   Str := '[' + TimeToStr(Time) + ']  ' + Str;
   MainForm.LogListBox.AddItem(Str,MainForm);
+  MainForm.LogListBox.ItemIndex := MainForm.LogListBox.Items.Capacity - 1;
 end;
 
 // Открытие-закрытие тестаба
@@ -83,13 +87,15 @@ begin
           WriteLog('TestTab закрыт - открываем и переходим на лог');
           MainForm.TestTabSheet.TabVisible := True;
           WriteLog('Переходим на TestTab.');
-          // Реализовать переход на тесттаб
+          MainForm.MainPageControl.ActivePageIndex := MainForm.MainPageControl.PageCount - 1;
           WriteLog('Переходим на LogTab.');
           MainForm.TestPageControl.TabIndex := 0;
        end
   else begin
           WriteLog('TestTab открыт - закрываем и переходим на главную баша');
           MainForm.TestTabSheet.TabVisible := False;
+          WriteLog('Переходим на BashTab.');
+          MainForm.MainPageControl.ActivePageIndex := 0;
        end;
 end;
 
@@ -113,8 +119,25 @@ end;
 // Переход на новую цитату
 procedure BashNext;
 begin
-  WriteLog('Конец цитаты');
-  ShowMessage('Конец. Нужно переходить на новую цитату');
+  if NOT(CurrentMainQuoteNumber = StrToInt(CurrentMainQuotesArray[0]))
+  then begin
+          CurrentMainQuoteNumber := CurrentMainQuoteNumber + 1;
+          MainForm.MainHtmlBrowser.LoadFromStream(TStringStream.Create(CurrentMainQuotesArray[CurrentMainQuoteNumber]));
+          MainForm.MainHtmlBrowser.VScrollBar.Position := -1000; // Временный код
+       end;
+  WriteLog('Переход на след. цитату с CurrentNumber ' + IntToStr(CurrentMainQuoteNumber));
+end;
+
+// Переход на предыдущую цитату
+procedure BashPrevious;
+begin
+  if NOT(CurrentMainQuoteNumber = 1)
+  then begin
+          CurrentMainQuoteNumber := CurrentMainQuoteNumber - 1;
+          MainForm.MainHtmlBrowser.LoadFromStream(TStringStream.Create(CurrentMainQuotesArray[CurrentMainQuoteNumber]));
+          MainForm.MainHtmlBrowser.VScrollBar.Position := -1000; // Временный код
+       end;
+  WriteLog('Переход на пред. цитату с CurrentNumber ' + IntToStr(CurrentMainQuoteNumber));     
 end;
 
 // Получаем html код страницы по указанной ссылке
@@ -129,6 +152,59 @@ function BashGetMainAsString: string;
 begin
   WriteLog('Загрузка html главной баша в строку');
   BashGetMainAsString := GetStringFromUrl('http://bash.org.ru/');
+end;
+
+procedure TestProc;
+var i:Integer;
+S:string;
+q: array [0..100] of string;
+begin
+  i:=0;
+  //S:=MainForm.TestMemo.Text;
+  S:= BashGetMainAsString;
+  MainForm.Memo1.Clear;
+  WriteLog('Начало разбора');
+  while not (Pos('<div class="q">',S) = 0) do
+  begin
+    S := Copy(S, Pos('<div class="q">',S),Length(S));
+    S := Copy(S, Pos('<div>',S),Length(S));
+    i:= i + 1;
+    q[i] := Copy(S, Pos('<div>',S),Pos('</div>',S)+5);
+    if (q[i] = '') or (Pos('http://lol.bash.org.ru/',q[i]) <> 0) then i:=i-1;
+    MainForm.Memo1.Lines.Add('=========='+IntToStr(i)+'==========');
+    MainForm.Memo1.Lines.Add(q[i]);
+    MainForm.Memo1.Lines.Add('========================');
+  end;
+  WriteLog('Конец разбора');
+  //ShowMessage(IntToStr(i));
+  q[0] := IntToStr(i);
+  MainForm.MainHtmlBrowser.LoadFromStream(TStringStream.Create(q[1]));
+end;
+
+// Получаем массив цитат с главной
+function GetCurrentMainQuotes: QuoteArray;
+  var i:Integer;
+  S:string;
+  q: QuoteArray;
+begin
+  i:=0;
+
+  //S:=MainForm.TestMemo.Text;  // для тестов
+  S:= BashGetMainAsString;
+
+  WriteLog('Начало разбора html');
+  while not (Pos('<div class="q">',S) = 0) do
+  begin
+    S := Copy(S, Pos('<div class="q">',S),Length(S));
+    S := Copy(S, Pos('<div>',S),Length(S));
+    i:= i + 1;
+    q[i] := Copy(S, Pos('<div>',S),Pos('</div>',S)+5);
+    if (q[i] = '') or (Pos('http://lol.bash.org.ru/',q[i]) <> 0) then i:=i-1;
+  end;
+  WriteLog('Конец разбора html. Цитат: ' + IntToStr(i));
+  q[0] := IntToStr(i);
+
+  GetCurrentMainQuotes := q;
 end;
 
 procedure TMainForm.FormCreate(Sender: TObject);
@@ -146,13 +222,14 @@ begin
   TestPageControl.TabIndex := 0;
 
   // Убираем TestTab
-  //TestTabSheet.TabVisible := False;
+  TestTabSheet.TabVisible := False;
 
-  // Временный код
-  // Переводим строку в поток и выводим с форматированием
-  MainHtmlBrowser.LoadFromStream(TStringStream.Create(Memo1.Text));
-  //MainHtmlBrowser.LoadTextFromString(Memo1.Text);
-  WriteLog('Отображение тестовой цитаты');
+  // Загружаем главную в массив и отображаем первую цитату
+  CurrentMainQuotesArray := GetCurrentMainQuotes;
+  CurrentMainQuoteNumber := 1;
+  MainHtmlBrowser.LoadFromStream(TStringStream.Create(CurrentMainQuotesArray[CurrentMainQuoteNumber]));
+
+  //TestProc;
 
 end;
 
@@ -185,30 +262,17 @@ begin
   // Переход на новую цитату при прокрутке колесом мыши
   if ((MainHtmlBrowser.VScrollBarPosition = MainHtmlBrowser.VScrollBarRange) or (MainHtmlBrowser.VScrollBarRange < 0)) and (WheelDelta < 0)
   then BashNext;
+
+  if ((MainHtmlBrowser.VScrollBarPosition = 0) and (WheelDelta > 0))
+  then BashPrevious;
+
 end;
 
-/////////////////////////////////////////////////////////////////
-// Блок перехвата клавиш                                       //
-/////////////////////////////////////////////////////////////////
-
+// Перехват клавиш
 procedure TMainForm.FormKeyPress(Sender: TObject; var Key: Char);
 begin
+  if (ConsoleInputEdit.Focused = False) then
   HotKeyMaster(Key);
 end;
-
-procedure TMainForm.MainHtmlBrowserKeyPress(Sender: TObject;
-  var Key: Char);
-begin
-  HotKeyMaster(Key);
-end;
-
-procedure TMainForm.LogListBoxKeyPress(Sender: TObject; var Key: Char);
-begin
-  HotKeyMaster(Key);
-end;
-
-/////////////////////////////////////////////////////////////////
-// Конец блока перехвата клавиш                                //
-/////////////////////////////////////////////////////////////////
 
 end.
