@@ -1,8 +1,8 @@
 object MainForm: TMainForm
-  Left = 397
-  Top = 362
-  Width = 534
-  Height = 378
+  Left = 452
+  Top = 197
+  Width = 366
+  Height = 476
   Caption = 'bClient'
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
@@ -17,32 +17,35 @@ object MainForm: TMainForm
   OnShow = FormShow
   PixelsPerInch = 96
   TextHeight = 13
-  object TestStatusBar: TStatusBar
-    Left = 0
-    Top = 325
-    Width = 526
-    Height = 19
-    Panels = <>
-  end
   object MainPageControl: TPageControl
     Left = 0
     Top = 0
-    Width = 526
-    Height = 325
+    Width = 358
+    Height = 442
     ActivePage = BashTabSheet
     Align = alClient
     Style = tsFlatButtons
-    TabOrder = 1
+    TabOrder = 0
     object BashTabSheet: TTabSheet
       Caption = 'Bash'
       OnEnter = BashTabSheetEnter
+      object QuoteNumberLabel: TLabel
+        Left = 0
+        Top = 400
+        Width = 29
+        Height = 13
+        Align = alCustom
+        Anchors = [akLeft, akBottom]
+        Caption = '50/50'
+      end
       object BashNavBar: TdxNavBar
         Left = 0
         Top = 0
-        Width = 518
-        Height = 294
-        Align = alClient
-        ActiveGroupIndex = 0
+        Width = 350
+        Height = 389
+        Align = alCustom
+        Anchors = [akLeft, akTop, akRight, akBottom]
+        ActiveGroupIndex = 2
         DefaultStyles.GroupHeader.BackColor = clBtnFace
         DefaultStyles.GroupHeader.BackColor2 = clBtnFace
         DefaultStyles.GroupHeader.Font.Charset = DEFAULT_CHARSET
@@ -57,6 +60,7 @@ object MainForm: TMainForm
         HotTrackedGroupCursor = crDefault
         HotTrackedLinkCursor = -1118
         View = 0
+        OnActiveGroupChanged = BashNavBarActiveGroupChanged
         object MainBashNavBarGroup: TdxNavBarGroup
           Caption = #1043#1083#1072#1074#1085#1072#1103
           LinksUseSmallImages = True
@@ -107,17 +111,17 @@ object MainForm: TMainForm
         end
         object MainBashNavBarGroupControl: TdxNavBarGroupControl
           Left = 0
-          Top = 19
-          Width = 518
-          Height = 218
+          Top = 0
+          Width = 350
+          Height = 19
           TabOrder = 1
           GroupIndex = 0
           OriginalHeight = 41
           object MainHtmlBrowser: THTMLViewer
             Left = 0
             Top = 0
-            Width = 518
-            Height = 218
+            Width = 350
+            Height = 19
             TabOrder = 0
             Align = alClient
             DefBackground = clBtnHighlight
@@ -138,30 +142,93 @@ object MainForm: TMainForm
         end
         object AbyssBestBashNavBarGroupControl: TdxNavBarGroupControl
           Left = 0
-          Top = 237
-          Width = 518
+          Top = 19
+          Width = 350
           Height = 19
           TabOrder = 3
           GroupIndex = 1
           OriginalHeight = 41
+          object AbyssBestHtmlBrowser: THTMLViewer
+            Left = 0
+            Top = 0
+            Width = 350
+            Height = 19
+            TabOrder = 0
+            Align = alClient
+            DefBackground = clBtnHighlight
+            BorderStyle = htFocused
+            HistoryMaxCount = 0
+            DefFontName = 'Times New Roman'
+            DefPreFontName = 'Courier New'
+            NoSelect = False
+            CharSet = DEFAULT_CHARSET
+            PrintMarginLeft = 2.000000000000000000
+            PrintMarginRight = 2.000000000000000000
+            PrintMarginTop = 2.000000000000000000
+            PrintMarginBottom = 2.000000000000000000
+            PrintScale = 1.000000000000000000
+            OnMouseWheel = AbyssBestHtmlBrowserMouseWheel
+          end
         end
         object AbyssTopBashNavBarGroupControl: TdxNavBarGroupControl
           Left = 0
-          Top = 256
-          Width = 518
-          Height = 19
+          Top = 57
+          Width = 350
+          Height = 313
           TabOrder = 4
           GroupIndex = 2
           OriginalHeight = 41
+          object AbyssTopHtmlBrowser: THTMLViewer
+            Left = 0
+            Top = 0
+            Width = 350
+            Height = 313
+            TabOrder = 0
+            Align = alClient
+            DefBackground = clBtnHighlight
+            BorderStyle = htFocused
+            HistoryMaxCount = 0
+            DefFontName = 'Times New Roman'
+            DefPreFontName = 'Courier New'
+            NoSelect = False
+            CharSet = DEFAULT_CHARSET
+            PrintMarginLeft = 2.000000000000000000
+            PrintMarginRight = 2.000000000000000000
+            PrintMarginTop = 2.000000000000000000
+            PrintMarginBottom = 2.000000000000000000
+            PrintScale = 1.000000000000000000
+            OnMouseWheel = AbyssTopHtmlBrowserMouseWheel
+          end
         end
         object AbyssBashNavBarGroupControl: TdxNavBarGroupControl
           Left = 0
-          Top = 275
-          Width = 518
+          Top = 370
+          Width = 350
           Height = 19
           TabOrder = 2
           GroupIndex = 3
           OriginalHeight = 41
+          object AbyssHtmlBrowser: THTMLViewer
+            Left = 0
+            Top = 0
+            Width = 350
+            Height = 19
+            TabOrder = 0
+            Align = alClient
+            DefBackground = clBtnHighlight
+            BorderStyle = htFocused
+            HistoryMaxCount = 0
+            DefFontName = 'Times New Roman'
+            DefPreFontName = 'Courier New'
+            NoSelect = False
+            CharSet = DEFAULT_CHARSET
+            PrintMarginLeft = 2.000000000000000000
+            PrintMarginRight = 2.000000000000000000
+            PrintMarginTop = 2.000000000000000000
+            PrintMarginBottom = 2.000000000000000000
+            PrintScale = 1.000000000000000000
+            OnMouseWheel = AbyssHtmlBrowserMouseWheel
+          end
         end
       end
     end
@@ -183,7 +250,7 @@ object MainForm: TMainForm
       object lbl1: TLabel
         Left = 0
         Top = 0
-        Width = 518
+        Width = 350
         Height = 26
         Align = alTop
         AutoSize = False
@@ -195,29 +262,29 @@ object MainForm: TMainForm
       object TestPageControl: TPageControl
         Left = 0
         Top = 26
-        Width = 518
-        Height = 268
+        Width = 350
+        Height = 385
         ActivePage = LogTabSheet
         Align = alClient
         TabOrder = 0
         object LogTabSheet: TTabSheet
           Caption = 'Log'
           DesignSize = (
-            510
-            240)
+            342
+            357)
           object LogListBox: TListBox
             Left = 0
             Top = 0
-            Width = 510
-            Height = 214
+            Width = 342
+            Height = 331
             Anchors = [akLeft, akTop, akRight, akBottom]
             ItemHeight = 13
             TabOrder = 0
           end
           object ConsoleInputEdit: TEdit
             Left = 0
-            Top = 217
-            Width = 510
+            Top = 334
+            Width = 342
             Height = 21
             Anchors = [akLeft, akRight, akBottom]
             TabOrder = 1
@@ -227,8 +294,8 @@ object MainForm: TMainForm
           Caption = 'Other'
           ImageIndex = 1
           DesignSize = (
-            510
-            240)
+            342
+            357)
           object btn1: TButton
             Left = 6
             Top = 4
@@ -249,15 +316,15 @@ object MainForm: TMainForm
           object WebTabControl: TTabControl
             Left = 0
             Top = 32
-            Width = 510
-            Height = 208
+            Width = 342
+            Height = 325
             Anchors = [akLeft, akTop, akRight, akBottom]
             TabOrder = 2
             object wb1: TWebBrowser
               Left = 4
               Top = 6
-              Width = 502
-              Height = 198
+              Width = 334
+              Height = 315
               Align = alClient
               TabOrder = 0
               ControlData = {
@@ -275,43 +342,32 @@ object MainForm: TMainForm
           object Memo1: TMemo
             Left = 0
             Top = 0
-            Width = 510
-            Height = 240
+            Width = 342
+            Height = 357
             Align = alClient
             Lines.Strings = (
-              
-                '<div>&gt; xxx: '#1085#1072#1076#1086' '#1076#1086#1073#1072#1074#1080#1090#1100' '#1074#1086' '#1074#1089#1077' '#1103#1079#1099#1082#1080' '#1076#1080#1088#1077#1082#1090#1080#1074#1091' #please<br>&' +
-                'gt; xxx: '#1090#1080#1087#1072' #please '
-              
-                'mysql_query("SET CHARACTER SET '#39'normal'#39';");<br><br>'#1052#1072#1083#1086' '#1082#1090#1086' '#1079#1085#1072#1077 +
-                #1090', '#1085#1086' '#1077#1089#1090#1100' '#1090#1072#1082#1086#1081' '#1103#1079#1099#1082'. '
-              
-                #1053#1072#1079#1099#1074#1072#1077#1090#1089#1103' INTERCAL.<br>'#1057#1086#1079#1076#1072#1074#1072#1083#1089#1103' '#1082#1072#1082' '#1085#1072#1089#1084#1077#1096#1082#1072' '#1085#1072#1076' '#1085#1077#1073#1077#1079#1099#1079#1074#1077#1089#1090#1085 +
-                #1099#1084#1080' FORTRAN '#1080' '
-              
-                'COBOL. '#1056#1091#1082#1086#1074#1086#1076#1089#1090#1074#1086' '#1082' '#1103#1079#1099#1082#1091' '#1089#1086#1076#1077#1088#1078#1072#1083#1086' '#1074' '#1089#1077#1073#1077' '#1088#1072#1079#1076#1077#1083' '#171#1052#1080#1085#1076#1072#1083#1080#1085#1072#187'. ' +
-                #1050#1072#1082' '#1087#1086#1103#1089#1085#1103#1083#1086#1089#1100' '#1074' '
-              
-                #1089#1089#1099#1083#1082#1077' '#1082' '#1088#1072#1079#1076#1077#1083#1091', '#1074#1089#1077' '#1084#1072#1085#1091#1072#1083#1099' '#1089#1086#1076#1077#1088#1078#1072#1090' '#1088#1072#1079#1076#1077#1083' '#171#1055#1088#1080#1083#1086#1078#1077#1085#1080#1103#187' ('#1087#1086'-'#1072 +
-                #1085#1075#1083#1080#1081#1089#1082#1080' '#171#1072#1087#1087#1077#1085#1076#1080#1082#1089#187'), '
-              
-                #1087#1086#1101#1090#1086#1084#1091' '#1089#1086#1079#1076#1072#1090#1077#1083#1080' '#1087#1088#1080#1085#1103#1083#1080' '#1088#1077#1096#1077#1085#1080#1077' '#1074#1082#1083#1102#1095#1080#1090#1100' '#1074' '#1089#1074#1086#1102' '#1076#1086#1082#1091#1084#1077#1085#1090#1072#1094#1080#1102' '#1082 +
-                #1072#1082#1091#1102'-'#1085#1080#1073#1091#1076#1100' '#1076#1088#1091#1075#1091#1102' '
-              
-                #1091#1076#1072#1083#1103#1077#1084#1091#1102' '#1095#1072#1089#1090#1100' '#1095#1077#1083#1086#1074#1077#1095#1077#1089#1082#1086#1075#1086' '#1090#1077#1083#1072' '#8211' '#1089#1082#1072#1078#1077#1084', '#1084#1080#1085#1076#1072#1083#1080#1085#1099'.<br><br>'#1042 +
-                ' '#1103#1079#1099#1082#1077' '#1080#1089#1087#1086#1083#1100#1079#1091#1102#1090#1089#1103' '
-              
-                #1084#1086#1076#1080#1092#1080#1082#1072#1090#1086#1088#1099' '#1090#1080#1087#1072' '#171#1055#1054#1046#1040#1051#1059#1049#1057#1058#1040#187'. '#1045#1089#1083#1080' '#1074' '#1087#1088#1086#1075#1088#1072#1084#1084#1077' '#1086#1085' '#1080#1089#1087#1086#1083#1100#1079#1091#1077#1090#1089#1103 +
-                ' '#1085#1077' '#1076#1086#1089#1090#1072#1090#1086#1095#1085#1086' '
-              
-                #1095#1072#1089#1090#1086', '#1086#1085#1072' '#1085#1077' '#1087#1088#1080#1085#1080#1084#1072#1077#1090#1089#1103' '#1082#1086#1084#1087#1080#1083#1103#1090#1086#1088#1086#1084' '#1082#1072#1082' '#171#1085#1077#1076#1086#1089#1090#1072#1090#1086#1095#1085#1086' '#1074#1077#1078#1083#1080#1074#1072 +
-                #1103#187'. '#1045#1089#1083#1080' '#1078#1077' '#1085#1072#1086#1073#1086#1088#1086#1090' '#1086#1085' '
-              
-                #1087#1086#1103#1074#1083#1103#1077#1090#1089#1103' '#1089#1083#1080#1096#1082#1086#1084' '#1095#1072#1089#1090#1086', '#1082#1086#1084#1087#1080#1083#1103#1090#1086#1088' '#1086#1090#1074#1077#1088#1075#1072#1077#1090' '#1077#1105' '#1082#1072#1082' '#171#1095#1077#1088#1077#1089#1095#1091#1088' ' +
-                #1074#1077#1078#1083#1080#1074#1091#1102#187'. '#1053#1086' '#1085#1077#1089#1084#1086#1090#1088#1103' '
-              
-                #1085#1072' '#1085#1072#1083#1080#1095#1080#1077' '#1086#1094#1077#1085#1082#1080' '#1074#1077#1078#1083#1080#1074#1086#1089#1090#1080', '#1101#1090#1072' '#1086#1089#1086#1073#1077#1085#1085#1086#1089#1090#1100' '#1085#1077' '#1073#1099#1083#1072' '#1085#1080#1075#1076#1077' '#1076#1086#1082#1091 +
-                #1084#1077#1085#1090#1080#1088#1086#1074#1072#1085#1072'. :))</div>')
+              '<div>&gt; xxx: '#1085#1072#1076#1086' '#1076#1086#1073#1072#1074#1080#1090#1100' '#1074#1086' '#1074#1089#1077' '#1103#1079#1099#1082#1080' '#1076#1080#1088#1077#1082#1090#1080#1074#1091' '
+              '#please<br>&gt; xxx: '#1090#1080#1087#1072' #please '
+              'mysql_query("SET CHARACTER SET '#39'normal'#39';");<br><br>'#1052#1072#1083#1086' '
+              #1082#1090#1086' '#1079#1085#1072#1077#1090', '#1085#1086' '#1077#1089#1090#1100' '#1090#1072#1082#1086#1081' '#1103#1079#1099#1082'. '
+              #1053#1072#1079#1099#1074#1072#1077#1090#1089#1103' INTERCAL.<br>'#1057#1086#1079#1076#1072#1074#1072#1083#1089#1103' '#1082#1072#1082' '#1085#1072#1089#1084#1077#1096#1082#1072' '#1085#1072#1076' '
+              #1085#1077#1073#1077#1079#1099#1079#1074#1077#1089#1090#1085#1099#1084#1080' FORTRAN '#1080' '
+              'COBOL. '#1056#1091#1082#1086#1074#1086#1076#1089#1090#1074#1086' '#1082' '#1103#1079#1099#1082#1091' '#1089#1086#1076#1077#1088#1078#1072#1083#1086' '#1074' '#1089#1077#1073#1077' '#1088#1072#1079#1076#1077#1083' '
+              #171#1052#1080#1085#1076#1072#1083#1080#1085#1072#187'. '#1050#1072#1082' '#1087#1086#1103#1089#1085#1103#1083#1086#1089#1100' '#1074' '
+              #1089#1089#1099#1083#1082#1077' '#1082' '#1088#1072#1079#1076#1077#1083#1091', '#1074#1089#1077' '#1084#1072#1085#1091#1072#1083#1099' '#1089#1086#1076#1077#1088#1078#1072#1090' '#1088#1072#1079#1076#1077#1083' '
+              #171#1055#1088#1080#1083#1086#1078#1077#1085#1080#1103#187' ('#1087#1086'-'#1072#1085#1075#1083#1080#1081#1089#1082#1080' '#171#1072#1087#1087#1077#1085#1076#1080#1082#1089#187'), '
+              #1087#1086#1101#1090#1086#1084#1091' '#1089#1086#1079#1076#1072#1090#1077#1083#1080' '#1087#1088#1080#1085#1103#1083#1080' '#1088#1077#1096#1077#1085#1080#1077' '#1074#1082#1083#1102#1095#1080#1090#1100' '#1074' '#1089#1074#1086#1102' '
+              #1076#1086#1082#1091#1084#1077#1085#1090#1072#1094#1080#1102' '#1082#1072#1082#1091#1102'-'#1085#1080#1073#1091#1076#1100' '#1076#1088#1091#1075#1091#1102' '
+              #1091#1076#1072#1083#1103#1077#1084#1091#1102' '#1095#1072#1089#1090#1100' '#1095#1077#1083#1086#1074#1077#1095#1077#1089#1082#1086#1075#1086' '#1090#1077#1083#1072' '#8211' '#1089#1082#1072#1078#1077#1084', '
+              #1084#1080#1085#1076#1072#1083#1080#1085#1099'.<br><br>'#1042' '#1103#1079#1099#1082#1077' '#1080#1089#1087#1086#1083#1100#1079#1091#1102#1090#1089#1103' '
+              #1084#1086#1076#1080#1092#1080#1082#1072#1090#1086#1088#1099' '#1090#1080#1087#1072' '#171#1055#1054#1046#1040#1051#1059#1049#1057#1058#1040#187'. '#1045#1089#1083#1080' '#1074' '#1087#1088#1086#1075#1088#1072#1084#1084#1077' '#1086#1085' '
+              #1080#1089#1087#1086#1083#1100#1079#1091#1077#1090#1089#1103' '#1085#1077' '#1076#1086#1089#1090#1072#1090#1086#1095#1085#1086' '
+              #1095#1072#1089#1090#1086', '#1086#1085#1072' '#1085#1077' '#1087#1088#1080#1085#1080#1084#1072#1077#1090#1089#1103' '#1082#1086#1084#1087#1080#1083#1103#1090#1086#1088#1086#1084' '#1082#1072#1082' '#171#1085#1077#1076#1086#1089#1090#1072#1090#1086#1095#1085#1086' '
+              #1074#1077#1078#1083#1080#1074#1072#1103#187'. '#1045#1089#1083#1080' '#1078#1077' '#1085#1072#1086#1073#1086#1088#1086#1090' '#1086#1085' '
+              #1087#1086#1103#1074#1083#1103#1077#1090#1089#1103' '#1089#1083#1080#1096#1082#1086#1084' '#1095#1072#1089#1090#1086', '#1082#1086#1084#1087#1080#1083#1103#1090#1086#1088' '#1086#1090#1074#1077#1088#1075#1072#1077#1090' '#1077#1105' '#1082#1072#1082' '
+              #171#1095#1077#1088#1077#1089#1095#1091#1088' '#1074#1077#1078#1083#1080#1074#1091#1102#187'. '#1053#1086' '#1085#1077#1089#1084#1086#1090#1088#1103' '
+              #1085#1072' '#1085#1072#1083#1080#1095#1080#1077' '#1086#1094#1077#1085#1082#1080' '#1074#1077#1078#1083#1080#1074#1086#1089#1090#1080', '#1101#1090#1072' '#1086#1089#1086#1073#1077#1085#1085#1086#1089#1090#1100' '#1085#1077' '#1073#1099#1083#1072' '
+              #1085#1080#1075#1076#1077' '#1076#1086#1082#1091#1084#1077#1085#1090#1080#1088#1086#1074#1072#1085#1072'. :))</div>')
             ScrollBars = ssVertical
             TabOrder = 0
           end
@@ -347,8 +403,8 @@ object MainForm: TMainForm
           object TestMemo: TMemo
             Left = 0
             Top = 0
-            Width = 510
-            Height = 240
+            Width = 342
+            Height = 357
             Align = alClient
             Lines.Strings = (
               '<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">'
@@ -1786,22 +1842,19 @@ object MainForm: TMainForm
     end
   end
   object AntiFreeze: TIdAntiFreeze
-    Left = 604
-    Top = 483
+    Left = 708
+    Top = 555
   end
-  object IdHTTP1: TIdHTTP
-    MaxLineAction = maException
-    AllowCookies = True
-    ProxyParams.BasicAuthentication = False
-    ProxyParams.ProxyPort = 0
-    Request.ContentLength = -1
-    Request.ContentRangeEnd = 0
-    Request.ContentRangeStart = 0
-    Request.Accept = 'text/html, */*'
-    Request.BasicAuthentication = False
-    Request.UserAgent = 'Mozilla/3.0 (compatible; Indy Library)'
-    HTTPOptions = [hoForceEncodeParams]
-    Left = 628
-    Top = 483
+  object StartUpTimer: TTimer
+    Interval = 10
+    OnTimer = StartUpTimerTimer
+    Left = 776
+    Top = 557
+  end
+  object FindFocusDelayTimer: TTimer
+    Interval = 10
+    OnTimer = FindFocusDelayTimerTimer
+    Left = 869
+    Top = 560
   end
 end
