@@ -32,27 +32,29 @@ type
     TestPageControl: TPageControl;
     LogTabSheet: TTabSheet;
     OtherTabSheet: TTabSheet;
-    btn1: TButton;
-    edt1: TEdit;
-    WebTabControl: TTabControl;
-    wb1: TWebBrowser;
     LogListBox: TListBox;
     ConsoleInputEdit: TEdit;
     MemoTabSheet: TTabSheet;
-    Memo1: TMemo;
     ts1: TTabSheet;
-    htmlvwr1: THTMLViewer;
     MainHtmlBrowser: THTMLViewer;
     TestMemoMainTabSheet: TTabSheet;
-    TestMemo: TMemo;
     StartUpTimer: TTimer;
     AbyssHtmlBrowser: THTMLViewer;
     FindFocusDelayTimer: TTimer;
     AbyssBestHtmlBrowser: THTMLViewer;
     AbyssTopHtmlBrowser: THTMLViewer;
     QuoteNumberLabel: TLabel;
+    QuoteBashNumberLabel: TLabel;
+    QuoteBashRatingLabel: TLabel;
+    TestMainMemo: TMemo;
+    TestAbyssBestMemo: TMemo;
+    TestAbyssTopMemo: TMemo;
+    TestAbyssMemo: TMemo;
+    FontSelectButton: TButton;
+    FontSelectDialog: TFontDialog;
+    AbyssNextButton: TButton;
+    procedure wmGetMinMaxInfo(var Msg : TMessage); message wm_GetMinMaxInfo; // Ограничение размеров формы
     procedure FormCreate(Sender: TObject);
-    procedure btn1Click(Sender: TObject);
     procedure FormShow(Sender: TObject);
     procedure BashTabSheetEnter(Sender: TObject);
     procedure MainHtmlBrowserMouseWheel(Sender: TObject;
@@ -71,6 +73,9 @@ type
     procedure AbyssTopHtmlBrowserMouseWheel(Sender: TObject;
       Shift: TShiftState; WheelDelta: Integer; MousePos: TPoint;
       var Handled: Boolean);
+    procedure FontSelectButtonClick(Sender: TObject);
+    procedure FormResize(Sender: TObject);
+    procedure AbyssNextButtonClick(Sender: TObject);
   private
     { Private declarations }
   public
@@ -78,37 +83,55 @@ type
   end;
 
 // Описание формата:
-// Массив из 101 записи.
+// Массив из 56 записей.
 // 0 : служебная
 // [0,0] : количество цитат в массиве
 // [0,1] : не используется
 // [0,2] : не используется
-// 1-100 : цитаты (не более 100)
+// [0,3] : не используется
+// 1-55 : цитаты (не более 55)
 // [*,0] : html тект цитаты
-// [*,1] : не используется
-// [*,2] : не используется
+// [*,1] : номер цитаты
+// [*,2] : рейтинг
+// [*,3] : не используется
 
-type QuoteArray = array [0..100] of array [0..2] of string; // Массив цитат
+type QuoteArray = array [0..55] of array [0..3] of string; // Массив цитат
+
+// Описание формата:
+// Массив из 13 записей.
+// [*,1] : тип страницы (linc, dots, currentpage, prevlinc, nextlinc)
+// [*,2] : номер страницы
+
+type PageArray = array [1..13] of array [1..2] of string; // Массив сраниц
 
 var
   MainForm: TMainForm;
   CurrentMainQuotesArray: QuoteArray;
   CurrentMainQuoteNumber: Integer;
+  CurrentMainPagesArray: PageArray;
   CurrentAbyssQuotesArray: QuoteArray;
   CurrentAbyssQuoteNumber: Integer;
   CurrentAbyssBestQuotesArray: QuoteArray;
   CurrentAbyssBestQuoteNumber: Integer;
+  CurrentAbyssBestPagesArray: PageArray;
   CurrentAbyssTopQuotesArray: QuoteArray;
   CurrentAbyssTopQuoteNumber: Integer;
   MainNeedLoad: Boolean;
   AbyssNeedLoad: Boolean;
   AbyssBestNeedLoad: Boolean;
   AbyssTopNeedLoad: Boolean;
-  //NeedLoad: Boolean;
+  LogFile: TextFile;
 
 implementation
 
 {$R *.dfm}
+
+// Ограничение размеров формы
+procedure TMainForm.wmGetMinMaxInfo(var Msg : TMessage);
+begin
+  PMinMaxInfo(Msg.lParam)^.ptMinTrackSize.X := 366;
+  PMinMaxInfo(Msg.lParam)^.ptMinTrackSize.Y := 450;
+end;
 
 // Запись лога
 procedure WriteLog(Str: string);
@@ -116,11 +139,62 @@ begin
   Str := '[' + TimeToStr(Time) + ']  ' + Str;
   MainForm.LogListBox.AddItem(Str,MainForm);
   MainForm.LogListBox.ItemIndex := MainForm.LogListBox.Items.Capacity - 1;
+  Append(LogFile);
+  Writeln(LogFile,Str);
+end;
+
+// Извлечение страниц из конструкции <div class="pager"> ... </div>
+function ExtractPages(S,From:string):PageArray;
+var
+  ptype: array[1..13] of string; // Тип страницы: linc, dots, currentpage, prevlinc, nextlinc
+  pnum: array[1..13] of string; // Номер страницы
+  num: integer; // Номер записи
+  StartPoint: string;
+begin
+  WriteLog('Извлекаем номера страниц');
+  if From = 'Main' then StartPoint := 'x/';
+  if From = 'AbyssBest' then StartPoint := 't/';
+  S := Copy(S, Pos('/sp',S)+6,Length(S));
+  num:=1;
+  // Пошла особая магия
+  while not(Copy(S, 0, 6) = '</div>') do
+  begin
+    if Copy(S, 0, 2) = '<a' then
+      begin
+        pnum[num]:= Copy(S, Pos(StartPoint,S)+2,Pos('">',S) - Pos(StartPoint,S) - 2);
+        S := Copy(S, Pos('">',S)+2,Length(S));
+        if Copy(S, 0,1) = '&'
+        then
+          begin
+            if Copy(S, 2,1) = 'l' then ptype[num] := 'nextlinc' else ptype[num] := 'prevlinc';
+          end
+        else
+          begin
+            ptype[num] := 'linc';
+          end;
+        S := Copy(S, Pos('/a',S)+3,Length(S));
+      end
+    else
+      begin
+        pnum[num] := Copy(S, 7 ,Pos('</',S)-7);
+        if  pnum[num] = '…' then ptype[num] := 'dots' else ptype[num] := 'currentpage';
+        S := Copy(S, Pos('/sp',S)+6,Length(S));
+      end;
+    // Пишем в лог результаты
+    WriteLog('№ ' + IntToStr(num) + ', type = '+ ptype[num] + ', num = '+ pnum[num]);
+    ExtractPages[num, 1]:=ptype[num];
+    ExtractPages[num, 2]:=pnum[num];
+    num := num +1;
+  end;
+  WriteLog('Все страницы извлечены');
 end;
 
 // Присваем переменным начальные значения
 procedure SetVariables;
 begin
+  Assign(LogFile,'Log.txt');
+  Rewrite(LogFile);
+  Close(LogFile);
   WriteLog('Загрузка переменных');
   CurrentMainQuoteNumber := 0;
   CurrentAbyssQuoteNumber := 0;
@@ -129,7 +203,14 @@ begin
   AbyssBestNeedLoad := False;
   AbyssTopNeedLoad := False;
   MainForm.QuoteNumberLabel.Caption := '?/?';
-  //NeedLoad := False;
+  MainForm.MainHtmlBrowser.DefFontName := MainForm.FontSelectDialog.Font.Name;
+  MainForm.MainHtmlBrowser.DefFontSize := MainForm.FontSelectDialog.Font.Size;
+  MainForm.AbyssHtmlBrowser.DefFontName := MainForm.FontSelectDialog.Font.Name;
+  MainForm.AbyssHtmlBrowser.DefFontSize := MainForm.FontSelectDialog.Font.Size;
+  MainForm.AbyssTopHtmlBrowser.DefFontName := MainForm.FontSelectDialog.Font.Name;
+  MainForm.AbyssTopHtmlBrowser.DefFontSize := MainForm.FontSelectDialog.Font.Size;
+  MainForm.AbyssBestHtmlBrowser.DefFontName := MainForm.FontSelectDialog.Font.Name;
+  MainForm.AbyssBestHtmlBrowser.DefFontSize := MainForm.FontSelectDialog.Font.Size;
 end;
 
 // Открытие-закрытие тестаба
@@ -161,24 +242,44 @@ begin
   end;
 end;
 
+// Меняем данные цитаты
 procedure ChangeQuoteNumber;
-var lCaption: string;
+var lCaption1: string;
+    lCaption2: string;
+    lCaption3: string;
 begin
   case MainForm.BashNavBar.ActiveGroupIndex of
-    0: lCaption := IntToStr(CurrentMainQuoteNumber) + '/' + CurrentMainQuotesArray[0,0];
-    1: lCaption := IntToStr(CurrentAbyssBestQuoteNumber) + '/' + CurrentAbyssBestQuotesArray[0,0];
-    2: lCaption := IntToStr(CurrentAbyssTopQuoteNumber) + '/' + CurrentAbyssTopQuotesArray[0,0];
-    3: lCaption := IntToStr(CurrentAbyssQuoteNumber) + '/' + CurrentAbyssQuotesArray[0,0];
+     0: begin
+          lCaption1 := IntToStr(CurrentMainQuoteNumber) + '/' + CurrentMainQuotesArray[0,0];
+          lCaption2 := CurrentMainQuotesArray[CurrentMainQuoteNumber,1];
+          lCaption3 := CurrentMainQuotesArray[CurrentMainQuoteNumber,2];
+       end;
+    1: begin
+          lCaption1 := IntToStr(CurrentAbyssBestQuoteNumber) + '/' + CurrentAbyssBestQuotesArray[0,0];
+          lCaption2 := CurrentAbyssBestQuotesArray[CurrentAbyssBestQuoteNumber,1];
+          lCaption3 := CurrentAbyssBestQuotesArray[CurrentAbyssBestQuoteNumber,2];
+       end;
+    2: begin
+          lCaption1 := IntToStr(CurrentAbyssTopQuoteNumber) + '/' + CurrentAbyssTopQuotesArray[0,0];
+          lCaption2 := CurrentAbyssTopQuotesArray[CurrentAbyssTopQuoteNumber,1];
+          lCaption3 := CurrentAbyssTopQuotesArray[CurrentAbyssTopQuoteNumber,2];
+       end;
+    3: begin
+          lCaption1 := IntToStr(CurrentAbyssQuoteNumber) + '/' + CurrentAbyssQuotesArray[0,0];
+          lCaption2 := CurrentAbyssQuotesArray[CurrentAbyssQuoteNumber,1];
+          lCaption3 := CurrentAbyssQuotesArray[CurrentAbyssQuoteNumber,2];
+       end;
   end;
-  if lCaption = '0/' then lCaption := '?/?';
-  MainForm.QuoteNumberLabel.Caption := lCaption;
-  WriteLog('Меняем QuoteNumber ' + lCaption);
+  if lCaption1 = '0/' then lCaption1 := '?/?';
+  MainForm.QuoteNumberLabel.Caption := lCaption1;
+  MainForm.QuoteBashNumberLabel.Caption := '#' + lCaption2;
+  MainForm.QuoteBashRatingLabel.Caption := '[' + lCaption3 + ']';
+  WriteLog('Меняем данные цитаты: ' + lCaption1 + ', '+ lCaption2 + ', '+ lCaption3);
 end;
 
 // Ищем окно для выставления фокуса, чтобы "не терять скроллинг"
 procedure FindFocus;
 begin
-  // Временный код
   case MainForm.BashNavBar.ActiveGroupIndex of
   // Главная
   0: begin
@@ -234,7 +335,7 @@ begin
                 MainForm.AbyssTopHtmlBrowser.LoadFromStream(TStringStream.Create(CurrentAbyssTopQuotesArray[CurrentAbyssTopQuoteNumber,0]));
                 MainForm.AbyssTopHtmlBrowser.VScrollBar.Position := -1000; // Временный код
              end;
-        WriteLog('Переход на след. цитату бездны с CurrentNumber ' + IntToStr(CurrentAbyssTopQuoteNumber));
+        WriteLog('Переход на след. цитату топа бездны с CurrentNumber ' + IntToStr(CurrentAbyssTopQuoteNumber));
         ChangeQuoteNumber;
       end;
   3:  begin
@@ -243,6 +344,10 @@ begin
                 CurrentAbyssQuoteNumber := CurrentAbyssQuoteNumber + 1;
                 MainForm.AbyssHtmlBrowser.LoadFromStream(TStringStream.Create(CurrentAbyssQuotesArray[CurrentAbyssQuoteNumber,0]));
                 MainForm.AbyssHtmlBrowser.VScrollBar.Position := -1000; // Временный код
+             end
+        else
+             begin
+                MainForm.AbyssNextButton.Visible := True;
              end;
         WriteLog('Переход на след. цитату бездны с CurrentNumber ' + IntToStr(CurrentAbyssQuoteNumber));
         ChangeQuoteNumber;
@@ -282,7 +387,7 @@ begin
                 MainForm.AbyssTopHtmlBrowser.LoadFromStream(TStringStream.Create(CurrentAbyssTopQuotesArray[CurrentAbyssTopQuoteNumber,0]));
                 MainForm.AbyssTopHtmlBrowser.VScrollBar.Position := -1000; // Временный код
              end;
-        WriteLog('Переход на пред. цитату бездны с CurrentNumber ' + IntToStr(CurrentAbyssTopQuoteNumber));
+        WriteLog('Переход на пред. цитату топа бездны с CurrentNumber ' + IntToStr(CurrentAbyssTopQuoteNumber));
         ChangeQuoteNumber;
       end;
   3:  begin
@@ -291,6 +396,7 @@ begin
                 CurrentAbyssQuoteNumber := CurrentAbyssQuoteNumber - 1;
                 MainForm.AbyssHtmlBrowser.LoadFromStream(TStringStream.Create(CurrentAbyssQuotesArray[CurrentAbyssQuoteNumber,0]));
                 MainForm.AbyssHtmlBrowser.VScrollBar.Position := -1000; // Временный код
+                MainForm.AbyssNextButton.Visible := False;
              end;
         WriteLog('Переход на пред. цитату бездны с CurrentNumber ' + IntToStr(CurrentAbyssQuoteNumber));
         ChangeQuoteNumber;
@@ -343,130 +449,111 @@ begin
   BashGetAbyssTopAsString := GetStringFromUrl('http://bash.org.ru/abysstop');
 end;
 
-// Тестовая процедура. Временный код.
-procedure TestProc;
+// Удаляем длинные слова, чтобы не сдвигать страницу
+function RemoveLongWords(S: string):string;
+var i,num:integer;
+    S2: string;
+begin
+  num := 0;
+  S2:='';
+  for i := 0 to (Length(S)-1) do
+  begin
+    num := num + 1;
+    if (S[i] = ' ') or (S[i] = '<') then num := 0;
+    if (num < 35) then S2 := S2 + S[i];
+  end;
+  RemoveLongWords := S2;
+end;
+
+// Парсер цитат
+function BashQuoteParser(S: string; qtype: integer):QuoteArray;
 var i:Integer;
-S:string;
-q: QuoteArray;
+    q: QuoteArray;
 begin
   i:=0;
-  //S:=MainForm.TestMemo.Text;
-  S:= BashGetMainAsString;
-  MainForm.Memo1.Clear;
-  WriteLog('Начало разбора');
+  WriteLog('Начало разбора html');
+  S := Copy(S, Pos('"pager">',S),Length(S));
+  // Получаем номера страниц
+  case qtype of
+    0: CurrentMainPagesArray:= ExtractPages(Copy(S, 0, Pos('</div>',S)+6),'Main');
+    1: CurrentAbyssBestPagesArray := ExtractPages(Copy(S, 0, Pos('</div>',S)+6),'AbyssBest');
+    2: ;
+    3: ;
+  end;
+  // Загрузка цитат
   while not (Pos('<div class="q">',S) = 0) do
   begin
-    S := Copy(S, Pos('<div class="q">',S),Length(S));
-    S := Copy(S, Pos('<div>',S),Length(S));
-    i:= i + 1;
-    q[i,0] := Copy(S, Pos('<div>',S),Pos('</div>',S)+5);
-    if (q[i,0] = '') or (Pos('http://lol.bash.org.ru/',q[i,0]) <> 0) then i:=i-1;
-    MainForm.Memo1.Lines.Add('=========='+IntToStr(i)+'==========');
-    MainForm.Memo1.Lines.Add(q[i,0]);
-    MainForm.Memo1.Lines.Add('========================');
+      i:= i + 1;
+      S := Copy(S, Pos('<div class="q">',S),Length(S));
+      // Получаем номер цитаты
+      case qtype of
+        0: begin
+              S := Copy(S, Pos('e/',S)+2,Length(S));
+              q[i,1] := Copy(S, 0,Pos('"',S)-1);
+           end;
+        1: begin
+              S := Copy(S, Pos('<b>',S)+3,Length(S));
+              q[i,1] := Copy(S, 0,Pos('<',S)-1);
+           end;
+        2: q[i,1] := 'none';
+        3: begin
+              S := Copy(S, Pos('span id=',S)+10,Length(S));
+              q[i,1] := Copy(S, 0,Pos('"',S)-1);
+           end;
+      end;
+     // Получаем рейтинг цитаты
+      case qtype of
+        0: begin
+              S := Copy(S, Pos('<span id=',S),Length(S));
+              S := Copy(S, Pos('>',S)+1,Length(S));
+              q[i,2] := Copy(S, 0,Pos('<',S)-1);
+           end;
+        1: q[i,2] := 'none';
+        2: begin
+              S := Copy(S, Pos('<span>',S)+6,Length(S));
+              S := Copy(S, 0,Length(S));
+              q[i,2] := Copy(S, 0,Pos('<',S)-1);
+           end;
+        3: q[i,2] := 'none';
+      end;
+      S := Copy(S, Pos('<div>',S),Length(S));
+      q[i,0] := RemoveLongWords(Copy(S, Pos('<div>',S),Pos('</div>',S)+5));
+      if (q[i,0] = '') or (Pos('http://lol.bash.org.ru/',q[i,0]) <> 0) then i:=i-1;
   end;
-  WriteLog('Конец разбора');
-  //ShowMessage(IntToStr(i));
+  WriteLog('Конец разбора html. Цитат: ' + IntToStr(i));
   q[0,0] := IntToStr(i);
+  BashQuoteParser := q;
 end;
 
 // Получаем массив цитат с главной
 function GetCurrentMainQuotes: QuoteArray;
-  var i:Integer;
-  S:string;
-  q: QuoteArray;
 begin
-  i:=0;
-
-  //S:=MainForm.TestMemo.Text;  // для тестов
-  S:= BashGetMainAsString;
-
-  WriteLog('Начало разбора html');
-  while not (Pos('<div class="q">',S) = 0) do
-  begin
-    S := Copy(S, Pos('<div class="q">',S),Length(S));
-    S := Copy(S, Pos('<div>',S),Length(S));
-    i:= i + 1;
-    q[i,0] := Copy(S, Pos('<div>',S),Pos('</div>',S)+5);
-    if (q[i,0] = '') or (Pos('http://lol.bash.org.ru/',q[i,0]) <> 0) then i:=i-1;
-  end;
-  WriteLog('Конец разбора html. Цитат: ' + IntToStr(i));
-  q[0,0] := IntToStr(i);
-
-  GetCurrentMainQuotes := q;
+  //GetCurrentMainQuotes := BashQuoteParser(MainForm.TestMainMemo.Text, 0); // для тестов
+  GetCurrentMainQuotes := BashQuoteParser(BashGetMainAsString, 0);
 end;
 
 // Получаем массив цитат с бездны
 function GetCurrentAbyssQuotes: QuoteArray;
-  var i:Integer;
-  S:string;
-  q: QuoteArray;
 begin
-  i:=0;
-  S:= BashGetAbyssAsString;
-  WriteLog('Начало разбора html');
-  while not (Pos('<div class="q">',S) = 0) do
-  begin
-    S := Copy(S, Pos('<div class="q">',S),Length(S));
-    S := Copy(S, Pos('<div>',S),Length(S));
-    i:= i + 1;
-    q[i,0] := Copy(S, Pos('<div>',S),Pos('</div>',S)+5);
-    if (q[i,0] = '') or (Pos('http://lol.bash.org.ru/',q[i,0]) <> 0) then i:=i-1;
-  end;
-  WriteLog('Конец разбора html. Цитат: ' + IntToStr(i));
-  q[0,0] := IntToStr(i);
-
-  GetCurrentAbyssQuotes := q;
+  //GetCurrentAbyssQuotes := BashQuoteParser(MainForm.TestAbyssMemo.Text, 3); // для тестов
+  GetCurrentAbyssQuotes := BashQuoteParser(BashGetAbyssAsString, 3);
 end;
 
 // Получаем массив цитат с лучшего бездны
 function GetCurrentAbyssBestQuotes: QuoteArray;
-  var i:Integer;
-  S:string;
-  q: QuoteArray;
 begin
-  i:=0;
-  S:= BashGetAbyssBestAsString;
-  WriteLog('Начало разбора html');
-  while not (Pos('<div class="q">',S) = 0) do
-  begin
-    S := Copy(S, Pos('<div class="q">',S),Length(S));
-    S := Copy(S, Pos('<div>',S),Length(S));
-    i:= i + 1;
-    q[i,0] := Copy(S, Pos('<div>',S),Pos('</div>',S)+5);
-    if (q[i,0] = '') or (Pos('http://lol.bash.org.ru/',q[i,0]) <> 0) then i:=i-1;
-  end;
-  WriteLog('Конец разбора html. Цитат: ' + IntToStr(i));
-  q[0,0] := IntToStr(i);
-
-  GetCurrentAbyssBestQuotes := q;
+  //GetCurrentAbyssBestQuotes := BashQuoteParser(MainForm.TestAbyssBestMemo.Text, 1); // для тестов
+  GetCurrentAbyssBestQuotes := BashQuoteParser(BashGetAbyssBestAsString, 1);
 end;
 
 // Получаем массив цитат с топа бездны
 function GetCurrentAbyssTopQuotes: QuoteArray;
-  var i:Integer;
-  S:string;
-  q: QuoteArray;
 begin
-  i:=0;
-  S:= BashGetAbyssTopAsString;
-  WriteLog('Начало разбора html');
-  while not (Pos('<div class="q">',S) = 0) do
-  begin
-    S := Copy(S, Pos('<div class="q">',S),Length(S));
-    S := Copy(S, Pos('<div>',S),Length(S));
-    i:= i + 1;
-    q[i,0] := Copy(S, Pos('<div>',S),Pos('</div>',S)+5);
-    if (q[i,0] = '') or (Pos('http://lol.bash.org.ru/',q[i,0]) <> 0) then i:=i-1;
-  end;
-  WriteLog('Конец разбора html. Цитат: ' + IntToStr(i));
-  q[0,0] := IntToStr(i);
-
-  GetCurrentAbyssTopQuotes := q;
+  //GetCurrentAbyssTopQuotes := BashQuoteParser(MainForm.TestAbyssTopMemo.Text, 2); // для тестов
+  GetCurrentAbyssTopQuotes := BashQuoteParser(BashGetAbyssTopAsString, 2);
 end;
 
-
-//
+// Открытие Главной
 procedure OpenMain;
 begin
   if MainNeedLoad = true then
@@ -479,7 +566,7 @@ begin
   ChangeQuoteNumber;
 end;
 
-//
+// Открытие Бездны
 procedure OpenAbyss;
 begin
   if AbyssNeedLoad = True then
@@ -491,7 +578,7 @@ begin
   end;
 end;
 
-//
+// Открытие Лучшего Бездны
 procedure OpenAbyssBest;
 begin
   if AbyssBestNeedLoad = True then
@@ -503,7 +590,7 @@ begin
   end;
 end;
 
-//
+// Открытие Топа Бездны
 procedure OpenAbyssTop;
 begin
   if AbyssTopNeedLoad = True then
@@ -516,38 +603,26 @@ begin
 end;
 
 
+
+///////////////////////////////////////////////////////
+// Создание формы                                    //
+///////////////////////////////////////////////////////
 procedure TMainForm.FormCreate(Sender: TObject);
 begin
-  WriteLog('Создание формы.');
   SetVariables;
+  WriteLog('Создание формы.');
   // Меняем размер формы на более компактный.
   MainForm.Width := 366;
   MainForm.Height := 450;
   WriteLog('Меняем размер формы на ' + IntToStr(MainForm.Width) + 'x' + IntToStr(MainForm.Height));
-
   // Переводим PageControl'ы на начало.
   BashNavBar.ActiveGroupIndex :=0;
   WriteLog('Переходим на BashTab.');
   MainPageControl.TabIndex := 0;
   WriteLog('Переходим на LogTab.');
   TestPageControl.TabIndex := 0;
-
   // Убираем TestTab
   TestTabSheet.TabVisible := False;
-
-  //TestProc;
-
-end;
-
-procedure TMainForm.btn1Click(Sender: TObject);
-var S:string;
-mm:TStream;
-begin
-  // Временный код
-  S:=Memo1.Text;
-  mm := TStringStream.Create(S);
-  htmlvwr1.LoadFromStream(mm);
-
 end;
 
 // Функции и процедуры, невыполнимые на этапе создания формы
@@ -556,23 +631,57 @@ begin
   FindFocus;
 end;
 
+// При заходе на вкладку баша передаем фокус на нужный браузер
 procedure TMainForm.BashTabSheetEnter(Sender: TObject);
 begin
   FindFocus;
+end;
+
+
+
+///////////////////////////////////////////////////////////////////////////////
+// Переход на новую цитату при прокрутке колесом мыши
+///////////////////////////////////////////////////////////////////////////////
+procedure ScrollControl(hb: THTMLViewer; WheelDelta: integer);
+begin
+  if ((hb.VScrollBarPosition = hb.VScrollBarRange) or (hb.VScrollBarRange < 0)) and (WheelDelta < 0)
+  then BashNext;
+
+  if ((hb.VScrollBarPosition = 0) and (WheelDelta > 0))
+  then BashPrevious;
 end;
 
 procedure TMainForm.MainHtmlBrowserMouseWheel(Sender: TObject;
   Shift: TShiftState; WheelDelta: Integer; MousePos: TPoint;
   var Handled: Boolean);
 begin
-  // Переход на новую цитату при прокрутке колесом мыши
-  if ((MainHtmlBrowser.VScrollBarPosition = MainHtmlBrowser.VScrollBarRange) or (MainHtmlBrowser.VScrollBarRange < 0)) and (WheelDelta < 0)
-  then BashNext;
-
-  if ((MainHtmlBrowser.VScrollBarPosition = 0) and (WheelDelta > 0))
-  then BashPrevious;
-
+  ScrollControl(MainHtmlBrowser,WheelDelta);
 end;
+procedure TMainForm.AbyssHtmlBrowserMouseWheel(Sender: TObject;
+  Shift: TShiftState; WheelDelta: Integer; MousePos: TPoint;
+  var Handled: Boolean);
+begin
+  ScrollControl(AbyssHtmlBrowser,WheelDelta);
+end;
+
+procedure TMainForm.AbyssBestHtmlBrowserMouseWheel(Sender: TObject;
+  Shift: TShiftState; WheelDelta: Integer; MousePos: TPoint;
+  var Handled: Boolean);
+begin
+  ScrollControl(AbyssBestHtmlBrowser,WheelDelta);
+end;
+
+procedure TMainForm.AbyssTopHtmlBrowserMouseWheel(Sender: TObject;
+  Shift: TShiftState; WheelDelta: Integer; MousePos: TPoint;
+  var Handled: Boolean);
+begin
+  ScrollControl(AbyssTopHtmlBrowser,WheelDelta);
+end;
+///////////////////////////////////////////////////////////////////////////////
+//Конец блока
+///////////////////////////////////////////////////////////////////////////////
+
+
 
 // Перехват клавиш
 procedure TMainForm.FormKeyPress(Sender: TObject; var Key: Char);
@@ -598,12 +707,14 @@ begin
   AbyssTopNeedLoad := True;
 end;
 
+// Задержка перед поиском фокуса
 procedure TMainForm.FindFocusDelayTimerTimer(Sender: TObject);
 begin
   FindFocus;
   FindFocusDelayTimer.Enabled:=False;
 end;
 
+// Смена вкладки Баша
 procedure TMainForm.BashNavBarActiveGroupChanged(Sender: TObject);
 begin
   FindFocusDelayTimer.Enabled := True;
@@ -620,37 +731,41 @@ begin
   ChangeQuoteNumber;
 end;
 
-procedure TMainForm.AbyssHtmlBrowserMouseWheel(Sender: TObject;
-  Shift: TShiftState; WheelDelta: Integer; MousePos: TPoint;
-  var Handled: Boolean);
+// Выбираем шрифт
+procedure TMainForm.FontSelectButtonClick(Sender: TObject);
 begin
-  if ((AbyssHtmlBrowser.VScrollBarPosition = AbyssHtmlBrowser.VScrollBarRange) or (AbyssHtmlBrowser.VScrollBarRange < 0)) and (WheelDelta < 0)
-  then BashNext;
-
-  if ((AbyssHtmlBrowser.VScrollBarPosition = 0) and (WheelDelta > 0))
-  then BashPrevious;
+  if FontSelectDialog.Execute then
+    begin
+      MainHtmlBrowser.DefFontName := FontSelectDialog.Font.Name;
+      MainHtmlBrowser.DefFontSize := FontSelectDialog.Font.Size;
+      AbyssHtmlBrowser.DefFontName := FontSelectDialog.Font.Name;
+      AbyssHtmlBrowser.DefFontSize := FontSelectDialog.Font.Size;
+      AbyssTopHtmlBrowser.DefFontName := FontSelectDialog.Font.Name;
+      AbyssTopHtmlBrowser.DefFontSize := FontSelectDialog.Font.Size;
+      AbyssBestHtmlBrowser.DefFontName := FontSelectDialog.Font.Name;
+      AbyssBestHtmlBrowser.DefFontSize := FontSelectDialog.Font.Size;
+    end;
 end;
 
-procedure TMainForm.AbyssBestHtmlBrowserMouseWheel(Sender: TObject;
-  Shift: TShiftState; WheelDelta: Integer; MousePos: TPoint;
-  var Handled: Boolean);
+// Меняем размер кнопки "А Дальше?!"
+procedure TMainForm.FormResize(Sender: TObject);
 begin
-  if ((AbyssBestHtmlBrowser.VScrollBarPosition = AbyssBestHtmlBrowser.VScrollBarRange) or (AbyssBestHtmlBrowser.VScrollBarRange < 0)) and (WheelDelta < 0)
-  then BashNext;
-
-  if ((AbyssBestHtmlBrowser.VScrollBarPosition = 0) and (WheelDelta > 0))
-  then BashPrevious;
+  AbyssNextButton.Left:= 0;
+  AbyssNextButton.Top:= 0;
+  AbyssNextButton.Width:= AbyssBashNavBarGroupControl.Width;
+  AbyssNextButton.Height:= AbyssBashNavBarGroupControl.Height;
 end;
 
-procedure TMainForm.AbyssTopHtmlBrowserMouseWheel(Sender: TObject;
-  Shift: TShiftState; WheelDelta: Integer; MousePos: TPoint;
-  var Handled: Boolean);
+// Нажата кнопка "А Дальше?!"
+procedure TMainForm.AbyssNextButtonClick(Sender: TObject);
 begin
-  if ((AbyssTopHtmlBrowser.VScrollBarPosition = AbyssTopHtmlBrowser.VScrollBarRange) or (AbyssTopHtmlBrowser.VScrollBarRange < 0)) and (WheelDelta < 0)
-  then BashNext;
-
-  if ((AbyssTopHtmlBrowser.VScrollBarPosition = 0) and (WheelDelta > 0))
-  then BashPrevious;
+  WriteLog('Нажата кнопка "А Дальше?!"');
+  AbyssNextButton.Visible := False;
+  CurrentAbyssQuotesArray := GetCurrentAbyssQuotes;
+  CurrentAbyssQuoteNumber := 1;
+  MainForm.AbyssHtmlBrowser.LoadFromStream(TStringStream.Create(CurrentAbyssQuotesArray[CurrentAbyssQuoteNumber,0]));
+  ChangeQuoteNumber;
+  FindFocus;
 end;
 
 end.
