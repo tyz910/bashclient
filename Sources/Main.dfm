@@ -1,8 +1,8 @@
 object MainForm: TMainForm
-  Left = 401
-  Top = 301
-  Width = 366
-  Height = 474
+  Left = 245
+  Top = 280
+  Width = 378
+  Height = 527
   Caption = 'bClient'
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
@@ -21,8 +21,8 @@ object MainForm: TMainForm
   object MainPageControl: TPageControl
     Left = 0
     Top = 0
-    Width = 358
-    Height = 440
+    Width = 370
+    Height = 493
     ActivePage = BashTabSheet
     Align = alClient
     Style = tsFlatButtons
@@ -32,7 +32,7 @@ object MainForm: TMainForm
       OnEnter = BashTabSheetEnter
       object QuoteNumberLabel: TLabel
         Left = 0
-        Top = 396
+        Top = 449
         Width = 29
         Height = 13
         Align = alCustom
@@ -41,7 +41,7 @@ object MainForm: TMainForm
       end
       object QuoteBashNumberLabel: TLabel
         Left = 32
-        Top = 396
+        Top = 449
         Width = 43
         Height = 13
         Align = alCustom
@@ -56,7 +56,7 @@ object MainForm: TMainForm
       end
       object QuoteBashRatingLabel: TLabel
         Left = 92
-        Top = 396
+        Top = 449
         Width = 30
         Height = 13
         Align = alCustom
@@ -66,8 +66,8 @@ object MainForm: TMainForm
       object BashNavBar: TdxNavBar
         Left = 0
         Top = 0
-        Width = 350
-        Height = 387
+        Width = 362
+        Height = 440
         Align = alCustom
         Anchors = [akLeft, akTop, akRight, akBottom]
         ActiveGroupIndex = 0
@@ -137,129 +137,89 @@ object MainForm: TMainForm
         object MainBashNavBarGroupControl: TdxNavBarGroupControl
           Left = 0
           Top = 19
-          Width = 350
-          Height = 311
+          Width = 362
+          Height = 364
           TabOrder = 1
           GroupIndex = 0
           OriginalHeight = 41
-          object MainHtmlBrowser: THTMLViewer
+          object MainHtmlViewer: TRichView
             Left = 0
             Top = 0
-            Width = 350
-            Height = 311
-            TabOrder = 0
+            Width = 362
+            Height = 364
             Align = alClient
-            DefBackground = clBtnHighlight
-            BorderStyle = htFocused
-            HistoryMaxCount = 0
-            DefFontName = 'Courier'
-            DefPreFontName = 'Courier New'
-            NoSelect = False
-            CharSet = DEFAULT_CHARSET
-            PrintMarginLeft = 2.000000000000000000
-            PrintMarginRight = 2.000000000000000000
-            PrintMarginTop = 2.000000000000000000
-            PrintMarginBottom = 2.000000000000000000
-            PrintScale = 1.000000000000000000
-            OnMouseWheel = MainHtmlBrowserMouseWheel
+            TabOrder = 0
+            OnMouseWheel = MainHtmlViewerMouseWheel
+            DoInPaletteMode = rvpaCreateCopies
+            Style = HtmlViewerStyle
           end
         end
         object AbyssBestBashNavBarGroupControl: TdxNavBarGroupControl
           Left = 0
-          Top = 330
-          Width = 350
+          Top = 383
+          Width = 362
           Height = 19
           TabOrder = 3
           GroupIndex = 1
           OriginalHeight = 41
-          object AbyssBestHtmlBrowser: THTMLViewer
+          object AbyssBestHtmlViewer: TRichView
             Left = 0
             Top = 0
-            Width = 350
+            Width = 362
             Height = 19
-            TabOrder = 0
             Align = alClient
-            DefBackground = clBtnHighlight
-            BorderStyle = htFocused
-            HistoryMaxCount = 0
-            DefFontName = 'Times New Roman'
-            DefPreFontName = 'Courier New'
-            NoSelect = False
-            CharSet = DEFAULT_CHARSET
-            PrintMarginLeft = 2.000000000000000000
-            PrintMarginRight = 2.000000000000000000
-            PrintMarginTop = 2.000000000000000000
-            PrintMarginBottom = 2.000000000000000000
-            PrintScale = 1.000000000000000000
-            OnMouseWheel = AbyssBestHtmlBrowserMouseWheel
+            TabOrder = 0
+            OnMouseWheel = AbyssBestHtmlViewerMouseWheel
+            DoInPaletteMode = rvpaCreateCopies
+            Style = HtmlViewerStyle
           end
         end
         object AbyssTopBashNavBarGroupControl: TdxNavBarGroupControl
           Left = 0
-          Top = 349
-          Width = 350
+          Top = 402
+          Width = 362
           Height = 19
           TabOrder = 4
           GroupIndex = 2
           OriginalHeight = 41
-          object AbyssTopHtmlBrowser: THTMLViewer
+          object AbyssTopHtmlViewer: TRichView
             Left = 0
             Top = 0
-            Width = 350
+            Width = 362
             Height = 19
-            TabOrder = 0
             Align = alClient
-            DefBackground = clBtnHighlight
-            BorderStyle = htFocused
-            HistoryMaxCount = 0
-            DefFontName = 'Times New Roman'
-            DefPreFontName = 'Courier New'
-            NoSelect = False
-            CharSet = DEFAULT_CHARSET
-            PrintMarginLeft = 2.000000000000000000
-            PrintMarginRight = 2.000000000000000000
-            PrintMarginTop = 2.000000000000000000
-            PrintMarginBottom = 2.000000000000000000
-            PrintScale = 1.000000000000000000
-            OnMouseWheel = AbyssTopHtmlBrowserMouseWheel
+            TabOrder = 0
+            OnMouseWheel = AbyssTopHtmlViewerMouseWheel
+            DoInPaletteMode = rvpaCreateCopies
+            Style = HtmlViewerStyle
           end
         end
         object AbyssBashNavBarGroupControl: TdxNavBarGroupControl
           Left = 0
-          Top = 368
-          Width = 350
+          Top = 421
+          Width = 362
           Height = 19
           TabOrder = 2
           DesignSize = (
-            350
+            362
             19)
           GroupIndex = 3
           OriginalHeight = 41
-          object AbyssHtmlBrowser: THTMLViewer
+          object AbyssHtmlViewer: TRichView
             Left = 0
             Top = 0
-            Width = 350
+            Width = 362
             Height = 19
-            TabOrder = 0
             Align = alClient
-            DefBackground = clBtnHighlight
-            BorderStyle = htFocused
-            HistoryMaxCount = 0
-            DefFontName = 'Times New Roman'
-            DefPreFontName = 'Courier New'
-            NoSelect = False
-            CharSet = DEFAULT_CHARSET
-            PrintMarginLeft = 2.000000000000000000
-            PrintMarginRight = 2.000000000000000000
-            PrintMarginTop = 2.000000000000000000
-            PrintMarginBottom = 2.000000000000000000
-            PrintScale = 1.000000000000000000
-            OnMouseWheel = AbyssHtmlBrowserMouseWheel
+            TabOrder = 0
+            OnMouseWheel = AbyssHtmlViewerMouseWheel
+            DoInPaletteMode = rvpaCreateCopies
+            Style = HtmlViewerStyle
           end
           object AbyssNextButton: TButton
-            Left = 40
-            Top = 88
-            Width = 209
+            Left = 24
+            Top = 248
+            Width = 221
             Height = 0
             Anchors = [akLeft, akTop, akRight, akBottom]
             Caption = #1040' '#1044#1040#1051#1068#1064#1045'?!'
@@ -303,7 +263,7 @@ object MainForm: TMainForm
       object lbl1: TLabel
         Left = 0
         Top = 0
-        Width = 350
+        Width = 362
         Height = 26
         Align = alTop
         AutoSize = False
@@ -315,29 +275,29 @@ object MainForm: TMainForm
       object TestPageControl: TPageControl
         Left = 0
         Top = 26
-        Width = 350
-        Height = 383
+        Width = 362
+        Height = 436
         ActivePage = LogTabSheet
         Align = alClient
         TabOrder = 0
         object LogTabSheet: TTabSheet
           Caption = 'Log'
           DesignSize = (
-            342
-            355)
+            354
+            408)
           object LogListBox: TListBox
             Left = 0
             Top = 0
-            Width = 342
-            Height = 329
+            Width = 354
+            Height = 382
             Anchors = [akLeft, akTop, akRight, akBottom]
             ItemHeight = 13
             TabOrder = 0
           end
           object ConsoleInputEdit: TEdit
             Left = 0
-            Top = 332
-            Width = 342
+            Top = 385
+            Width = 354
             Height = 21
             Anchors = [akLeft, akRight, akBottom]
             TabOrder = 1
@@ -349,8 +309,8 @@ object MainForm: TMainForm
           object TestMainMemo: TMemo
             Left = 0
             Top = 0
-            Width = 342
-            Height = 355
+            Width = 354
+            Height = 408
             Align = alClient
             Lines.Strings = (
               '<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 '
@@ -1852,8 +1812,8 @@ object MainForm: TMainForm
           object TestAbyssBestMemo: TMemo
             Left = 0
             Top = 0
-            Width = 342
-            Height = 355
+            Width = 354
+            Height = 408
             Align = alClient
             Lines.Strings = (
               '<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 '
@@ -2842,8 +2802,8 @@ object MainForm: TMainForm
           object TestAbyssTopMemo: TMemo
             Left = 0
             Top = 0
-            Width = 342
-            Height = 355
+            Width = 354
+            Height = 408
             Align = alClient
             Lines.Strings = (
               '<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 '
@@ -3436,8 +3396,8 @@ object MainForm: TMainForm
           object TestAbyssMemo: TMemo
             Left = 0
             Top = 0
-            Width = 342
-            Height = 355
+            Width = 354
+            Height = 408
             Align = alClient
             Lines.Strings = (
               '<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 '
@@ -4278,5 +4238,204 @@ object MainForm: TMainForm
     Options = [fdAnsiOnly, fdEffects, fdNoFaceSel, fdNoStyleSel]
     Left = 316
     Top = 395
+  end
+  object HtmlViewerStyle: TRVStyle
+    TextStyles = <
+      item
+        StyleName = 'Normal text'
+        FontName = 'Arial'
+      end
+      item
+        StyleName = 'Heading'
+        FontName = 'Arial'
+        Style = [fsBold]
+        Color = clBlue
+      end
+      item
+        StyleName = 'Subheading'
+        FontName = 'Arial'
+        Style = [fsBold]
+        Color = clNavy
+      end
+      item
+        StyleName = 'Keywords'
+        FontName = 'Arial'
+        Style = [fsItalic]
+        Color = clMaroon
+      end
+      item
+        StyleName = 'Jump 1'
+        FontName = 'Arial'
+        Style = [fsUnderline]
+        Color = clGreen
+        Jump = True
+      end
+      item
+        StyleName = 'Jump 2'
+        FontName = 'Arial'
+        Style = [fsUnderline]
+        Color = clGreen
+        Jump = True
+      end>
+    ParaStyles = <
+      item
+        StyleName = 'Paragraph Style'
+        Tabs = <>
+      end
+      item
+        StyleName = 'Centered'
+        Alignment = rvaCenter
+        Tabs = <>
+      end>
+    ListStyles = <>
+    InvalidPicture.Data = {
+      07544269746D617036100000424D361000000000000036000000280000002000
+      0000200000000100200000000000001000000000000000000000000000000000
+      0000808080008080800080808000808080008080800080808000808080008080
+      8000808080008080800080808000808080008080800080808000808080008080
+      8000808080008080800080808000808080008080800080808000808080008080
+      8000808080008080800080808000808080008080800080808000808080008080
+      800080808000FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF008080
+      800080808000FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF008080
+      800080808000FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF008080
+      800080808000FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF008080
+      800080808000FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF008080
+      800080808000FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF008080
+      800080808000FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF008080
+      800080808000FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF000000000000000000000000000000000000000000000000000000
+      000000000000000000000000000000000000000000000000000000000000FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF008080
+      800080808000FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF0080808000C0C0C000C0C0C000C0C0C000C0C0C000C0C0C000C0C0
+      C000C0C0C000C0C0C000C0C0C000C0C0C000C0C0C000C0C0C00000000000FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF008080
+      800080808000FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF0080808000FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00C0C0C00000000000FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF008080
+      800080808000FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF0080808000FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00C0C0C00000000000FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF008080
+      800080808000FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF0080808000FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00C0C0C00000000000FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF008080
+      800080808000FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF0080808000FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00C0C0C00000000000FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF008080
+      800080808000FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF0080808000FFFFFF00FFFFFF00FFFFFF000000FF000000FF00FFFF
+      FF00FFFFFF000000FF000000FF00FFFFFF00FFFFFF00C0C0C00000000000FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF008080
+      800080808000FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF0080808000FFFFFF00FFFFFF00FFFFFF00FFFFFF000000FF000000
+      FF000000FF000000FF00FFFFFF00FFFFFF00FFFFFF00C0C0C00000000000FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF008080
+      800080808000FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF0080808000FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF000000
+      FF000000FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00C0C0C00000000000FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF008080
+      800080808000FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF0080808000FFFFFF00FFFFFF00FFFFFF00FFFFFF000000FF000000
+      FF000000FF000000FF00FFFFFF00FFFFFF00FFFFFF00C0C0C00000000000FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF008080
+      800080808000FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF0080808000FFFFFF00FFFFFF00FFFFFF000000FF000000FF00FFFF
+      FF00FFFFFF000000FF000000FF00FFFFFF00FFFFFF00C0C0C00000000000FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF008080
+      800080808000FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF0080808000FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00C0C0C00000000000FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF008080
+      800080808000FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF0080808000FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00C0C0C00000000000FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF008080
+      800080808000FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF0080808000FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00C0C0C00000000000FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF008080
+      800080808000FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF0080808000FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00C0C0C00000000000FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF008080
+      800080808000FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF008080800080808000808080008080800080808000808080008080
+      800080808000808080008080800080808000808080008080800080808000FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF008080
+      800080808000FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF008080
+      800080808000FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF008080
+      800080808000FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF008080
+      800080808000FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF008080
+      800080808000FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF008080
+      800080808000FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF008080
+      800080808000FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF008080
+      8000808080008080800080808000808080008080800080808000808080008080
+      8000808080008080800080808000808080008080800080808000808080008080
+      8000808080008080800080808000808080008080800080808000808080008080
+      8000808080008080800080808000808080008080800080808000808080008080
+      8000}
+    StyleTemplates = <>
+    Left = 372
+    Top = 310
+  end
+  object HtmlImporter: TRvHtmlImporter
+    RichView = MainHtmlViewer
+    DefaultFontName = 'Times New Roman'
+    DefaultCFontName = 'Courier New'
+    Left = 436
+    Top = 310
+  end
+  object ScrollDelayTimer: TTimer
+    Enabled = False
+    Interval = 10
+    OnTimer = ScrollDelayTimerTimer
+    Left = 552
+    Top = 573
   end
 end
