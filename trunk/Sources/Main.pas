@@ -8,7 +8,8 @@ uses
   Dialogs, ComCtrls, cxClasses, dxNavBarBase, dxNavBarCollns, ExtCtrls,
   dxNavBar, StdCtrls, IdBaseComponent, IdComponent, IdTCPConnection,
   IdTCPClient, IdHTTP, IdAntiFreezeBase, IdAntiFreeze, OleCtrls, SHDocVw, ActiveX, COMObj, MSHTML,
-  Htmlview, Readhtml, FramView, FramBrwz;
+  Htmlview, Readhtml, FramView, FramBrwz, rvhtmlimport, RVStyle, RVScroll,
+  RichView;
 
 type
   TMainForm = class(TForm)
@@ -36,13 +37,9 @@ type
     ConsoleInputEdit: TEdit;
     MemoTabSheet: TTabSheet;
     ts1: TTabSheet;
-    MainHtmlBrowser: THTMLViewer;
     TestMemoMainTabSheet: TTabSheet;
     StartUpTimer: TTimer;
-    AbyssHtmlBrowser: THTMLViewer;
     FindFocusDelayTimer: TTimer;
-    AbyssBestHtmlBrowser: THTMLViewer;
-    AbyssTopHtmlBrowser: THTMLViewer;
     QuoteNumberLabel: TLabel;
     QuoteBashNumberLabel: TLabel;
     QuoteBashRatingLabel: TLabel;
@@ -53,29 +50,36 @@ type
     FontSelectButton: TButton;
     FontSelectDialog: TFontDialog;
     AbyssNextButton: TButton;
+    MainHtmlViewer: TRichView;
+    HtmlViewerStyle: TRVStyle;
+    HtmlImporter: TRvHtmlImporter;
+    ScrollDelayTimer: TTimer;
+    AbyssBestHtmlViewer: TRichView;
+    AbyssTopHtmlViewer: TRichView;
+    AbyssHtmlViewer: TRichView;
     procedure wmGetMinMaxInfo(var Msg : TMessage); message wm_GetMinMaxInfo; // Ограничение размеров формы
     procedure FormCreate(Sender: TObject);
     procedure FormShow(Sender: TObject);
     procedure BashTabSheetEnter(Sender: TObject);
-    procedure MainHtmlBrowserMouseWheel(Sender: TObject;
-      Shift: TShiftState; WheelDelta: Integer; MousePos: TPoint;
-      var Handled: Boolean);
     procedure FormKeyPress(Sender: TObject; var Key: Char);
     procedure StartUpTimerTimer(Sender: TObject);
     procedure FindFocusDelayTimerTimer(Sender: TObject);
     procedure BashNavBarActiveGroupChanged(Sender: TObject);
-    procedure AbyssHtmlBrowserMouseWheel(Sender: TObject;
-      Shift: TShiftState; WheelDelta: Integer; MousePos: TPoint;
-      var Handled: Boolean);
-    procedure AbyssBestHtmlBrowserMouseWheel(Sender: TObject;
-      Shift: TShiftState; WheelDelta: Integer; MousePos: TPoint;
-      var Handled: Boolean);
-    procedure AbyssTopHtmlBrowserMouseWheel(Sender: TObject;
-      Shift: TShiftState; WheelDelta: Integer; MousePos: TPoint;
-      var Handled: Boolean);
     procedure FontSelectButtonClick(Sender: TObject);
     procedure FormResize(Sender: TObject);
     procedure AbyssNextButtonClick(Sender: TObject);
+    procedure MainHtmlViewerMouseWheel(Sender: TObject; Shift: TShiftState;
+      WheelDelta: Integer; MousePos: TPoint; var Handled: Boolean);
+    procedure ScrollDelayTimerTimer(Sender: TObject);
+    procedure AbyssBestHtmlViewerMouseWheel(Sender: TObject;
+      Shift: TShiftState; WheelDelta: Integer; MousePos: TPoint;
+      var Handled: Boolean);
+    procedure AbyssTopHtmlViewerMouseWheel(Sender: TObject;
+      Shift: TShiftState; WheelDelta: Integer; MousePos: TPoint;
+      var Handled: Boolean);
+    procedure AbyssHtmlViewerMouseWheel(Sender: TObject;
+      Shift: TShiftState; WheelDelta: Integer; MousePos: TPoint;
+      var Handled: Boolean);
   private
     { Private declarations }
   public
@@ -143,6 +147,16 @@ begin
   Writeln(LogFile,Str);
 end;
 
+// Загрузка строки в HtmlViewer
+procedure ChangeHtmlViewerText(HV:TRichView; LoadText:String);
+begin
+  //WriteLog('Load ' + LoadText);
+  MainForm.HtmlImporter.RichView := HV;
+  MainForm.HtmlImporter.LoadHtml(LoadText);
+  HV.Format;
+  MainForm.ScrollDelayTimer.Enabled := True;
+end;
+
 // Извлечение страниц из конструкции <div class="pager"> ... </div>
 function ExtractPages(S,From:string):PageArray;
 var
@@ -203,14 +217,6 @@ begin
   AbyssBestNeedLoad := False;
   AbyssTopNeedLoad := False;
   MainForm.QuoteNumberLabel.Caption := '?/?';
-  MainForm.MainHtmlBrowser.DefFontName := MainForm.FontSelectDialog.Font.Name;
-  MainForm.MainHtmlBrowser.DefFontSize := MainForm.FontSelectDialog.Font.Size;
-  MainForm.AbyssHtmlBrowser.DefFontName := MainForm.FontSelectDialog.Font.Name;
-  MainForm.AbyssHtmlBrowser.DefFontSize := MainForm.FontSelectDialog.Font.Size;
-  MainForm.AbyssTopHtmlBrowser.DefFontName := MainForm.FontSelectDialog.Font.Name;
-  MainForm.AbyssTopHtmlBrowser.DefFontSize := MainForm.FontSelectDialog.Font.Size;
-  MainForm.AbyssBestHtmlBrowser.DefFontName := MainForm.FontSelectDialog.Font.Name;
-  MainForm.AbyssBestHtmlBrowser.DefFontSize := MainForm.FontSelectDialog.Font.Size;
 end;
 
 // Открытие-закрытие тестаба
@@ -283,22 +289,22 @@ begin
   case MainForm.BashNavBar.ActiveGroupIndex of
   // Главная
   0: begin
-        MainForm.MainHtmlBrowser.SetFocus;
+        MainForm.MainHtmlViewer.SetFocus;
         WriteLog('Передача фокуса на Главную');
      end;
   // Лучшее бездны
   1: begin
-        MainForm.AbyssBestHtmlBrowser.SetFocus;
+        MainForm.AbyssBestHtmlViewer.SetFocus;
         WriteLog('Передача фокуса на Лучшее Бездны');
      end;
   // Топ бездны
   2: begin
-        MainForm.AbyssTopHtmlBrowser.SetFocus;
+        MainForm.AbyssTopHtmlViewer.SetFocus;
         WriteLog('Передача фокуса на Топ Бездну');
      end;
   // Бездна
   3: begin
-        MainForm.AbyssHtmlBrowser.SetFocus;
+        MainForm.AbyssHtmlViewer.SetFocus;
         WriteLog('Передача фокуса на Бездну');
      end;
   end;
@@ -312,8 +318,7 @@ begin
         if NOT(CurrentMainQuoteNumber = StrToInt(CurrentMainQuotesArray[0,0]))
         then begin
                 CurrentMainQuoteNumber := CurrentMainQuoteNumber + 1;
-                MainForm.MainHtmlBrowser.LoadFromStream(TStringStream.Create(CurrentMainQuotesArray[CurrentMainQuoteNumber,0]));
-                MainForm.MainHtmlBrowser.VScrollBar.Position := -1000; // Временный код
+                ChangeHtmlViewerText(MainForm.MainHtmlViewer,CurrentMainQuotesArray[CurrentMainQuoteNumber,0]);
              end;
         WriteLog('Переход на след. цитату главной с CurrentNumber ' + IntToStr(CurrentMainQuoteNumber));
         ChangeQuoteNumber;
@@ -322,8 +327,7 @@ begin
         if NOT(CurrentAbyssBestQuoteNumber = StrToInt(CurrentAbyssBestQuotesArray[0,0]))
         then begin
                 CurrentAbyssBestQuoteNumber := CurrentAbyssBestQuoteNumber + 1;
-                MainForm.AbyssBestHtmlBrowser.LoadFromStream(TStringStream.Create(CurrentAbyssBestQuotesArray[CurrentAbyssBestQuoteNumber,0]));
-                MainForm.AbyssBestHtmlBrowser.VScrollBar.Position := -1000; // Временный код
+                ChangeHtmlViewerText(MainForm.AbyssBestHtmlViewer,CurrentAbyssBestQuotesArray[CurrentAbyssBestQuoteNumber,0]);
              end;
         WriteLog('Переход на след. цитату лучшего бездны с CurrentNumber ' + IntToStr(CurrentAbyssBestQuoteNumber));
         ChangeQuoteNumber;
@@ -332,8 +336,7 @@ begin
         if NOT(CurrentAbyssTopQuoteNumber = StrToInt(CurrentAbyssTopQuotesArray[0,0]))
         then begin
                 CurrentAbyssTopQuoteNumber := CurrentAbyssTopQuoteNumber + 1;
-                MainForm.AbyssTopHtmlBrowser.LoadFromStream(TStringStream.Create(CurrentAbyssTopQuotesArray[CurrentAbyssTopQuoteNumber,0]));
-                MainForm.AbyssTopHtmlBrowser.VScrollBar.Position := -1000; // Временный код
+                ChangeHtmlViewerText(MainForm.AbyssTopHtmlViewer,CurrentAbyssTopQuotesArray[CurrentAbyssTopQuoteNumber,0]);
              end;
         WriteLog('Переход на след. цитату топа бездны с CurrentNumber ' + IntToStr(CurrentAbyssTopQuoteNumber));
         ChangeQuoteNumber;
@@ -342,8 +345,7 @@ begin
         if NOT(CurrentAbyssQuoteNumber = StrToInt(CurrentAbyssQuotesArray[0,0]))
         then begin
                 CurrentAbyssQuoteNumber := CurrentAbyssQuoteNumber + 1;
-                MainForm.AbyssHtmlBrowser.LoadFromStream(TStringStream.Create(CurrentAbyssQuotesArray[CurrentAbyssQuoteNumber,0]));
-                MainForm.AbyssHtmlBrowser.VScrollBar.Position := -1000; // Временный код
+                ChangeHtmlViewerText(MainForm.AbyssHtmlViewer,CurrentAbyssQuotesArray[CurrentAbyssQuoteNumber,0]);
              end
         else
              begin
@@ -364,8 +366,7 @@ begin
         if NOT(CurrentMainQuoteNumber = 1)
         then begin
                 CurrentMainQuoteNumber := CurrentMainQuoteNumber - 1;
-                MainForm.MainHtmlBrowser.LoadFromStream(TStringStream.Create(CurrentMainQuotesArray[CurrentMainQuoteNumber,0]));
-                MainForm.MainHtmlBrowser.VScrollBar.Position := -1000; // Временный код
+                ChangeHtmlViewerText(MainForm.MainHtmlViewer, CurrentMainQuotesArray[CurrentMainQuoteNumber,0]);
              end;
         WriteLog('Переход на пред. цитату главной с CurrentNumber ' + IntToStr(CurrentMainQuoteNumber));
         ChangeQuoteNumber;
@@ -374,8 +375,7 @@ begin
         if NOT(CurrentAbyssBestQuoteNumber = 1)
         then begin
                 CurrentAbyssBestQuoteNumber := CurrentAbyssBestQuoteNumber - 1;
-                MainForm.AbyssBestHtmlBrowser.LoadFromStream(TStringStream.Create(CurrentAbyssBestQuotesArray[CurrentAbyssBestQuoteNumber,0]));
-                MainForm.AbyssBestHtmlBrowser.VScrollBar.Position := -1000; // Временный код
+                ChangeHtmlViewerText(MainForm.AbyssBestHtmlViewer,CurrentAbyssBestQuotesArray[CurrentAbyssBestQuoteNumber,0]);
              end;
         WriteLog('Переход на пред. цитату лучшего бездны с CurrentNumber ' + IntToStr(CurrentAbyssBestQuoteNumber));
         ChangeQuoteNumber;
@@ -384,8 +384,7 @@ begin
         if NOT(CurrentAbyssTopQuoteNumber = 1)
         then begin
                 CurrentAbyssTopQuoteNumber := CurrentAbyssTopQuoteNumber - 1;
-                MainForm.AbyssTopHtmlBrowser.LoadFromStream(TStringStream.Create(CurrentAbyssTopQuotesArray[CurrentAbyssTopQuoteNumber,0]));
-                MainForm.AbyssTopHtmlBrowser.VScrollBar.Position := -1000; // Временный код
+                ChangeHtmlViewerText(MainForm.AbyssTopHtmlViewer,CurrentAbyssTopQuotesArray[CurrentAbyssTopQuoteNumber,0]);
              end;
         WriteLog('Переход на пред. цитату топа бездны с CurrentNumber ' + IntToStr(CurrentAbyssTopQuoteNumber));
         ChangeQuoteNumber;
@@ -394,8 +393,7 @@ begin
         if NOT(CurrentAbyssQuoteNumber = 1)
         then begin
                 CurrentAbyssQuoteNumber := CurrentAbyssQuoteNumber - 1;
-                MainForm.AbyssHtmlBrowser.LoadFromStream(TStringStream.Create(CurrentAbyssQuotesArray[CurrentAbyssQuoteNumber,0]));
-                MainForm.AbyssHtmlBrowser.VScrollBar.Position := -1000; // Временный код
+                ChangeHtmlViewerText(MainForm.AbyssHtmlViewer,CurrentAbyssQuotesArray[CurrentAbyssQuoteNumber,0]);
                 MainForm.AbyssNextButton.Visible := False;
              end;
         WriteLog('Переход на пред. цитату бездны с CurrentNumber ' + IntToStr(CurrentAbyssQuoteNumber));
@@ -408,10 +406,10 @@ end;
 function GetStringFromUrl(GetUrl: string): string;
 begin
     case MainForm.BashNavBar.ActiveGroupIndex of
-      0: MainForm.MainHtmlBrowser.LoadFromStream(TStringStream.Create('Загрузка...'));
-      1: MainForm.AbyssBestHtmlBrowser.LoadFromStream(TStringStream.Create('Загрузка...'));
-      2: MainForm.AbyssTopHtmlBrowser.LoadFromStream(TStringStream.Create('Загрузка...'));
-      3: MainForm.AbyssHtmlBrowser.LoadFromStream(TStringStream.Create('Загрузка...'));
+      0: ChangeHtmlViewerText(MainForm.MainHtmlViewer, 'Загрузка...');
+      1: ChangeHtmlViewerText(MainForm.AbyssBestHtmlViewer, 'Загрузка...');
+      2: ChangeHtmlViewerText(MainForm.AbyssTopHtmlViewer, 'Загрузка...');
+      3: ChangeHtmlViewerText(MainForm.AbyssHtmlViewer, 'Загрузка...');
     end;
     WriteLog('Получаем html код со страницы ' + GetUrl);
     with TIdHTTP.Create(MainForm) do
@@ -447,22 +445,6 @@ function BashGetAbyssTopAsString: string;
 begin
   WriteLog('Загрузка html топа бездны в строку');
   BashGetAbyssTopAsString := GetStringFromUrl('http://bash.org.ru/abysstop');
-end;
-
-// Удаляем длинные слова, чтобы не сдвигать страницу
-function RemoveLongWords(S: string):string;
-var i,num:integer;
-    S2: string;
-begin
-  num := 0;
-  S2:='';
-  for i := 0 to (Length(S)-1) do
-  begin
-    num := num + 1;
-    if (S[i] = ' ') or (S[i] = '<') then num := 0;
-    if (num < 35) then S2 := S2 + S[i];
-  end;
-  RemoveLongWords := S2;
 end;
 
 // Парсер цитат
@@ -517,7 +499,7 @@ begin
         3: q[i,2] := 'none';
       end;
       S := Copy(S, Pos('<div>',S),Length(S));
-      q[i,0] := RemoveLongWords(Copy(S, Pos('<div>',S),Pos('</div>',S)+5));
+      q[i,0] := Copy(S, Pos('<div>',S),Pos('</div>',S)+5);
       if (q[i,0] = '') or (Pos('http://lol.bash.org.ru/',q[i,0]) <> 0) then i:=i-1;
   end;
   WriteLog('Конец разбора html. Цитат: ' + IntToStr(i));
@@ -560,7 +542,7 @@ begin
   begin
     CurrentMainQuotesArray := GetCurrentMainQuotes;
     CurrentMainQuoteNumber := 1;
-    MainForm.MainHtmlBrowser.LoadFromStream(TStringStream.Create(CurrentMainQuotesArray[CurrentMainQuoteNumber,0]));
+    ChangeHtmlViewerText(MainForm.MainHtmlViewer, CurrentMainQuotesArray[CurrentMainQuoteNumber,0]);
     MainNeedLoad := False;
   end;
   ChangeQuoteNumber;
@@ -573,7 +555,7 @@ begin
   begin
     CurrentAbyssQuotesArray := GetCurrentAbyssQuotes;
     CurrentAbyssQuoteNumber := 1;
-    MainForm.AbyssHtmlBrowser.LoadFromStream(TStringStream.Create(CurrentAbyssQuotesArray[CurrentAbyssQuoteNumber,0]));
+    ChangeHtmlViewerText(MainForm.AbyssHtmlViewer, CurrentAbyssQuotesArray[CurrentAbyssQuoteNumber,0]);
     AbyssNeedLoad := False;
   end;
 end;
@@ -585,7 +567,7 @@ begin
   begin
     CurrentAbyssBestQuotesArray := GetCurrentAbyssBestQuotes;
     CurrentAbyssBestQuoteNumber := 1;
-    MainForm.AbyssBestHtmlBrowser.LoadFromStream(TStringStream.Create(CurrentAbyssBestQuotesArray[CurrentAbyssBestQuoteNumber,0]));
+    ChangeHtmlViewerText(MainForm.AbyssBestHtmlViewer, CurrentAbyssBestQuotesArray[CurrentAbyssBestQuoteNumber,0]);
     AbyssBestNeedLoad := False;
   end;
 end;
@@ -597,7 +579,7 @@ begin
   begin
     CurrentAbyssTopQuotesArray := GetCurrentAbyssTopQuotes;
     CurrentAbyssTopQuoteNumber := 1;
-    MainForm.AbyssTopHtmlBrowser.LoadFromStream(TStringStream.Create(CurrentAbyssTopQuotesArray[CurrentAbyssTopQuoteNumber,0]));
+    ChangeHtmlViewerText(MainForm.AbyssTopHtmlViewer, CurrentAbyssTopQuotesArray[CurrentAbyssTopQuoteNumber,0]);
     AbyssTopNeedLoad := False;
   end;
 end;
@@ -642,41 +624,45 @@ end;
 ///////////////////////////////////////////////////////////////////////////////
 // Переход на новую цитату при прокрутке колесом мыши
 ///////////////////////////////////////////////////////////////////////////////
-procedure ScrollControl(hb: THTMLViewer; WheelDelta: integer);
+
+procedure ScrollControl(hv: TRichView; WheelDelta: integer);
 begin
-  if ((hb.VScrollBarPosition = hb.VScrollBarRange) or (hb.VScrollBarRange < 0)) and (WheelDelta < 0)
+
+  if ((hv.VScrollPos = hv.VScrollMax) or (hv.VScrollMax < 0)) and (WheelDelta < 0)
   then BashNext;
 
-  if ((hb.VScrollBarPosition = 0) and (WheelDelta > 0))
+  if ((hv.VScrollPos = 0) and (WheelDelta > 0))
   then BashPrevious;
 end;
 
-procedure TMainForm.MainHtmlBrowserMouseWheel(Sender: TObject;
+procedure TMainForm.MainHtmlViewerMouseWheel(Sender: TObject;
   Shift: TShiftState; WheelDelta: Integer; MousePos: TPoint;
   var Handled: Boolean);
 begin
-  ScrollControl(MainHtmlBrowser,WheelDelta);
-end;
-procedure TMainForm.AbyssHtmlBrowserMouseWheel(Sender: TObject;
-  Shift: TShiftState; WheelDelta: Integer; MousePos: TPoint;
-  var Handled: Boolean);
-begin
-  ScrollControl(AbyssHtmlBrowser,WheelDelta);
+   ScrollControl(MainHtmlViewer,WheelDelta);
 end;
 
-procedure TMainForm.AbyssBestHtmlBrowserMouseWheel(Sender: TObject;
+procedure TMainForm.AbyssBestHtmlViewerMouseWheel(Sender: TObject;
   Shift: TShiftState; WheelDelta: Integer; MousePos: TPoint;
   var Handled: Boolean);
 begin
-  ScrollControl(AbyssBestHtmlBrowser,WheelDelta);
+   ScrollControl(AbyssBestHtmlViewer,WheelDelta);
 end;
 
-procedure TMainForm.AbyssTopHtmlBrowserMouseWheel(Sender: TObject;
+procedure TMainForm.AbyssTopHtmlViewerMouseWheel(Sender: TObject;
   Shift: TShiftState; WheelDelta: Integer; MousePos: TPoint;
   var Handled: Boolean);
 begin
-  ScrollControl(AbyssTopHtmlBrowser,WheelDelta);
+  ScrollControl(AbyssTopHtmlViewer,WheelDelta);
 end;
+
+procedure TMainForm.AbyssHtmlViewerMouseWheel(Sender: TObject;
+  Shift: TShiftState; WheelDelta: Integer; MousePos: TPoint;
+  var Handled: Boolean);
+begin
+  ScrollControl(AbyssHtmlViewer,WheelDelta);
+end;
+
 ///////////////////////////////////////////////////////////////////////////////
 //Конец блока
 ///////////////////////////////////////////////////////////////////////////////
@@ -699,7 +685,7 @@ begin
   MainNeedLoad := True;
   CurrentMainQuotesArray := GetCurrentMainQuotes;
   CurrentMainQuoteNumber := 1;
-  MainHtmlBrowser.LoadFromStream(TStringStream.Create(CurrentMainQuotesArray[CurrentMainQuoteNumber,0]));
+  ChangeHtmlViewerText(MainHtmlViewer, CurrentMainQuotesArray[CurrentMainQuoteNumber,0]);
   ChangeQuoteNumber;
   MainNeedLoad := False;
   AbyssNeedLoad := True;
@@ -736,14 +722,7 @@ procedure TMainForm.FontSelectButtonClick(Sender: TObject);
 begin
   if FontSelectDialog.Execute then
     begin
-      MainHtmlBrowser.DefFontName := FontSelectDialog.Font.Name;
-      MainHtmlBrowser.DefFontSize := FontSelectDialog.Font.Size;
-      AbyssHtmlBrowser.DefFontName := FontSelectDialog.Font.Name;
-      AbyssHtmlBrowser.DefFontSize := FontSelectDialog.Font.Size;
-      AbyssTopHtmlBrowser.DefFontName := FontSelectDialog.Font.Name;
-      AbyssTopHtmlBrowser.DefFontSize := FontSelectDialog.Font.Size;
-      AbyssBestHtmlBrowser.DefFontName := FontSelectDialog.Font.Name;
-      AbyssBestHtmlBrowser.DefFontSize := FontSelectDialog.Font.Size;
+      HtmlViewerStyle.
     end;
 end;
 
@@ -763,9 +742,20 @@ begin
   AbyssNextButton.Visible := False;
   CurrentAbyssQuotesArray := GetCurrentAbyssQuotes;
   CurrentAbyssQuoteNumber := 1;
-  MainForm.AbyssHtmlBrowser.LoadFromStream(TStringStream.Create(CurrentAbyssQuotesArray[CurrentAbyssQuoteNumber,0]));
+  ChangeHtmlViewerText(AbyssHtmlViewer,CurrentAbyssQuotesArray[CurrentAbyssQuoteNumber,0]);
   ChangeQuoteNumber;
   FindFocus;
+end;
+
+procedure TMainForm.ScrollDelayTimerTimer(Sender: TObject);
+begin
+  ScrollDelayTimer.Enabled := False;
+  case BashNavBar.ActiveGroupIndex of
+  0: MainHtmlViewer.ScrollTo(0);
+  1: AbyssBestHtmlViewer.ScrollTo(0);
+  2: AbyssTopHtmlViewer.ScrollTo(0);
+  3: AbyssHtmlViewer.ScrollTo(0);
+  end;
 end;
 
 end.
