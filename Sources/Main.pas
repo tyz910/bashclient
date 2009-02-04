@@ -48,7 +48,6 @@ type
     TestAbyssTopMemo: TMemo;
     TestAbyssMemo: TMemo;
     FontSelectButton: TButton;
-    FontSelectDialog: TFontDialog;
     AbyssNextButton: TButton;
     MainHtmlViewer: TRichView;
     HtmlViewerStyle: TRVStyle;
@@ -57,6 +56,9 @@ type
     AbyssBestHtmlViewer: TRichView;
     AbyssTopHtmlViewer: TRichView;
     AbyssHtmlViewer: TRichView;
+    FontSelectDialog: TFontDialog;
+    PagesRichView: TRichView;
+    rvstyl1: TRVStyle;
     procedure wmGetMinMaxInfo(var Msg : TMessage); message wm_GetMinMaxInfo; // Ограничение размеров формы
     procedure FormCreate(Sender: TObject);
     procedure FormShow(Sender: TObject);
@@ -80,6 +82,8 @@ type
     procedure AbyssHtmlViewerMouseWheel(Sender: TObject;
       Shift: TShiftState; WheelDelta: Integer; MousePos: TPoint;
       var Handled: Boolean);
+    procedure PagesRichViewJump(Sender: TObject; id: Integer);
+    procedure PagesRichViewClick(Sender: TObject);
   private
     { Private declarations }
   public
@@ -150,11 +154,44 @@ end;
 // Загрузка строки в HtmlViewer
 procedure ChangeHtmlViewerText(HV:TRichView; LoadText:String);
 begin
-  //WriteLog('Load ' + LoadText);
   MainForm.HtmlImporter.RichView := HV;
   MainForm.HtmlImporter.LoadHtml(LoadText);
   HV.Format;
   MainForm.ScrollDelayTimer.Enabled := True;
+  // Меняем шрифт
+  MainForm.HtmlViewerStyle.TextStyles[0].Assign(MainForm.FontSelectDialog.Font);
+  HV.Reformat;
+end;
+
+// Отображение страниц
+procedure ChangePages;
+var CurArray: PageArray;
+    i: Integer;
+
+begin
+   i:=1;
+   MainForm.PagesRichView.Visible:= True;
+   MainForm.PagesRichView.Clear;
+
+   case MainForm.BashNavBar.ActiveGroupIndex of
+   0: CurArray := CurrentMainPagesArray;
+   1: CurArray := CurrentAbyssBestPagesArray;
+   end;
+
+   while not(CurArray[i,1] = '') do
+   begin
+       if (CurArray[i,1] = 'currentpage') or (CurArray[i,1] = 'dots') then MainForm.PagesRichView.Add(CurArray[i,2],5)
+       else
+           begin
+             if (CurArray[i,1] = 'prevlinc') then MainForm.PagesRichView.AddNLTag('>>',4,-1,i);
+             if (CurArray[i,1] = 'nextlinc') then MainForm.PagesRichView.AddNLTag('<<',4,-1,i);
+             if (CurArray[i,1] = 'linc') then MainForm.PagesRichView.AddNLTag(CurArray[i,2],4,-1,i);
+           end;
+
+       MainForm.PagesRichView.Add(' ',0);
+       i:= i+1;
+   end;
+   MainForm.PagesRichView.Reformat;
 end;
 
 // Извлечение страниц из конструкции <div class="pager"> ... </div>
@@ -535,6 +572,24 @@ begin
   GetCurrentAbyssTopQuotes := BashQuoteParser(BashGetAbyssTopAsString, 2);
 end;
 
+procedure OpenBashMainPageNum(Num: string);
+begin
+  CurrentMainQuotesArray := BashQuoteParser(GetStringFromUrl('http://bash.org.ru/index/' + Num), 0);
+  CurrentMainQuoteNumber := 1;
+  ChangeHtmlViewerText(MainForm.MainHtmlViewer, CurrentMainQuotesArray[CurrentMainQuoteNumber,0]);
+  ChangeQuoteNumber;
+  ChangePages;
+end;
+
+procedure OpenBashAbyssBestPageNum(Num: string);
+begin
+  CurrentAbyssBestQuotesArray := BashQuoteParser(GetStringFromUrl('http://bash.org.ru/abyssbest/' + Num), 1);
+  CurrentAbyssBestQuoteNumber := 1;
+  ChangeHtmlViewerText(MainForm.AbyssBestHtmlViewer, CurrentAbyssBestQuotesArray[CurrentAbyssBestQuoteNumber,0]);
+  ChangeQuoteNumber;
+  ChangePages;
+end;
+
 // Открытие Главной
 procedure OpenMain;
 begin
@@ -545,7 +600,7 @@ begin
     ChangeHtmlViewerText(MainForm.MainHtmlViewer, CurrentMainQuotesArray[CurrentMainQuoteNumber,0]);
     MainNeedLoad := False;
   end;
-  ChangeQuoteNumber;
+  ChangePages;
 end;
 
 // Открытие Бездны
@@ -558,6 +613,7 @@ begin
     ChangeHtmlViewerText(MainForm.AbyssHtmlViewer, CurrentAbyssQuotesArray[CurrentAbyssQuoteNumber,0]);
     AbyssNeedLoad := False;
   end;
+  MainForm.PagesRichView.Visible:= False;
 end;
 
 // Открытие Лучшего Бездны
@@ -570,6 +626,7 @@ begin
     ChangeHtmlViewerText(MainForm.AbyssBestHtmlViewer, CurrentAbyssBestQuotesArray[CurrentAbyssBestQuoteNumber,0]);
     AbyssBestNeedLoad := False;
   end;
+  ChangePages;
 end;
 
 // Открытие Топа Бездны
@@ -582,6 +639,7 @@ begin
     ChangeHtmlViewerText(MainForm.AbyssTopHtmlViewer, CurrentAbyssTopQuotesArray[CurrentAbyssTopQuoteNumber,0]);
     AbyssTopNeedLoad := False;
   end;
+  MainForm.PagesRichView.Visible:= False;
 end;
 
 
@@ -687,6 +745,7 @@ begin
   CurrentMainQuoteNumber := 1;
   ChangeHtmlViewerText(MainHtmlViewer, CurrentMainQuotesArray[CurrentMainQuoteNumber,0]);
   ChangeQuoteNumber;
+  ChangePages;
   MainNeedLoad := False;
   AbyssNeedLoad := True;
   AbyssBestNeedLoad := True;
@@ -722,7 +781,7 @@ procedure TMainForm.FontSelectButtonClick(Sender: TObject);
 begin
   if FontSelectDialog.Execute then
     begin
-      HtmlViewerStyle.
+       HtmlViewerStyle.TextStyles[0].Assign(FontSelectDialog.Font);
     end;
 end;
 
@@ -756,6 +815,21 @@ begin
   2: AbyssTopHtmlViewer.ScrollTo(0);
   3: AbyssHtmlViewer.ScrollTo(0);
   end;
+end;
+
+procedure TMainForm.PagesRichViewJump(Sender: TObject; id: Integer);
+begin
+  case BashNavBar.ActiveGroupIndex of
+  0://ShowMessage(CurrentMainPagesArray[id+1,2]);
+    OpenBashMainPageNum(CurrentMainPagesArray[id+1,2]);
+  1://ShowMessage(CurrentAbyssBestPagesArray[id+1,2]);
+    OpenBashAbyssBestPageNum(CurrentAbyssBestPagesArray[id+1,2]);
+  end;
+end;
+
+procedure TMainForm.PagesRichViewClick(Sender: TObject);
+begin
+  FindFocus;
 end;
 
 end.
