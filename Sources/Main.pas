@@ -4,12 +4,11 @@ interface
 
 // Проверить, все ли используются.
 uses
-  Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
-  Dialogs, ComCtrls, cxClasses, dxNavBarBase, dxNavBarCollns, ExtCtrls,
-  dxNavBar, StdCtrls, IdBaseComponent, IdComponent, IdTCPConnection,
-  IdTCPClient, IdHTTP, IdAntiFreezeBase, IdAntiFreeze, OleCtrls, SHDocVw, ActiveX, COMObj, MSHTML,
-  Htmlview, Readhtml, FramView, FramBrwz, rvhtmlimport, RVStyle, RVScroll,
-  RichView;
+  Windows, Messages, SysUtils, Forms, IdHTTP, RichView,
+  Classes, Graphics, Controls, Dialogs, ComCtrls, cxClasses,
+  dxNavBarBase, dxNavBarCollns, ExtCtrls, dxNavBar, StdCtrls,
+  IdBaseComponent, IdAntiFreezeBase, IdAntiFreeze, rvhtmlimport, RVStyle,
+  RVScroll, CheckLst;
 
 type
   TMainForm = class(TForm)
@@ -59,6 +58,7 @@ type
     FontSelectDialog: TFontDialog;
     PagesRichView: TRichView;
     rvstyl1: TRVStyle;
+    chklst1: TCheckListBox;
     procedure wmGetMinMaxInfo(var Msg : TMessage); message wm_GetMinMaxInfo; // Ограничение размеров формы
     procedure FormCreate(Sender: TObject);
     procedure FormShow(Sender: TObject);
@@ -84,6 +84,7 @@ type
       var Handled: Boolean);
     procedure PagesRichViewJump(Sender: TObject; id: Integer);
     procedure PagesRichViewClick(Sender: TObject);
+    procedure chklst1ClickCheck(Sender: TObject);
   private
     { Private declarations }
   public
@@ -151,6 +152,24 @@ begin
   Writeln(LogFile,Str);
 end;
 
+function CurrentBashHtmlViewer:TRichView;
+begin
+  case MainForm.BashNavBar.ActiveGroupIndex of
+    0: CurrentBashHtmlViewer := MainForm.MainHtmlViewer;
+    1: CurrentBashHtmlViewer := MainForm.AbyssBestHtmlViewer;
+    2: CurrentBashHtmlViewer := MainForm.AbyssTopHtmlViewer;
+    3: CurrentBashHtmlViewer := MainForm.AbyssHtmlViewer;
+  end;
+end;
+
+function CurrentBashPagesArray:PageArray;
+begin
+  case MainForm.BashNavBar.ActiveGroupIndex of
+   0: CurrentBashPagesArray := CurrentMainPagesArray;
+   1: CurrentBashPagesArray := CurrentAbyssBestPagesArray;
+   end;
+end;
+
 // Загрузка строки в HtmlViewer
 procedure ChangeHtmlViewerText(HV:TRichView; LoadText:String);
 begin
@@ -165,27 +184,20 @@ end;
 
 // Отображение страниц
 procedure ChangePages;
-var CurArray: PageArray;
-    i: Integer;
-
+var  i: Integer;
 begin
    i:=1;
    MainForm.PagesRichView.Visible:= True;
    MainForm.PagesRichView.Clear;
 
-   case MainForm.BashNavBar.ActiveGroupIndex of
-   0: CurArray := CurrentMainPagesArray;
-   1: CurArray := CurrentAbyssBestPagesArray;
-   end;
-
-   while not(CurArray[i,1] = '') do
+   while not(CurrentBashPagesArray[i,1] = '') do
    begin
-       if (CurArray[i,1] = 'currentpage') or (CurArray[i,1] = 'dots') then MainForm.PagesRichView.Add(CurArray[i,2],5)
+       if (CurrentBashPagesArray[i,1] = 'currentpage') or (CurrentBashPagesArray[i,1] = 'dots') then MainForm.PagesRichView.Add(CurrentBashPagesArray[i,2],5)
        else
            begin
-             if (CurArray[i,1] = 'prevlinc') then MainForm.PagesRichView.AddNLTag('>>',4,-1,i);
-             if (CurArray[i,1] = 'nextlinc') then MainForm.PagesRichView.AddNLTag('<<',4,-1,i);
-             if (CurArray[i,1] = 'linc') then MainForm.PagesRichView.AddNLTag(CurArray[i,2],4,-1,i);
+             if (CurrentBashPagesArray[i,1] = 'prevlinc') then MainForm.PagesRichView.AddNLTag('>>',4,-1,i);
+             if (CurrentBashPagesArray[i,1] = 'nextlinc') then MainForm.PagesRichView.AddNLTag('<<',4,-1,i);
+             if (CurrentBashPagesArray[i,1] = 'linc') then MainForm.PagesRichView.AddNLTag(CurrentBashPagesArray[i,2],4,-1,i);
            end;
 
        MainForm.PagesRichView.Add(' ',0);
@@ -256,6 +268,45 @@ begin
   MainForm.QuoteNumberLabel.Caption := '?/?';
 end;
 
+//
+function GetRVText(RV:TRichView):string;
+begin
+  RV.SelectAll;
+  GetRVText := RV.GetSelText;
+  RV.Deselect;
+end;
+
+// 
+function CurrentBashQuoteNumber: Integer;
+begin
+  case MainForm.BashNavBar.ActiveGroupIndex of
+  0: CurrentBashQuoteNumber := CurrentMainQuoteNumber;
+  1: CurrentBashQuoteNumber := CurrentAbyssBestQuoteNumber;
+  2: CurrentBashQuoteNumber := CurrentAbyssTopQuoteNumber;
+  3: CurrentBashQuoteNumber := CurrentAbyssQuoteNumber;
+  end;
+end;
+
+procedure ChangeCurrentBashQuoteNumber(i:Integer);
+begin
+  case MainForm.BashNavBar.ActiveGroupIndex of
+  0: CurrentMainQuoteNumber := CurrentMainQuoteNumber + i;
+  1: CurrentAbyssBestQuoteNumber := CurrentAbyssBestQuoteNumber + i;
+  2: CurrentAbyssTopQuoteNumber := CurrentAbyssTopQuoteNumber + i;
+  3: CurrentAbyssQuoteNumber := CurrentAbyssQuoteNumber + i;
+  end;
+end;
+
+function CurrentBashQuotesArray: QuoteArray;
+begin
+  case MainForm.BashNavBar.ActiveGroupIndex of
+  0: CurrentBashQuotesArray := CurrentMainQuotesArray;
+  1: CurrentBashQuotesArray := CurrentAbyssBestQuotesArray;
+  2: CurrentBashQuotesArray := CurrentAbyssTopQuotesArray;
+  3: CurrentBashQuotesArray := CurrentAbyssQuotesArray;
+  end;
+end;
+
 // Открытие-закрытие тестаба
 procedure OpenCloseTestTab;
 begin
@@ -291,28 +342,9 @@ var lCaption1: string;
     lCaption2: string;
     lCaption3: string;
 begin
-  case MainForm.BashNavBar.ActiveGroupIndex of
-     0: begin
-          lCaption1 := IntToStr(CurrentMainQuoteNumber) + '/' + CurrentMainQuotesArray[0,0];
-          lCaption2 := CurrentMainQuotesArray[CurrentMainQuoteNumber,1];
-          lCaption3 := CurrentMainQuotesArray[CurrentMainQuoteNumber,2];
-       end;
-    1: begin
-          lCaption1 := IntToStr(CurrentAbyssBestQuoteNumber) + '/' + CurrentAbyssBestQuotesArray[0,0];
-          lCaption2 := CurrentAbyssBestQuotesArray[CurrentAbyssBestQuoteNumber,1];
-          lCaption3 := CurrentAbyssBestQuotesArray[CurrentAbyssBestQuoteNumber,2];
-       end;
-    2: begin
-          lCaption1 := IntToStr(CurrentAbyssTopQuoteNumber) + '/' + CurrentAbyssTopQuotesArray[0,0];
-          lCaption2 := CurrentAbyssTopQuotesArray[CurrentAbyssTopQuoteNumber,1];
-          lCaption3 := CurrentAbyssTopQuotesArray[CurrentAbyssTopQuoteNumber,2];
-       end;
-    3: begin
-          lCaption1 := IntToStr(CurrentAbyssQuoteNumber) + '/' + CurrentAbyssQuotesArray[0,0];
-          lCaption2 := CurrentAbyssQuotesArray[CurrentAbyssQuoteNumber,1];
-          lCaption3 := CurrentAbyssQuotesArray[CurrentAbyssQuoteNumber,2];
-       end;
-  end;
+  lCaption1 := IntToStr(CurrentBashQuoteNumber) + '/' + CurrentBashQuotesArray[0,0];
+  lCaption2 := CurrentBashQuotesArray[CurrentBashQuoteNumber,1];
+  lCaption3 := CurrentBashQuotesArray[CurrentBashQuoteNumber,2];
   if lCaption1 = '0/' then lCaption1 := '?/?';
   MainForm.QuoteNumberLabel.Caption := lCaption1;
   MainForm.QuoteBashNumberLabel.Caption := '#' + lCaption2;
@@ -350,47 +382,20 @@ end;
 // Переход на новую цитату
 procedure BashNext;
 begin
-  case MainForm.BashNavBar.ActiveGroupIndex of
-  0:  begin
-        if NOT(CurrentMainQuoteNumber = StrToInt(CurrentMainQuotesArray[0,0]))
-        then begin
-                CurrentMainQuoteNumber := CurrentMainQuoteNumber + 1;
-                ChangeHtmlViewerText(MainForm.MainHtmlViewer,CurrentMainQuotesArray[CurrentMainQuoteNumber,0]);
-             end;
-        WriteLog('Переход на след. цитату главной с CurrentNumber ' + IntToStr(CurrentMainQuoteNumber));
-        ChangeQuoteNumber;
-      end;
-  1:  begin
-        if NOT(CurrentAbyssBestQuoteNumber = StrToInt(CurrentAbyssBestQuotesArray[0,0]))
-        then begin
-                CurrentAbyssBestQuoteNumber := CurrentAbyssBestQuoteNumber + 1;
-                ChangeHtmlViewerText(MainForm.AbyssBestHtmlViewer,CurrentAbyssBestQuotesArray[CurrentAbyssBestQuoteNumber,0]);
-             end;
-        WriteLog('Переход на след. цитату лучшего бездны с CurrentNumber ' + IntToStr(CurrentAbyssBestQuoteNumber));
-        ChangeQuoteNumber;
-      end;
-  2:  begin
-        if NOT(CurrentAbyssTopQuoteNumber = StrToInt(CurrentAbyssTopQuotesArray[0,0]))
-        then begin
-                CurrentAbyssTopQuoteNumber := CurrentAbyssTopQuoteNumber + 1;
-                ChangeHtmlViewerText(MainForm.AbyssTopHtmlViewer,CurrentAbyssTopQuotesArray[CurrentAbyssTopQuoteNumber,0]);
-             end;
-        WriteLog('Переход на след. цитату топа бездны с CurrentNumber ' + IntToStr(CurrentAbyssTopQuoteNumber));
-        ChangeQuoteNumber;
-      end;
-  3:  begin
-        if NOT(CurrentAbyssQuoteNumber = StrToInt(CurrentAbyssQuotesArray[0,0]))
-        then begin
-                CurrentAbyssQuoteNumber := CurrentAbyssQuoteNumber + 1;
-                ChangeHtmlViewerText(MainForm.AbyssHtmlViewer,CurrentAbyssQuotesArray[CurrentAbyssQuoteNumber,0]);
-             end
-        else
-             begin
-                MainForm.AbyssNextButton.Visible := True;
-             end;
-        WriteLog('Переход на след. цитату бездны с CurrentNumber ' + IntToStr(CurrentAbyssQuoteNumber));
-        ChangeQuoteNumber;
-      end;
+  if not(GetRVText(CurrentBashHtmlViewer) = 'Загрузка...') then
+  begin
+    if NOT(CurrentBashQuoteNumber = StrToInt(CurrentBashQuotesArray[0,0]))
+          then
+          begin
+             ChangeCurrentBashQuoteNumber(+1);
+             ChangeHtmlViewerText(CurrentBashHtmlViewer,CurrentBashQuotesArray[CurrentBashQuoteNumber,0]);
+          end
+    else
+          begin
+             if CurrentBashHtmlViewer = MainForm.AbyssHtmlViewer then MainForm.AbyssNextButton.Visible := True;
+          end;
+          WriteLog('Переход на след. цитату с CurrentNumber ' + IntToStr(CurrentBashQuoteNumber));
+          ChangeQuoteNumber;
   end;
 
 end;
@@ -398,62 +403,30 @@ end;
 // Переход на предыдущую цитату
 procedure BashPrevious;
 begin
-  case MainForm.BashNavBar.ActiveGroupIndex of
-  0:  begin
-        if NOT(CurrentMainQuoteNumber = 1)
-        then begin
-                CurrentMainQuoteNumber := CurrentMainQuoteNumber - 1;
-                ChangeHtmlViewerText(MainForm.MainHtmlViewer, CurrentMainQuotesArray[CurrentMainQuoteNumber,0]);
-             end;
-        WriteLog('Переход на пред. цитату главной с CurrentNumber ' + IntToStr(CurrentMainQuoteNumber));
-        ChangeQuoteNumber;
-      end;
-  1:  begin
-        if NOT(CurrentAbyssBestQuoteNumber = 1)
-        then begin
-                CurrentAbyssBestQuoteNumber := CurrentAbyssBestQuoteNumber - 1;
-                ChangeHtmlViewerText(MainForm.AbyssBestHtmlViewer,CurrentAbyssBestQuotesArray[CurrentAbyssBestQuoteNumber,0]);
-             end;
-        WriteLog('Переход на пред. цитату лучшего бездны с CurrentNumber ' + IntToStr(CurrentAbyssBestQuoteNumber));
-        ChangeQuoteNumber;
-      end;
-  2:  begin
-        if NOT(CurrentAbyssTopQuoteNumber = 1)
-        then begin
-                CurrentAbyssTopQuoteNumber := CurrentAbyssTopQuoteNumber - 1;
-                ChangeHtmlViewerText(MainForm.AbyssTopHtmlViewer,CurrentAbyssTopQuotesArray[CurrentAbyssTopQuoteNumber,0]);
-             end;
-        WriteLog('Переход на пред. цитату топа бездны с CurrentNumber ' + IntToStr(CurrentAbyssTopQuoteNumber));
-        ChangeQuoteNumber;
-      end;
-  3:  begin
-        if NOT(CurrentAbyssQuoteNumber = 1)
-        then begin
-                CurrentAbyssQuoteNumber := CurrentAbyssQuoteNumber - 1;
-                ChangeHtmlViewerText(MainForm.AbyssHtmlViewer,CurrentAbyssQuotesArray[CurrentAbyssQuoteNumber,0]);
-                MainForm.AbyssNextButton.Visible := False;
-             end;
-        WriteLog('Переход на пред. цитату бездны с CurrentNumber ' + IntToStr(CurrentAbyssQuoteNumber));
-        ChangeQuoteNumber;
-      end;
+  if not(GetRVText(CurrentBashHtmlViewer) = 'Загрузка...') then
+  begin
+    if NOT(CurrentBashQuoteNumber = 1)
+          then
+          begin
+             ChangeCurrentBashQuoteNumber(-1);
+             ChangeHtmlViewerText(CurrentBashHtmlViewer,CurrentBashQuotesArray[CurrentBashQuoteNumber,0]);
+             if CurrentBashHtmlViewer = MainForm.AbyssHtmlViewer then MainForm.AbyssNextButton.Visible := False;
+          end;
+          WriteLog('Переход на пред. цитату с CurrentNumber ' + IntToStr(CurrentBashQuoteNumber));
+          ChangeQuoteNumber;
   end;
 end;
 
 // Получаем html код страницы по указанной ссылке
 function GetStringFromUrl(GetUrl: string): string;
 begin
-    case MainForm.BashNavBar.ActiveGroupIndex of
-      0: ChangeHtmlViewerText(MainForm.MainHtmlViewer, 'Загрузка...');
-      1: ChangeHtmlViewerText(MainForm.AbyssBestHtmlViewer, 'Загрузка...');
-      2: ChangeHtmlViewerText(MainForm.AbyssTopHtmlViewer, 'Загрузка...');
-      3: ChangeHtmlViewerText(MainForm.AbyssHtmlViewer, 'Загрузка...');
-    end;
-    WriteLog('Получаем html код со страницы ' + GetUrl);
-    with TIdHTTP.Create(MainForm) do
-    begin
-      GetStringFromUrl := Get(GetUrl);
-      Destroy;
-    end;
+      ChangeHtmlViewerText(CurrentBashHtmlViewer, 'Загрузка...');
+      WriteLog('Получаем html код со страницы ' + GetUrl);
+      with TIdHTTP.Create(MainForm) do
+      begin
+        GetStringFromUrl := Get(GetUrl);
+        Destroy;
+      end;
 end;
 
 // Загружаем html главной в строку
@@ -593,6 +566,8 @@ end;
 // Открытие Главной
 procedure OpenMain;
 begin
+  if not(GetRVText(CurrentBashHtmlViewer) = 'Загрузка...') then
+  begin
   if MainNeedLoad = true then
   begin
     CurrentMainQuotesArray := GetCurrentMainQuotes;
@@ -600,12 +575,15 @@ begin
     ChangeHtmlViewerText(MainForm.MainHtmlViewer, CurrentMainQuotesArray[CurrentMainQuoteNumber,0]);
     MainNeedLoad := False;
   end;
+  end;
   ChangePages;
 end;
 
 // Открытие Бездны
 procedure OpenAbyss;
 begin
+  if not(GetRVText(CurrentBashHtmlViewer) = 'Загрузка...') then
+  begin
   if AbyssNeedLoad = True then
   begin
     CurrentAbyssQuotesArray := GetCurrentAbyssQuotes;
@@ -613,12 +591,15 @@ begin
     ChangeHtmlViewerText(MainForm.AbyssHtmlViewer, CurrentAbyssQuotesArray[CurrentAbyssQuoteNumber,0]);
     AbyssNeedLoad := False;
   end;
+  end;
   MainForm.PagesRichView.Visible:= False;
 end;
 
 // Открытие Лучшего Бездны
 procedure OpenAbyssBest;
 begin
+  if not(GetRVText(CurrentBashHtmlViewer) = 'Загрузка...') then
+  begin
   if AbyssBestNeedLoad = True then
   begin
     CurrentAbyssBestQuotesArray := GetCurrentAbyssBestQuotes;
@@ -626,18 +607,22 @@ begin
     ChangeHtmlViewerText(MainForm.AbyssBestHtmlViewer, CurrentAbyssBestQuotesArray[CurrentAbyssBestQuoteNumber,0]);
     AbyssBestNeedLoad := False;
   end;
+  end;
   ChangePages;
 end;
 
 // Открытие Топа Бездны
 procedure OpenAbyssTop;
 begin
+  if not(GetRVText(CurrentBashHtmlViewer) = 'Загрузка...') then
+  begin
   if AbyssTopNeedLoad = True then
   begin
     CurrentAbyssTopQuotesArray := GetCurrentAbyssTopQuotes;
     CurrentAbyssTopQuoteNumber := 1;
     ChangeHtmlViewerText(MainForm.AbyssTopHtmlViewer, CurrentAbyssTopQuotesArray[CurrentAbyssTopQuoteNumber,0]);
     AbyssTopNeedLoad := False;
+  end;
   end;
   MainForm.PagesRichView.Visible:= False;
 end;
@@ -809,21 +794,14 @@ end;
 procedure TMainForm.ScrollDelayTimerTimer(Sender: TObject);
 begin
   ScrollDelayTimer.Enabled := False;
-  case BashNavBar.ActiveGroupIndex of
-  0: MainHtmlViewer.ScrollTo(0);
-  1: AbyssBestHtmlViewer.ScrollTo(0);
-  2: AbyssTopHtmlViewer.ScrollTo(0);
-  3: AbyssHtmlViewer.ScrollTo(0);
-  end;
+  CurrentBashHtmlViewer.ScrollTo(0);
 end;
 
 procedure TMainForm.PagesRichViewJump(Sender: TObject; id: Integer);
 begin
   case BashNavBar.ActiveGroupIndex of
-  0://ShowMessage(CurrentMainPagesArray[id+1,2]);
-    OpenBashMainPageNum(CurrentMainPagesArray[id+1,2]);
-  1://ShowMessage(CurrentAbyssBestPagesArray[id+1,2]);
-    OpenBashAbyssBestPageNum(CurrentAbyssBestPagesArray[id+1,2]);
+  0: OpenBashMainPageNum(CurrentMainPagesArray[id+1,2]);
+  1: OpenBashAbyssBestPageNum(CurrentAbyssBestPagesArray[id+1,2]);
   end;
 end;
 
@@ -831,5 +809,13 @@ procedure TMainForm.PagesRichViewClick(Sender: TObject);
 begin
   FindFocus;
 end;
+
+procedure TMainForm.chklst1ClickCheck(Sender: TObject);
+var i: Integer;
+begin
+  for i := 0 to (chklst1.Items.Count - 1) do
+  BashNavBar.Groups[i].Visible := chklst1.Checked[i];
+end;
+
 
 end.

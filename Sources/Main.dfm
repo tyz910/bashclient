@@ -272,6 +272,20 @@ object MainForm: TMainForm
         TabOrder = 0
         OnClick = FontSelectButtonClick
       end
+      object chklst1: TCheckListBox
+        Left = 8
+        Top = 64
+        Width = 105
+        Height = 57
+        OnClickCheck = chklst1ClickCheck
+        ItemHeight = 13
+        Items.Strings = (
+          #1043#1083#1072#1074#1085#1072#1103
+          #1051#1091#1095#1096#1077#1077' '#1041#1077#1079#1076#1085#1099
+          #1058#1086#1087' '#1041#1077#1079#1076#1085#1099
+          #1041#1077#1079#1076#1085#1072)
+        TabOrder = 1
+      end
     end
     object AboutTabSheet: TTabSheet
       Caption = #1054' '#1087#1088#1086#1075#1088#1072#1084#1084#1077
