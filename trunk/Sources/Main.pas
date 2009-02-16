@@ -67,6 +67,9 @@ type
     TestITHappensMemo: TMemo;
     ITHQuoteNumberLabel: TLabel;
     TabChangeDelayTimer: TTimer;
+    QuoteITHNumberLabel: TLabel;
+    QuoteITHRatingLabel: TLabel;
+    ITHPagesRichView: TRichView;
     procedure wmGetMinMaxInfo(var Msg : TMessage); message wm_GetMinMaxInfo; // Ограничение размеров формы
     procedure FormCreate(Sender: TObject);
     procedure FormShow(Sender: TObject);
@@ -99,6 +102,9 @@ type
     procedure MainPageControlChanging(Sender: TObject;
       var AllowChange: Boolean);
     procedure TabChangeDelayTimerTimer(Sender: TObject);
+    procedure FormClose(Sender: TObject; var Action: TCloseAction);
+    procedure NetDetectConnectionStatus(Sender: TObject;
+      isConnected: Boolean);
   private
     { Private declarations }
   public
@@ -106,19 +112,19 @@ type
   end;
 
 // Описание формата:
-// Массив из 56 записей.
+// Массив из 51 записи.
 // 0 : служебная
 // [0,0] : количество цитат в массиве
 // [0,1] : не используется
 // [0,2] : не используется
 // [0,3] : не используется
-// 1-55 : цитаты (не более 55)
+// 1-50 : цитаты (не более 50)
 // [*,0] : html тект цитаты
 // [*,1] : номер цитаты
 // [*,2] : рейтинг
 // [*,3] : не используется
 
-type QuoteArray = array [0..55] of array [0..3] of string; // Массив цитат
+type QuoteArray = array [0..50] of array [0..3] of string; // Массив цитат
 
 // Описание формата:
 // Массив из 13 записей.
@@ -126,6 +132,7 @@ type QuoteArray = array [0..55] of array [0..3] of string; // Массив цитат
 // [*,2] : номер страницы
 
 type PageArray = array [1..13] of array [1..2] of string; // Массив сраниц
+type ITHQuoteArray = array [0..10] of array [0..4] of string; // Массив цитат
 
 var
   MainForm: TMainForm;
@@ -145,8 +152,10 @@ var
   AbyssTopNeedLoad: Boolean;
   ITHMainNeedLoad: Boolean;
   LogFile: TextFile;
-  CurrentITHQuotesArray: QuoteArray;
+  CurrentITHQuotesArray: ITHQuoteArray;
   CurrentITHQuoteNumber: Integer;
+  CurrentITHPagesArray: PageArray;
+  Connection: Boolean;
 
 implementation
 
@@ -204,13 +213,31 @@ end;
 // Получаем html код страницы по указанной ссылке
 function GetStringFromUrl(GetUrl: string): string;
 begin
+      //Connection := False;
+
+      
       ChangeHtmlViewerText(CurrentHtmlViewer, 'Загрузка...');
       WriteLog('Получаем html код со страницы ' + GetUrl);
-      with TIdHTTP.Create(MainForm) do
+
+      with TIdHTTP.Create(nil) do
       begin
-        GetStringFromUrl := Get(GetUrl);
-        Destroy;
+
+        ConnectTimeout := 5000;
+        //ReadTimeout := 1000;
+        //Head(GetUrl);
+        try
+          GetStringFromUrl := Get(GetUrl);
+          DisconnectSocket;
+          Free;
+        except
+          GetStringFromUrl := 'error';
+          ChangeHtmlViewerText(CurrentHtmlViewer,'Ошибка');
+        end;
+
+
       end;
+
+
 end;
 
 // Получаем  текущий массив страниц баша
@@ -243,6 +270,67 @@ begin
        i:= i+1;
    end;
    MainForm.PagesRichView.Reformat;
+end;
+
+// Меняем страницы IT happens
+procedure ChangeITHPages;
+var  i: Integer;
+begin
+   i:=1;
+   MainForm.ITHPagesRichView.Visible:= True;
+   MainForm.ITHPagesRichView.Clear;
+   while not(CurrentITHPagesArray[i,1] = '') do
+   begin
+       if (CurrentITHPagesArray[i,1] = 'currentpage') or (CurrentITHPagesArray[i,1] = 'dots') then MainForm.ITHPagesRichView.Add(CurrentITHPagesArray[i,2],5)
+       else
+           begin
+             if (CurrentITHPagesArray[i,1] = 'prevlinc') then MainForm.ITHPagesRichView.AddNLTag('>>',4,-1,i);
+             if (CurrentITHPagesArray[i,1] = 'nextlinc') then MainForm.ITHPagesRichView.AddNLTag('<<',4,-1,i);
+             if (CurrentITHPagesArray[i,1] = 'linc') then MainForm.ITHPagesRichView.AddNLTag(CurrentITHPagesArray[i,2],4,-1,i);
+           end;
+
+       MainForm.ITHPagesRichView.Add(' ',0);
+       i:= i+1;
+   end;
+   MainForm.ITHPagesRichView.Reformat;
+end;
+
+// Извлечение страниц из конструкции <div class="selector"> ... </div>
+function ExtractITHPages(S:string):PageArray;
+var  ptype: array[1..13] of string; // Тип страницы: linc, dots, currentpage, prevlinc, nextlinc
+     pnum: array[1..13] of string; // Номер страницы
+     num: integer; // Номер записи
+     StartPoint: string;
+begin
+  StartPoint := 'e/';
+  S := Copy(S, Pos('<sp',S),Length(S));
+  num:=1;
+  // Фак мой мозг
+  while not(Copy(S, 0, 6) = '</div>') do
+  begin
+    if Copy(S, 0, 1) = '<' then
+    begin
+      S := Copy(S, Pos('<sp',S)+6,Length(S));
+      ptype[num] := 'linc';
+      pnum[num]:= Copy(S, Pos(StartPoint,S)+2,Pos('">',S) - Pos(StartPoint,S) - 2);
+      if Copy(S, 0, 2) = 'cl' then
+      begin
+      ptype[num] := 'currentpage';
+      pnum[num]:= Copy(S, Pos('<b>',S)+3,Pos('</b>',S) - Pos('<b>',S) - 3);
+      end;
+    end
+    else
+    begin
+       ptype[num] := 'dots';
+       pnum[num]:= '•';
+    end;
+    S := Copy(S, Pos('</sp',S)+7,Length(S));
+    //Delete(pnum[num], pos(Chr(13), pnum[num]), 1);
+    //Delete(pnum[num], pos(Chr(10), pnum[num]), 1);
+    ExtractITHPages[num, 1]:=ptype[num];
+    ExtractITHPages[num, 2]:=pnum[num];
+    num := num +1;
+  end;
 end;
 
 // Извлечение страниц из конструкции <div class="pager"> ... </div>
@@ -306,6 +394,7 @@ begin
   AbyssTopNeedLoad := False;
   ITHMainNeedLoad := False;
   MainForm.QuoteNumberLabel.Caption := '?/?';
+  MainForm.ITHQuoteNumberLabel.Caption := '?/?';
 end;
 
 // Получаем обработанный текст в TRichView
@@ -380,11 +469,34 @@ end;
 
 // Меняем данные цитаты
 procedure ChangeITHQuoteInformation;
+var lCaption1: string;
+    lCaption2: string;
+    lCaption3: string;
 begin
-  MainForm.ITHQuoteNumberLabel.Caption := IntToStr(CurrentITHQuoteNumber) + '/' + CurrentITHQuotesArray[0,0];
+   lCaption1 := IntToStr(CurrentITHQuoteNumber) + '/' + CurrentITHQuotesArray[0,0];
+   lCaption2 := CurrentITHQuotesArray[CurrentITHQuoteNumber,1];
+   lCaption3 := CurrentITHQuotesArray[CurrentITHQuoteNumber,2];
+
+   MainForm.ITHQuoteNumberLabel.Caption := lCaption1;
+   MainForm.QuoteITHNumberLabel.Caption := '#' + lCaption2;
+   MainForm.QuoteITHRatingLabel.Caption := '[' + lCaption3 + ']';
+   MainForm.ITHappensNavBar.ActiveGroup.Caption := 'Главная ' +  '['+ CurrentITHQuotesArray[CurrentITHQuoteNumber,4] + ']';
+
+
 end;
 
 // Меняем данные цитаты
+procedure ChangeQuoteHint;
+begin
+  with MainForm.QuoteBashNumberLabel do
+  begin
+    Hint := '';
+    Hint:='Цитата № ' + CurrentBashQuotesArray[CurrentBashQuoteNumber,1];
+    Hint:= Hint + #10 + #13;
+    Hint:= Hint + 'Рейтинг: ' + CurrentBashQuotesArray[CurrentBashQuoteNumber,2];
+  end;
+end;
+
 procedure ChangeQuoteInformation;
 var lCaption1: string;
     lCaption2: string;
@@ -397,12 +509,16 @@ begin
   MainForm.QuoteNumberLabel.Caption := lCaption1;
   MainForm.QuoteBashNumberLabel.Caption := '#' + lCaption2;
   MainForm.QuoteBashRatingLabel.Caption := '[' + lCaption3 + ']';
+  ChangeQuoteHint;
   WriteLog('Меняем данные цитаты: ' + lCaption1 + ', '+ lCaption2 + ', '+ lCaption3);
 end;
 
 // Ищем окно для выставления фокуса, чтобы "не терять скроллинг"
 procedure FindFocus;
 begin
+  case MainForm.MainPageControl.ActivePageIndex of
+  0:
+  begin
   case MainForm.BashNavBar.ActiveGroupIndex of
   // Главная
   0: begin
@@ -424,6 +540,9 @@ begin
         MainForm.AbyssHtmlViewer.SetFocus;
         WriteLog('Передача фокуса на Бездну');
      end;
+  end;
+  end;
+  1: MainForm.ITHappensMainHtmlViewer.SetFocus;
   end;
 end;
 
@@ -527,96 +646,113 @@ function BashQuoteParser(S: string; qtype: integer):QuoteArray;
 var i:Integer;
     q: QuoteArray;
 begin
-  i:=0;
-  WriteLog('Начало разбора html');
-  S := Copy(S, Pos('"pager">',S),Length(S));
-  // Получаем номера страниц
-  case qtype of
-    0: CurrentMainPagesArray:= ExtractPages(Copy(S, 0, Pos('</div>',S)+6),'Main');
-    1: CurrentAbyssBestPagesArray := ExtractPages(Copy(S, 0, Pos('</div>',S)+6),'AbyssBest');
-    2: ;
-    3: ;
-  end;
-  // Загрузка цитат
-  while not (Pos('<div class="q">',S) = 0) do
+  if not(S = 'error') then
   begin
-      i:= i + 1;
-      S := Copy(S, Pos('<div class="q">',S),Length(S));
-      // Получаем номер цитаты
-      case qtype of
-        0: begin
-              S := Copy(S, Pos('e/',S)+2,Length(S));
-              q[i,1] := Copy(S, 0,Pos('"',S)-1);
-           end;
-        1: begin
-              S := Copy(S, Pos('<b>',S)+3,Length(S));
-              q[i,1] := Copy(S, 0,Pos('<',S)-1);
-           end;
-        2: q[i,1] := 'none';
-        3: begin
-              S := Copy(S, Pos('span id=',S)+10,Length(S));
-              q[i,1] := Copy(S, 0,Pos('"',S)-1);
-           end;
-      end;
-     // Получаем рейтинг цитаты
-      case qtype of
-        0: begin
-              S := Copy(S, Pos('<span id=',S),Length(S));
-              S := Copy(S, Pos('>',S)+1,Length(S));
-              q[i,2] := Copy(S, 0,Pos('<',S)-1);
-           end;
-        1: q[i,2] := 'none';
-        2: begin
-              S := Copy(S, Pos('<span>',S)+6,Length(S));
-              S := Copy(S, 0,Length(S));
-              q[i,2] := Copy(S, 0,Pos('<',S)-1);
-           end;
-        3: q[i,2] := 'none';
-      end;
-      S := Copy(S, Pos('<div>',S),Length(S));
-      q[i,0] := Copy(S, Pos('<div>',S),Pos('</div>',S)+5);
-      if (q[i,0] = '') or (Pos('http://lol.bash.org.ru/',q[i,0]) <> 0) then i:=i-1;
+    i:=0;
+    WriteLog('Начало разбора html');
+    S := Copy(S, Pos('"pager">',S),Length(S));
+    // Получаем номера страниц
+    case qtype of
+      0: CurrentMainPagesArray:= ExtractPages(Copy(S, 0, Pos('</div>',S)+6),'Main');
+      1: CurrentAbyssBestPagesArray := ExtractPages(Copy(S, 0, Pos('</div>',S)+6),'AbyssBest');
+      2: ;
+      3: ;
+    end;
+    // Загрузка цитат
+    while not (Pos('<div class="q">',S) = 0) do
+    begin
+        i:= i + 1;
+        S := Copy(S, Pos('<div class="q">',S),Length(S));
+        // Получаем номер цитаты
+        case qtype of
+          0: begin
+                S := Copy(S, Pos('e/',S)+2,Length(S));
+                q[i,1] := Copy(S, 0,Pos('"',S)-1);
+             end;
+          1: begin
+                S := Copy(S, Pos('<b>',S)+3,Length(S));
+                q[i,1] := Copy(S, 0,Pos('<',S)-1);
+             end;
+          2: q[i,1] := 'none';
+          3: begin
+                S := Copy(S, Pos('span id=',S)+10,Length(S));
+                q[i,1] := Copy(S, 0,Pos('"',S)-1);
+             end;
+        end;
+       // Получаем рейтинг цитаты
+        case qtype of
+          0: begin
+                S := Copy(S, Pos('<span id=',S),Length(S));
+                S := Copy(S, Pos('>',S)+1,Length(S));
+                q[i,2] := Copy(S, 0,Pos('<',S)-1);
+             end;
+          1: q[i,2] := 'none';
+          2: begin
+                S := Copy(S, Pos('<span>',S)+6,Length(S));
+                S := Copy(S, 0,Length(S));
+                q[i,2] := Copy(S, 0,Pos('<',S)-1);
+             end;
+          3: q[i,2] := 'none';
+        end;
+        S := Copy(S, Pos('<div>',S),Length(S));
+        q[i,0] := Copy(S, Pos('<div>',S),Pos('</div>',S)+5);
+        if (q[i,0] = '') or (Pos('http://lol.bash.org.ru/',q[i,0]) <> 0) then i:=i-1;
+    end;
+    WriteLog('Конец разбора html. Цитат: ' + IntToStr(i));
+    q[0,0] := IntToStr(i);
+    BashQuoteParser := q;
+  end
+  else
+  begin
+    q[0,0] := '1';
+    q[1,0] := 'Ошибка';
+    BashQuoteParser := q;
   end;
-  WriteLog('Конец разбора html. Цитат: ' + IntToStr(i));
-  q[0,0] := IntToStr(i);
-  BashQuoteParser := q;
 end;
 
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// IT
-function ITHQuoteParser(S: string; qtype: integer):QuoteArray;
+// Парсер цитат IT happens
+function ITHQuoteParser(S: string; qtype: integer):ITHQuoteArray;
 var num: Integer;
-    buf: QuoteArray;
+    buf: ITHQuoteArray;
 begin
   WriteLog('ITH Parser on');
   num:=0;
-  //<div class="text">
-  //(Pos('div class="text"',S) = 0)
+  S := Copy(S, Pos('<div class="selector">',S),Length(S));
+  CurrentITHPagesArray := ExtractITHPages(Copy(S, 0,Pos('</div>',S)-Pos('<div class="selector">',S)+6));
   while not(Pos('<div class="text">',S) = 0)  do
   begin
      num := num + 1;
-     WriteLog(IntToStr(num));
+     // В рот мне ноги!
      S := Copy(S, Pos('<div class="text">',S),Length(S));
-
+     S := Copy(S, Pos('<a href="/story/' ,S)+ 16,Length(S));
+     buf[num,1] := Copy(S, 0,Pos('"',S)-1);
+     S := Copy(S, Pos(':' ,S) + 2,Length(S));
+     buf[num,4] := Copy(S, 0,Pos('</a>',S)-1);
+     // Удаляем символ перехода на новую строку
+     Delete(buf[num,4], pos(Chr(13), buf[num,4]), 1);
+     Delete(buf[num,4], pos(Chr(10), buf[num,4]), 1);
+     S := Copy(S, Pos('<p class="date">' ,S) + 17,Length(S));
+     buf[num,3] := Copy(S, 0,Pos('<',S)-1);
+     S := Copy(S, Pos('рейтинг:' ,S) + 9,Length(S));
+     //WriteLog(S);
+     buf[num,2] := Copy(S, 0,Pos('<',S)-1);
+     Delete(buf[num,2], pos(Chr(13), buf[num,2]), 1);
+     Delete(buf[num,2], pos(Chr(10), buf[num,2]), 1);
+     Delete(buf[num,2], pos(Chr(13), buf[num,2]), 1);
+     Delete(buf[num,2], pos(Chr(10), buf[num,2]), 1);
      buf[num,0] := Copy(S, Pos('<p class="text">',S),Pos('</p>',S) - Pos('<p class="text">',S)+4);
-     WriteLog(buf[num,0]);
-
      S := Copy(S, Pos('</div>',S),Length(S));
-
   end;
   WriteLog('ITH Parser off');
-  
   buf[0,0] := IntToStr(num);
   ITHQuoteParser := buf;
-  //ChangeHtmlViewerText(MainForm.ITHappensMainHtmlViewer,buf[5,0]);
 end;
 
-function GetCurrentITHMainQuotes: QuoteArray;
+function GetCurrentITHMainQuotes: ITHQuoteArray;
 begin
-  // GetCurrentITHMainQuotes := ITHQuoteParser(MainForm.TestITHappensMemo.Text, 0); // для тестов
+  //GetCurrentITHMainQuotes := ITHQuoteParser(MainForm.TestITHappensMemo.Text, 0); // для тестов
   GetCurrentITHMainQuotes := ITHQuoteParser(ITHGetMainAsString, 0);
 end;
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // Получаем массив цитат с главной
 function GetCurrentMainQuotes: QuoteArray;
@@ -664,6 +800,15 @@ begin
   ChangePages;
 end;
 
+procedure OpenITHMainPageNum(Num: string);
+begin
+  CurrentITHQuotesArray := ITHQuoteParser(GetStringFromUrl('http://ithappens.ru/page/' + Num),0);
+  CurrentITHQuoteNumber := 1;
+  ChangeHtmlViewerText(MainForm.ITHappensMainHtmlViewer, CurrentITHQuotesArray[CurrentITHQuoteNumber,0]);
+  ChangeITHQuoteInformation;
+  ChangeITHPages;
+end;
+
 procedure OpenITH;
 begin
   if not(GetRVText(MainForm.ITHappensMainHtmlViewer) = 'Загрузка...') then
@@ -671,14 +816,13 @@ begin
   if ITHMainNeedLoad = true then
   begin
     CurrentITHQuotesArray := GetCurrentITHMainQuotes;
-    
     CurrentITHQuoteNumber := 1;
-
     ChangeHtmlViewerText(MainForm.ITHappensMainHtmlViewer, CurrentITHQuotesArray[CurrentITHQuoteNumber,0]);
-
     ITHMainNeedLoad := False;
 
   end;
+  ChangeITHQuoteInformation;
+  ChangeITHPages;
   end;
 
 end;
@@ -939,10 +1083,18 @@ end;
 // Переходим на страницу
 procedure TMainForm.PagesRichViewJump(Sender: TObject; id: Integer);
 begin
-  case BashNavBar.ActiveGroupIndex of
-  0: OpenBashMainPageNum(CurrentMainPagesArray[id+1,2]);
-  1: OpenBashAbyssBestPageNum(CurrentAbyssBestPagesArray[id+1,2]);
+  case MainPageControl.ActivePageIndex of
+  0:
+    begin
+      case BashNavBar.ActiveGroupIndex of
+      0: OpenBashMainPageNum(CurrentMainPagesArray[id+1,2]);
+      1: OpenBashAbyssBestPageNum(CurrentAbyssBestPagesArray[id+1,2]);
+      end;
+    end;
+  1:OpenITHMainPageNum(CurrentITHPagesArray[id+1,2]);
+
   end;
+
 end;
 
 procedure TMainForm.PagesRichViewClick(Sender: TObject);
@@ -968,6 +1120,17 @@ begin
   TabChangeDelayTimer.Enabled := False;
   if MainPageControl.ActivePageIndex = 1 then OpenITH;
 
+end;
+
+procedure TMainForm.FormClose(Sender: TObject; var Action: TCloseAction);
+begin
+  Application.Terminate;
+end;
+
+procedure TMainForm.NetDetectConnectionStatus(Sender: TObject;
+  isConnected: Boolean);
+begin
+  Connection := isConnected;
 end;
 
 end.
