@@ -1,6 +1,6 @@
 object MainForm: TMainForm
-  Left = 245
-  Top = 280
+  Left = 315
+  Top = 298
   Width = 366
   Height = 527
   Caption = 'bClient'
@@ -15,7 +15,6 @@ object MainForm: TMainForm
   OnClose = FormClose
   OnCreate = FormCreate
   OnKeyPress = FormKeyPress
-  OnResize = FormResize
   OnShow = FormShow
   PixelsPerInch = 96
   TextHeight = 13
@@ -24,7 +23,7 @@ object MainForm: TMainForm
     Top = 0
     Width = 358
     Height = 493
-    ActivePage = BashTabSheet
+    ActivePage = IThappensTabSheet
     Align = alClient
     Style = tsFlatButtons
     TabOrder = 0
@@ -76,7 +75,7 @@ object MainForm: TMainForm
         Width = 240
         Height = 20
         Anchors = [akLeft]
-        TabOrder = 1
+        TabOrder = 0
         OnClick = PagesRichViewClick
         BorderStyle = bsNone
         BottomMargin = 0
@@ -87,177 +86,35 @@ object MainForm: TMainForm
         VScrollVisible = False
         OnJump = PagesRichViewJump
       end
-      object BashNavBar: TdxNavBar
+      object BashPageSelectComboBox: TComboBox
         Left = 0
         Top = 0
         Width = 350
-        Height = 440
-        Align = alCustom
+        Height = 21
+        Style = csDropDownList
+        Anchors = [akLeft, akTop, akRight]
+        ItemHeight = 13
+        ItemIndex = 0
+        TabOrder = 1
+        Text = #1043#1083#1072#1074#1085#1072#1103
+        OnChange = BashPageSelectComboBoxChange
+        OnClick = BashPageSelectComboBoxClick
+        Items.Strings = (
+          #1043#1083#1072#1074#1085#1072#1103
+          #1051#1091#1095#1096#1077#1077' '#1041#1077#1079#1076#1085#1099
+          #1058#1086#1087' '#1041#1077#1079#1076#1085#1099
+          #1041#1077#1079#1076#1085#1072)
+      end
+      object BashOrgRuHtmlViewer: TRichView
+        Left = 0
+        Top = 24
+        Width = 350
+        Height = 417
         Anchors = [akLeft, akTop, akRight, akBottom]
-        ActiveGroupIndex = 0
-        DefaultStyles.GroupHeader.BackColor = clBtnFace
-        DefaultStyles.GroupHeader.BackColor2 = clBtnFace
-        DefaultStyles.GroupHeader.Font.Charset = DEFAULT_CHARSET
-        DefaultStyles.GroupHeader.Font.Color = clBtnText
-        DefaultStyles.GroupHeader.Font.Height = -11
-        DefaultStyles.GroupHeader.Font.Name = 'MS Sans Serif'
-        DefaultStyles.GroupHeader.Font.Style = []
-        DefaultStyles.GroupHeader.HAlignment = haLeft
-        DragCopyCursor = -1119
-        DragCursor = -1120
-        DragDropFlags = [fAllowDragLink, fAllowDropLink, fAllowDragGroup, fAllowDropGroup]
-        HotTrackedGroupCursor = crDefault
-        HotTrackedLinkCursor = -1118
-        View = 0
-        OnActiveGroupChanged = BashNavBarActiveGroupChanged
-        object MainBashNavBarGroup: TdxNavBarGroup
-          Caption = #1043#1083#1072#1074#1085#1072#1103
-          LinksUseSmallImages = True
-          SelectedLinkIndex = -1
-          ShowAsIconView = False
-          ShowControl = True
-          TopVisibleLinkIndex = 0
-          UseControl = True
-          UseSmallImages = True
-          Visible = True
-          Links = <>
-        end
-        object AbyssBestBashNavBarGroup: TdxNavBarGroup
-          Caption = #1051#1091#1095#1096#1077#1077' '#1041#1077#1079#1076#1085#1099
-          LinksUseSmallImages = True
-          SelectedLinkIndex = -1
-          ShowAsIconView = False
-          ShowControl = True
-          TopVisibleLinkIndex = 0
-          UseControl = True
-          UseSmallImages = True
-          Visible = True
-          Links = <>
-        end
-        object AbyssTopBashNavBarGroup: TdxNavBarGroup
-          Caption = #1058#1086#1087' '#1041#1077#1079#1076#1085#1099
-          LinksUseSmallImages = True
-          SelectedLinkIndex = -1
-          ShowAsIconView = False
-          ShowControl = True
-          TopVisibleLinkIndex = 0
-          UseControl = True
-          UseSmallImages = True
-          Visible = True
-          Links = <>
-        end
-        object AbyssBashNavBarGroup: TdxNavBarGroup
-          Caption = #1041#1077#1079#1076#1085#1072
-          LinksUseSmallImages = True
-          SelectedLinkIndex = -1
-          ShowAsIconView = False
-          ShowControl = True
-          TopVisibleLinkIndex = 0
-          UseControl = True
-          UseSmallImages = True
-          Visible = True
-          Links = <>
-        end
-        object MainBashNavBarGroupControl: TdxNavBarGroupControl
-          Left = 0
-          Top = 19
-          Width = 350
-          Height = 364
-          TabOrder = 1
-          GroupIndex = 0
-          OriginalHeight = 41
-          object MainHtmlViewer: TRichView
-            Left = 0
-            Top = 0
-            Width = 350
-            Height = 364
-            Align = alClient
-            TabOrder = 0
-            OnMouseWheel = MainHtmlViewerMouseWheel
-            DoInPaletteMode = rvpaCreateCopies
-            Style = HtmlViewerStyle
-          end
-        end
-        object AbyssBestBashNavBarGroupControl: TdxNavBarGroupControl
-          Left = 0
-          Top = 383
-          Width = 350
-          Height = 19
-          TabOrder = 3
-          GroupIndex = 1
-          OriginalHeight = 41
-          object AbyssBestHtmlViewer: TRichView
-            Left = 0
-            Top = 0
-            Width = 350
-            Height = 19
-            Align = alClient
-            TabOrder = 0
-            OnMouseWheel = AbyssBestHtmlViewerMouseWheel
-            DoInPaletteMode = rvpaCreateCopies
-            Style = HtmlViewerStyle
-          end
-        end
-        object AbyssTopBashNavBarGroupControl: TdxNavBarGroupControl
-          Left = 0
-          Top = 402
-          Width = 350
-          Height = 19
-          TabOrder = 4
-          GroupIndex = 2
-          OriginalHeight = 41
-          object AbyssTopHtmlViewer: TRichView
-            Left = 0
-            Top = 0
-            Width = 350
-            Height = 19
-            Align = alClient
-            TabOrder = 0
-            OnMouseWheel = AbyssTopHtmlViewerMouseWheel
-            DoInPaletteMode = rvpaCreateCopies
-            Style = HtmlViewerStyle
-          end
-        end
-        object AbyssBashNavBarGroupControl: TdxNavBarGroupControl
-          Left = 0
-          Top = 421
-          Width = 350
-          Height = 19
-          TabOrder = 2
-          DesignSize = (
-            350
-            19)
-          GroupIndex = 3
-          OriginalHeight = 41
-          object AbyssHtmlViewer: TRichView
-            Left = 0
-            Top = 0
-            Width = 350
-            Height = 19
-            Align = alClient
-            TabOrder = 0
-            OnMouseWheel = AbyssHtmlViewerMouseWheel
-            DoInPaletteMode = rvpaCreateCopies
-            Style = HtmlViewerStyle
-          end
-          object AbyssNextButton: TButton
-            Left = 24
-            Top = 248
-            Width = 209
-            Height = 0
-            Anchors = [akLeft, akTop, akRight, akBottom]
-            Caption = #1040' '#1044#1040#1051#1068#1064#1045'?!'
-            Font.Charset = DEFAULT_CHARSET
-            Font.Color = clWindowText
-            Font.Height = -32
-            Font.Name = 'MS Sans Serif'
-            Font.Style = [fsBold]
-            ParentFont = False
-            TabOrder = 1
-            Visible = False
-            OnClick = AbyssNextButtonClick
-          end
-        end
+        TabOrder = 2
+        OnMouseWheel = BashOrgRuHtmlViewerMouseWheel
+        DoInPaletteMode = rvpaCreateCopies
+        Style = HtmlViewerStyle
       end
     end
     object IThappensTabSheet: TTabSheet
@@ -5355,15 +5212,15 @@ object MainForm: TMainForm
       8000808080008080800080808000808080008080800080808000808080008080
       8000}
     StyleTemplates = <>
-    Left = 372
-    Top = 310
+    Left = 248
+    Top = 424
   end
   object HtmlImporter: TRvHtmlImporter
-    RichView = MainHtmlViewer
+    RichView = BashOrgRuHtmlViewer
     DefaultFontName = 'Times New Roman'
     DefaultCFontName = 'Courier New'
-    Left = 436
-    Top = 310
+    Left = 216
+    Top = 424
   end
   object ScrollDelayTimer: TTimer
     Enabled = False
@@ -5378,8 +5235,8 @@ object MainForm: TMainForm
     Font.Height = -11
     Font.Name = 'MS Sans Serif'
     Font.Style = []
-    Left = 292
-    Top = 339
+    Left = 184
+    Top = 424
   end
   object rvstyl1: TRVStyle
     TextStyles = <
@@ -5567,14 +5424,14 @@ object MainForm: TMainForm
       8000808080008080800080808000808080008080800080808000808080008080
       8000}
     StyleTemplates = <>
-    Left = 300
-    Top = 310
+    Left = 280
+    Top = 424
   end
   object TabChangeDelayTimer: TTimer
     Enabled = False
     Interval = 10
     OnTimer = TabChangeDelayTimerTimer
-    Left = 236
-    Top = 382
+    Left = 312
+    Top = 424
   end
 end

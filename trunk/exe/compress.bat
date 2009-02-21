@@ -1,0 +1,1 @@
+start upx.exe -9 bClient.exe

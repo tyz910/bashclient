@@ -16,18 +16,9 @@ type
     BashTabSheet: TTabSheet;
     IThappensTabSheet: TTabSheet;
     OptionsTabSheet: TTabSheet;
-    BashNavBar: TdxNavBar;
-    MainBashNavBarGroup: TdxNavBarGroup;
-    AbyssBestBashNavBarGroup: TdxNavBarGroup;
-    AbyssTopBashNavBarGroup: TdxNavBarGroup;
-    AbyssBashNavBarGroup: TdxNavBarGroup;
     AboutTabSheet: TTabSheet;
     TestTabSheet: TTabSheet;
     lbl1: TLabel;
-    MainBashNavBarGroupControl: TdxNavBarGroupControl;
-    AbyssBashNavBarGroupControl: TdxNavBarGroupControl;
-    AbyssBestBashNavBarGroupControl: TdxNavBarGroupControl;
-    AbyssTopBashNavBarGroupControl: TdxNavBarGroupControl;
     AntiFreeze: TIdAntiFreeze;
     TestPageControl: TPageControl;
     LogTabSheet: TTabSheet;
@@ -47,14 +38,9 @@ type
     TestAbyssTopMemo: TMemo;
     TestAbyssMemo: TMemo;
     FontSelectButton: TButton;
-    AbyssNextButton: TButton;
-    MainHtmlViewer: TRichView;
     HtmlViewerStyle: TRVStyle;
     HtmlImporter: TRvHtmlImporter;
     ScrollDelayTimer: TTimer;
-    AbyssBestHtmlViewer: TRichView;
-    AbyssTopHtmlViewer: TRichView;
-    AbyssHtmlViewer: TRichView;
     FontSelectDialog: TFontDialog;
     PagesRichView: TRichView;
     rvstyl1: TRVStyle;
@@ -70,6 +56,8 @@ type
     QuoteITHNumberLabel: TLabel;
     QuoteITHRatingLabel: TLabel;
     ITHPagesRichView: TRichView;
+    BashPageSelectComboBox: TComboBox;
+    BashOrgRuHtmlViewer: TRichView;
     procedure wmGetMinMaxInfo(var Msg : TMessage); message wm_GetMinMaxInfo; // Ограничение размеров формы
     procedure FormCreate(Sender: TObject);
     procedure FormShow(Sender: TObject);
@@ -77,22 +65,8 @@ type
     procedure FormKeyPress(Sender: TObject; var Key: Char);
     procedure StartUpTimerTimer(Sender: TObject);
     procedure FindFocusDelayTimerTimer(Sender: TObject);
-    procedure BashNavBarActiveGroupChanged(Sender: TObject);
     procedure FontSelectButtonClick(Sender: TObject);
-    procedure FormResize(Sender: TObject);
-    procedure AbyssNextButtonClick(Sender: TObject);
-    procedure MainHtmlViewerMouseWheel(Sender: TObject; Shift: TShiftState;
-      WheelDelta: Integer; MousePos: TPoint; var Handled: Boolean);
     procedure ScrollDelayTimerTimer(Sender: TObject);
-    procedure AbyssBestHtmlViewerMouseWheel(Sender: TObject;
-      Shift: TShiftState; WheelDelta: Integer; MousePos: TPoint;
-      var Handled: Boolean);
-    procedure AbyssTopHtmlViewerMouseWheel(Sender: TObject;
-      Shift: TShiftState; WheelDelta: Integer; MousePos: TPoint;
-      var Handled: Boolean);
-    procedure AbyssHtmlViewerMouseWheel(Sender: TObject;
-      Shift: TShiftState; WheelDelta: Integer; MousePos: TPoint;
-      var Handled: Boolean);
     procedure PagesRichViewJump(Sender: TObject; id: Integer);
     procedure PagesRichViewClick(Sender: TObject);
     procedure chklst1ClickCheck(Sender: TObject);
@@ -103,8 +77,11 @@ type
       var AllowChange: Boolean);
     procedure TabChangeDelayTimerTimer(Sender: TObject);
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
-    procedure NetDetectConnectionStatus(Sender: TObject;
-      isConnected: Boolean);
+    procedure BashPageSelectComboBoxChange(Sender: TObject);
+    procedure BashOrgRuHtmlViewerMouseWheel(Sender: TObject;
+      Shift: TShiftState; WheelDelta: Integer; MousePos: TPoint;
+      var Handled: Boolean);
+    procedure BashPageSelectComboBoxClick(Sender: TObject);
   private
     { Private declarations }
   public
@@ -159,6 +136,8 @@ var
 
 implementation
 
+uses IdTCPClient;
+
 {$R *.dfm}
 
 // Ограничение размеров формы
@@ -183,12 +162,13 @@ function CurrentHtmlViewer:TRichView;
 begin
   case MainForm.MainPageControl.ActivePageIndex of
   0: begin
-        case MainForm.BashNavBar.ActiveGroupIndex of
-          0: CurrentHtmlViewer := MainForm.MainHtmlViewer;
-          1: CurrentHtmlViewer := MainForm.AbyssBestHtmlViewer;
-          2: CurrentHtmlViewer := MainForm.AbyssTopHtmlViewer;
-          3: CurrentHtmlViewer := MainForm.AbyssHtmlViewer;
-        end;
+        //case MainForm.BashNavBar.ActiveGroupIndex of
+          //0: CurrentHtmlViewer := MainForm.MainHtmlViewer;
+          //1: CurrentHtmlViewer := MainForm.AbyssBestHtmlViewer;
+          //2: CurrentHtmlViewer := MainForm.AbyssTopHtmlViewer;
+          //3: CurrentHtmlViewer := MainForm.AbyssHtmlViewer;
+        //end;
+        CurrentHtmlViewer := MainForm.BashOrgRuHtmlViewer;
      end;
   1: begin
         case MainForm.ITHappensNavBar.ActiveGroupIndex of
@@ -222,7 +202,8 @@ begin
       with TIdHTTP.Create(nil) do
       begin
 
-        ConnectTimeout := 5000;
+        ConnectTimeout := 2000;
+
         //ReadTimeout := 1000;
         //Head(GetUrl);
         try
@@ -243,7 +224,7 @@ end;
 // Получаем  текущий массив страниц баша
 function CurrentBashPagesArray:PageArray;
 begin
-  case MainForm.BashNavBar.ActiveGroupIndex of
+  case MainForm.BashPageSelectComboBox.ItemIndex of
    0: CurrentBashPagesArray := CurrentMainPagesArray;
    1: CurrentBashPagesArray := CurrentAbyssBestPagesArray;
    end;
@@ -408,7 +389,7 @@ end;
 // Номер текущей цитаты баша
 function CurrentBashQuoteNumber: Integer;
 begin
-  case MainForm.BashNavBar.ActiveGroupIndex of
+  case MainForm.BashPageSelectComboBox.ItemIndex of
   0: CurrentBashQuoteNumber := CurrentMainQuoteNumber;
   1: CurrentBashQuoteNumber := CurrentAbyssBestQuoteNumber;
   2: CurrentBashQuoteNumber := CurrentAbyssTopQuoteNumber;
@@ -419,7 +400,7 @@ end;
 // Меняем номер текущей цитаты баша на delta
 procedure ChangeCurrentBashQuoteNumber(delta:Integer);
 begin
-  case MainForm.BashNavBar.ActiveGroupIndex of
+  case MainForm.BashPageSelectComboBox.ItemIndex of
   0: CurrentMainQuoteNumber := CurrentMainQuoteNumber + delta;
   1: CurrentAbyssBestQuoteNumber := CurrentAbyssBestQuoteNumber + delta;
   2: CurrentAbyssTopQuoteNumber := CurrentAbyssTopQuoteNumber + delta;
@@ -430,7 +411,7 @@ end;
 // Получаем  текущий массив цитат баша
 function CurrentBashQuotesArray: QuoteArray;
 begin
-  case MainForm.BashNavBar.ActiveGroupIndex of
+  case MainForm.BashPageSelectComboBox.ItemIndex of
   0: CurrentBashQuotesArray := CurrentMainQuotesArray;
   1: CurrentBashQuotesArray := CurrentAbyssBestQuotesArray;
   2: CurrentBashQuotesArray := CurrentAbyssTopQuotesArray;
@@ -517,31 +498,11 @@ end;
 procedure FindFocus;
 begin
   case MainForm.MainPageControl.ActivePageIndex of
-  0:
-  begin
-  case MainForm.BashNavBar.ActiveGroupIndex of
-  // Главная
   0: begin
-        MainForm.MainHtmlViewer.SetFocus;
-        WriteLog('Передача фокуса на Главную');
+     CurrentHtmlViewer.SetFocus;
+     WriteLog('Передача фокуса на Bash.org.ru');
      end;
-  // Лучшее бездны
-  1: begin
-        MainForm.AbyssBestHtmlViewer.SetFocus;
-        WriteLog('Передача фокуса на Лучшее Бездны');
-     end;
-  // Топ бездны
-  2: begin
-        MainForm.AbyssTopHtmlViewer.SetFocus;
-        WriteLog('Передача фокуса на Топ Бездну');
-     end;
-  // Бездна
-  3: begin
-        MainForm.AbyssHtmlViewer.SetFocus;
-        WriteLog('Передача фокуса на Бездну');
-     end;
-  end;
-  end;
+
   1: MainForm.ITHappensMainHtmlViewer.SetFocus;
   end;
 end;
@@ -559,7 +520,7 @@ begin
           end
     else
           begin
-             if CurrentHtmlViewer = MainForm.AbyssHtmlViewer then MainForm.AbyssNextButton.Visible := True;
+            // if CurrentHtmlViewer = MainForm.AbyssHtmlViewer then MainForm.AbyssNextButton.Visible := True;
           end;
           WriteLog('Переход на след. цитату с CurrentNumber ' + IntToStr(CurrentBashQuoteNumber));
           ChangeQuoteInformation;
@@ -577,7 +538,7 @@ begin
           begin
              ChangeCurrentBashQuoteNumber(-1);
              ChangeHtmlViewerText(CurrentHtmlViewer,CurrentBashQuotesArray[CurrentBashQuoteNumber,0]);
-             if CurrentHtmlViewer = MainForm.AbyssHtmlViewer then MainForm.AbyssNextButton.Visible := False;
+            // if CurrentHtmlViewer = MainForm.AbyssHtmlViewer then MainForm.AbyssNextButton.Visible := False;
           end;
           WriteLog('Переход на пред. цитату с CurrentNumber ' + IntToStr(CurrentBashQuoteNumber));
           ChangeQuoteInformation;
@@ -782,11 +743,22 @@ begin
   GetCurrentAbyssTopQuotes := BashQuoteParser(BashGetAbyssTopAsString, 2);
 end;
 
+//
+procedure GetCurrentBashQuotesTo(QA:QuoteArray);
+begin
+  case MainForm.BashPageSelectComboBox.ItemIndex of
+  0: QA := GetCurrentMainQuotes;
+  1: QA := GetCurrentAbyssBestQuotes;
+  2: QA := GetCurrentAbyssTopQuotes;
+  3: QA := GetCurrentAbyssQuotes;
+  end;
+end;
+
 procedure OpenBashMainPageNum(Num: string);
 begin
   CurrentMainQuotesArray := BashQuoteParser(GetStringFromUrl('http://bash.org.ru/index/' + Num), 0);
   CurrentMainQuoteNumber := 1;
-  ChangeHtmlViewerText(MainForm.MainHtmlViewer, CurrentMainQuotesArray[CurrentMainQuoteNumber,0]);
+  ChangeHtmlViewerText(CurrentHtmlViewer, CurrentMainQuotesArray[CurrentMainQuoteNumber,0]);
   ChangeQuoteInformation;
   ChangePages;
 end;
@@ -795,7 +767,7 @@ procedure OpenBashAbyssBestPageNum(Num: string);
 begin
   CurrentAbyssBestQuotesArray := BashQuoteParser(GetStringFromUrl('http://bash.org.ru/abyssbest/' + Num), 1);
   CurrentAbyssBestQuoteNumber := 1;
-  ChangeHtmlViewerText(MainForm.AbyssBestHtmlViewer, CurrentAbyssBestQuotesArray[CurrentAbyssBestQuoteNumber,0]);
+  ChangeHtmlViewerText(CurrentHtmlViewer, CurrentAbyssBestQuotesArray[CurrentAbyssBestQuoteNumber,0]);
   ChangeQuoteInformation;
   ChangePages;
 end;
@@ -835,11 +807,11 @@ begin
   if MainNeedLoad = true then
   begin
     CurrentMainQuotesArray := GetCurrentMainQuotes;
-    CurrentMainQuoteNumber := 1;
-    ChangeHtmlViewerText(MainForm.MainHtmlViewer, CurrentMainQuotesArray[CurrentMainQuoteNumber,0]);
     MainNeedLoad := False;
+    CurrentMainQuoteNumber := 1;
   end;
   end;
+  ChangeHtmlViewerText(CurrentHtmlViewer, CurrentMainQuotesArray[CurrentMainQuoteNumber,0]);
   ChangePages;
 end;
 
@@ -852,10 +824,10 @@ begin
   begin
     CurrentAbyssQuotesArray := GetCurrentAbyssQuotes;
     CurrentAbyssQuoteNumber := 1;
-    ChangeHtmlViewerText(MainForm.AbyssHtmlViewer, CurrentAbyssQuotesArray[CurrentAbyssQuoteNumber,0]);
     AbyssNeedLoad := False;
   end;
   end;
+  ChangeHtmlViewerText(CurrentHtmlViewer, CurrentAbyssQuotesArray[CurrentAbyssQuoteNumber,0]);
   MainForm.PagesRichView.Visible:= False;
 end;
 
@@ -868,10 +840,10 @@ begin
   begin
     CurrentAbyssBestQuotesArray := GetCurrentAbyssBestQuotes;
     CurrentAbyssBestQuoteNumber := 1;
-    ChangeHtmlViewerText(MainForm.AbyssBestHtmlViewer, CurrentAbyssBestQuotesArray[CurrentAbyssBestQuoteNumber,0]);
     AbyssBestNeedLoad := False;
   end;
   end;
+  ChangeHtmlViewerText(CurrentHtmlViewer, CurrentAbyssBestQuotesArray[CurrentAbyssBestQuoteNumber,0]);
   ChangePages;
 end;
 
@@ -884,10 +856,10 @@ begin
   begin
     CurrentAbyssTopQuotesArray := GetCurrentAbyssTopQuotes;
     CurrentAbyssTopQuoteNumber := 1;
-    ChangeHtmlViewerText(MainForm.AbyssTopHtmlViewer, CurrentAbyssTopQuotesArray[CurrentAbyssTopQuoteNumber,0]);
     AbyssTopNeedLoad := False;
   end;
   end;
+  ChangeHtmlViewerText(CurrentHtmlViewer, CurrentAbyssTopQuotesArray[CurrentAbyssTopQuoteNumber,0]);
   MainForm.PagesRichView.Visible:= False;
 end;
 
@@ -905,7 +877,7 @@ begin
   MainForm.Height := 450;
   WriteLog('Меняем размер формы на ' + IntToStr(MainForm.Width) + 'x' + IntToStr(MainForm.Height));
   // Переводим PageControl'ы на начало.
-  BashNavBar.ActiveGroupIndex :=0;
+
   WriteLog('Переходим на BashTab.');
   MainPageControl.TabIndex := 0;
   WriteLog('Переходим на LogTab.');
@@ -952,32 +924,11 @@ begin
   then ITHPrevious;
 end;
 
-procedure TMainForm.MainHtmlViewerMouseWheel(Sender: TObject;
+procedure TMainForm.BashOrgRuHtmlViewerMouseWheel(Sender: TObject;
   Shift: TShiftState; WheelDelta: Integer; MousePos: TPoint;
   var Handled: Boolean);
 begin
-   ScrollControl(MainHtmlViewer,WheelDelta);
-end;
-
-procedure TMainForm.AbyssBestHtmlViewerMouseWheel(Sender: TObject;
-  Shift: TShiftState; WheelDelta: Integer; MousePos: TPoint;
-  var Handled: Boolean);
-begin
-   ScrollControl(AbyssBestHtmlViewer,WheelDelta);
-end;
-
-procedure TMainForm.AbyssTopHtmlViewerMouseWheel(Sender: TObject;
-  Shift: TShiftState; WheelDelta: Integer; MousePos: TPoint;
-  var Handled: Boolean);
-begin
-  ScrollControl(AbyssTopHtmlViewer,WheelDelta);
-end;
-
-procedure TMainForm.AbyssHtmlViewerMouseWheel(Sender: TObject;
-  Shift: TShiftState; WheelDelta: Integer; MousePos: TPoint;
-  var Handled: Boolean);
-begin
-  ScrollControl(AbyssHtmlViewer,WheelDelta);
+  ScrollControl(BashOrgRuHtmlViewer,WheelDelta);
 end;
 
 procedure TMainForm.ITHappensMainHtmlViewerMouseWheel(Sender: TObject;
@@ -1009,7 +960,7 @@ begin
   MainNeedLoad := True;
   CurrentMainQuotesArray := GetCurrentMainQuotes;
   CurrentMainQuoteNumber := 1;
-  ChangeHtmlViewerText(MainHtmlViewer, CurrentMainQuotesArray[CurrentMainQuoteNumber,0]);
+  ChangeHtmlViewerText(CurrentHtmlViewer, CurrentMainQuotesArray[CurrentMainQuoteNumber,0]);
   ChangeQuoteInformation;
   ChangePages;
   MainNeedLoad := False;
@@ -1027,21 +978,8 @@ begin
 end;
 
 // Смена вкладки Баша
-procedure TMainForm.BashNavBarActiveGroupChanged(Sender: TObject);
-begin
-  FindFocusDelayTimer.Enabled := True;
-  case BashNavBar.ActiveGroupIndex of
-  // Главная
-  0: OpenMain;
-  // Лучшее бездны
-  1: OpenAbyssBest;
-  // Топ бездны
-  2: OpenAbyssTop;
-  // Бездна
-  3: OpenAbyss;
-  end;
-  ChangeQuoteInformation;
-end;
+//procedure TMainForm.BashNavBarActiveGroupChanged(Sender: TObject);
+
 
 // Выбираем шрифт
 procedure TMainForm.FontSelectButtonClick(Sender: TObject);
@@ -1052,26 +990,9 @@ begin
     end;
 end;
 
-// Меняем размер кнопки "А Дальше?!"
-procedure TMainForm.FormResize(Sender: TObject);
-begin
-  AbyssNextButton.Left:= 0;
-  AbyssNextButton.Top:= 0;
-  AbyssNextButton.Width:= AbyssBashNavBarGroupControl.Width;
-  AbyssNextButton.Height:= AbyssBashNavBarGroupControl.Height;
-end;
 
-// Нажата кнопка "А Дальше?!"
-procedure TMainForm.AbyssNextButtonClick(Sender: TObject);
-begin
-  WriteLog('Нажата кнопка "А Дальше?!"');
-  AbyssNextButton.Visible := False;
-  CurrentAbyssQuotesArray := GetCurrentAbyssQuotes;
-  CurrentAbyssQuoteNumber := 1;
-  ChangeHtmlViewerText(AbyssHtmlViewer,CurrentAbyssQuotesArray[CurrentAbyssQuoteNumber,0]);
-  ChangeQuoteInformation;
-  FindFocus;
-end;
+
+
 
 // Задержка скрола колесом мыши при смене цитат
 procedure TMainForm.ScrollDelayTimerTimer(Sender: TObject);
@@ -1086,7 +1007,7 @@ begin
   case MainPageControl.ActivePageIndex of
   0:
     begin
-      case BashNavBar.ActiveGroupIndex of
+      case BashPageSelectComboBox.ItemIndex of
       0: OpenBashMainPageNum(CurrentMainPagesArray[id+1,2]);
       1: OpenBashAbyssBestPageNum(CurrentAbyssBestPagesArray[id+1,2]);
       end;
@@ -1105,8 +1026,8 @@ end;
 procedure TMainForm.chklst1ClickCheck(Sender: TObject);
 var i: Integer;
 begin
-  for i := 0 to (chklst1.Items.Count - 1) do
-  BashNavBar.Groups[i].Visible := chklst1.Checked[i];
+ // for i := 0 to (chklst1.Items.Count - 1) do
+ // BashNavBar.Groups[i].Visible := chklst1.Checked[i];
 end;
 
 procedure TMainForm.MainPageControlChanging(Sender: TObject;
@@ -1124,13 +1045,29 @@ end;
 
 procedure TMainForm.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
-  Application.Terminate;
+  ExitProcess(0);
 end;
 
-procedure TMainForm.NetDetectConnectionStatus(Sender: TObject;
-  isConnected: Boolean);
+procedure TMainForm.BashPageSelectComboBoxChange(Sender: TObject);
 begin
-  Connection := isConnected;
+//
+  case MainForm.BashPageSelectComboBox.ItemIndex of
+  // Главная
+  0: OpenMain;
+  // Лучшее бездны
+  1: OpenAbyssBest;
+  // Топ бездны
+  2: OpenAbyssTop;
+  // Бездна
+  3: OpenAbyss;
+  end;
+  ChangeQuoteInformation;
+
+end;
+
+procedure TMainForm.BashPageSelectComboBoxClick(Sender: TObject);
+begin
+  FindFocus;
 end;
 
 end.
