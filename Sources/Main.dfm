@@ -1,6 +1,6 @@
 object MainForm: TMainForm
-  Left = 315
-  Top = 298
+  Left = 766
+  Top = 330
   Width = 366
   Height = 527
   Caption = 'bClient'
@@ -66,8 +66,11 @@ object MainForm: TMainForm
         Width = 30
         Height = 13
         Align = alCustom
+        Alignment = taRightJustify
         Anchors = [akRight, akBottom]
+        BiDiMode = bdLeftToRight
         Caption = '[9999]'
+        ParentBiDiMode = False
       end
       object PagesRichView: TRichView
         Left = 80
@@ -156,68 +159,13 @@ object MainForm: TMainForm
         Anchors = [akRight, akBottom]
         Caption = '[9999]'
       end
-      object ITHappensNavBar: TdxNavBar
-        Left = 0
-        Top = 0
-        Width = 350
-        Height = 440
-        Align = alCustom
-        Anchors = [akLeft, akTop, akRight, akBottom]
-        ActiveGroupIndex = 0
-        DefaultStyles.GroupHeader.BackColor = clBtnFace
-        DefaultStyles.GroupHeader.BackColor2 = clBtnFace
-        DefaultStyles.GroupHeader.Font.Charset = DEFAULT_CHARSET
-        DefaultStyles.GroupHeader.Font.Color = clBtnText
-        DefaultStyles.GroupHeader.Font.Height = -11
-        DefaultStyles.GroupHeader.Font.Name = 'MS Sans Serif'
-        DefaultStyles.GroupHeader.Font.Style = []
-        DefaultStyles.GroupHeader.HAlignment = haLeft
-        DragCopyCursor = -1119
-        DragCursor = -1120
-        DragDropFlags = [fAllowDragLink, fAllowDropLink, fAllowDragGroup, fAllowDropGroup]
-        HotTrackedGroupCursor = crDefault
-        HotTrackedLinkCursor = -1118
-        View = 0
-        object MainITHappensNavBarGroup: TdxNavBarGroup
-          Caption = #1043#1083#1072#1074#1085#1072#1103
-          LinksUseSmallImages = True
-          SelectedLinkIndex = -1
-          ShowAsIconView = False
-          ShowControl = True
-          TopVisibleLinkIndex = 0
-          UseControl = True
-          UseSmallImages = True
-          Visible = True
-          Links = <>
-        end
-        object MainITHappensNavBarGroupControl: TdxNavBarGroupControl
-          Left = 0
-          Top = 19
-          Width = 350
-          Height = 421
-          TabOrder = 1
-          GroupIndex = 0
-          OriginalHeight = 41
-          object ITHappensMainHtmlViewer: TRichView
-            Left = 0
-            Top = 0
-            Width = 350
-            Height = 421
-            Align = alClient
-            TabOrder = 0
-            OnMouseWheel = ITHappensMainHtmlViewerMouseWheel
-            DoInPaletteMode = rvpaCreateCopies
-            Style = HtmlViewerStyle
-          end
-        end
-      end
       object ITHPagesRichView: TRichView
         Left = 75
         Top = 442
         Width = 240
         Height = 20
         Anchors = [akLeft]
-        TabOrder = 1
+        TabOrder = 0
         OnClick = PagesRichViewClick
         BorderStyle = bsNone
         BottomMargin = 0
@@ -227,6 +175,33 @@ object MainForm: TMainForm
         Style = rvstyl1
         VScrollVisible = False
         OnJump = PagesRichViewJump
+      end
+      object ITHPageSelectComboBox: TComboBox
+        Left = 0
+        Top = 0
+        Width = 350
+        Height = 21
+        Style = csDropDownList
+        Anchors = [akLeft, akTop, akRight]
+        ItemHeight = 13
+        ItemIndex = 0
+        TabOrder = 1
+        Text = #1043#1083#1072#1074#1085#1072#1103
+        OnChange = BashPageSelectComboBoxChange
+        OnClick = BashPageSelectComboBoxClick
+        Items.Strings = (
+          #1043#1083#1072#1074#1085#1072#1103)
+      end
+      object ITHHtmlViewer: TRichView
+        Left = 0
+        Top = 24
+        Width = 350
+        Height = 417
+        Anchors = [akLeft, akTop, akRight, akBottom]
+        TabOrder = 2
+        OnMouseWheel = ITHHtmlViewerMouseWheel
+        DoInPaletteMode = rvpaCreateCopies
+        Style = HtmlViewerStyle
       end
     end
     object OptionsTabSheet: TTabSheet
