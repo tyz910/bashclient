@@ -4,11 +4,9 @@ interface
 
 // Проверить, все ли используются.
 uses
-  Windows, Messages, SysUtils, Forms, IdHTTP, RichView,
-  Classes, Graphics, Controls, Dialogs, ComCtrls, cxClasses,
-  dxNavBarBase, dxNavBarCollns, ExtCtrls, dxNavBar, StdCtrls,
-  IdBaseComponent, IdAntiFreezeBase, IdAntiFreeze, rvhtmlimport, RVStyle,
-  RVScroll, CheckLst;
+  Windows, Messages, Forms, SysUtils, Dialogs, rvhtmlimport, Graphics, RVStyle, ExtCtrls,
+  IdBaseComponent, IdAntiFreezeBase, IdHTTP, IdAntiFreeze, StdCtrls, Controls,
+  CheckLst, RVScroll, RichView, ComCtrls, Classes;
 
 type
   TMainForm = class(TForm)
@@ -45,10 +43,6 @@ type
     PagesRichView: TRichView;
     rvstyl1: TRVStyle;
     chklst1: TCheckListBox;
-    ITHappensNavBar: TdxNavBar;
-    MainITHappensNavBarGroup: TdxNavBarGroup;
-    MainITHappensNavBarGroupControl: TdxNavBarGroupControl;
-    ITHappensMainHtmlViewer: TRichView;
     ts2: TTabSheet;
     TestITHappensMemo: TMemo;
     ITHQuoteNumberLabel: TLabel;
@@ -58,6 +52,8 @@ type
     ITHPagesRichView: TRichView;
     BashPageSelectComboBox: TComboBox;
     BashOrgRuHtmlViewer: TRichView;
+    ITHPageSelectComboBox: TComboBox;
+    ITHHtmlViewer: TRichView;
     procedure wmGetMinMaxInfo(var Msg : TMessage); message wm_GetMinMaxInfo; // Ограничение размеров формы
     procedure FormCreate(Sender: TObject);
     procedure FormShow(Sender: TObject);
@@ -70,9 +66,6 @@ type
     procedure PagesRichViewJump(Sender: TObject; id: Integer);
     procedure PagesRichViewClick(Sender: TObject);
     procedure chklst1ClickCheck(Sender: TObject);
-    procedure ITHappensMainHtmlViewerMouseWheel(Sender: TObject;
-      Shift: TShiftState; WheelDelta: Integer; MousePos: TPoint;
-      var Handled: Boolean);
     procedure MainPageControlChanging(Sender: TObject;
       var AllowChange: Boolean);
     procedure TabChangeDelayTimerTimer(Sender: TObject);
@@ -82,6 +75,8 @@ type
       Shift: TShiftState; WheelDelta: Integer; MousePos: TPoint;
       var Handled: Boolean);
     procedure BashPageSelectComboBoxClick(Sender: TObject);
+    procedure ITHHtmlViewerMouseWheel(Sender: TObject; Shift: TShiftState;
+      WheelDelta: Integer; MousePos: TPoint; var Handled: Boolean);
   private
     { Private declarations }
   public
@@ -161,20 +156,9 @@ end;
 function CurrentHtmlViewer:TRichView;
 begin
   case MainForm.MainPageControl.ActivePageIndex of
-  0: begin
-        //case MainForm.BashNavBar.ActiveGroupIndex of
-          //0: CurrentHtmlViewer := MainForm.MainHtmlViewer;
-          //1: CurrentHtmlViewer := MainForm.AbyssBestHtmlViewer;
-          //2: CurrentHtmlViewer := MainForm.AbyssTopHtmlViewer;
-          //3: CurrentHtmlViewer := MainForm.AbyssHtmlViewer;
-        //end;
-        CurrentHtmlViewer := MainForm.BashOrgRuHtmlViewer;
-     end;
-  1: begin
-        case MainForm.ITHappensNavBar.ActiveGroupIndex of
-          0: CurrentHtmlViewer := MainForm.ITHappensMainHtmlViewer;
-        end;
-     end;
+  0: CurrentHtmlViewer := MainForm.BashOrgRuHtmlViewer;
+
+  1: CurrentHtmlViewer := MainForm.ITHHtmlViewer;
   end;
 end;
 
@@ -461,8 +445,8 @@ begin
    MainForm.ITHQuoteNumberLabel.Caption := lCaption1;
    MainForm.QuoteITHNumberLabel.Caption := '#' + lCaption2;
    MainForm.QuoteITHRatingLabel.Caption := '[' + lCaption3 + ']';
-   MainForm.ITHappensNavBar.ActiveGroup.Caption := 'Главная ' +  '['+ CurrentITHQuotesArray[CurrentITHQuoteNumber,4] + ']';
-
+   //MainForm.ITHappensNavBar.ActiveGroup.Caption := 'Главная ' +  '['+ CurrentITHQuotesArray[CurrentITHQuoteNumber,4] + ']';
+   //MainForm.ITHPageSelectComboBox.Items[0] := 'Главная ' +  '['+ CurrentITHQuotesArray[CurrentITHQuoteNumber,4] + ']';
 
 end;
 
@@ -503,7 +487,7 @@ begin
      WriteLog('Передача фокуса на Bash.org.ru');
      end;
 
-  1: MainForm.ITHappensMainHtmlViewer.SetFocus;
+  1: MainForm.ITHHtmlViewer.SetFocus;
   end;
 end;
 
@@ -551,7 +535,7 @@ begin
           then
           begin
              CurrentITHQuoteNumber:= CurrentITHQuoteNumber + 1;
-             ChangeHtmlViewerText(MainForm.ITHappensMainHtmlViewer,CurrentITHQuotesArray[CurrentITHQuoteNumber,0]);
+             ChangeHtmlViewerText(CurrentHtmlViewer,CurrentITHQuotesArray[CurrentITHQuoteNumber,0]);
           end;
           ChangeITHQuoteInformation;
 end;
@@ -562,7 +546,7 @@ begin
           then
           begin
              CurrentITHQuoteNumber:= CurrentITHQuoteNumber - 1;
-             ChangeHtmlViewerText(MainForm.ITHappensMainHtmlViewer,CurrentITHQuotesArray[CurrentITHQuoteNumber,0]);
+             ChangeHtmlViewerText(CurrentHtmlViewer,CurrentITHQuotesArray[CurrentITHQuoteNumber,0]);
           end;
           ChangeITHQuoteInformation;
 end;
@@ -776,20 +760,20 @@ procedure OpenITHMainPageNum(Num: string);
 begin
   CurrentITHQuotesArray := ITHQuoteParser(GetStringFromUrl('http://ithappens.ru/page/' + Num),0);
   CurrentITHQuoteNumber := 1;
-  ChangeHtmlViewerText(MainForm.ITHappensMainHtmlViewer, CurrentITHQuotesArray[CurrentITHQuoteNumber,0]);
+  ChangeHtmlViewerText(CurrentHtmlViewer, CurrentITHQuotesArray[CurrentITHQuoteNumber,0]);
   ChangeITHQuoteInformation;
   ChangeITHPages;
 end;
 
 procedure OpenITH;
 begin
-  if not(GetRVText(MainForm.ITHappensMainHtmlViewer) = 'Загрузка...') then
+  if not(GetRVText(CurrentHtmlViewer) = 'Загрузка...') then
   begin
   if ITHMainNeedLoad = true then
   begin
     CurrentITHQuotesArray := GetCurrentITHMainQuotes;
     CurrentITHQuoteNumber := 1;
-    ChangeHtmlViewerText(MainForm.ITHappensMainHtmlViewer, CurrentITHQuotesArray[CurrentITHQuoteNumber,0]);
+    ChangeHtmlViewerText(CurrentHtmlViewer, CurrentITHQuotesArray[CurrentITHQuoteNumber,0]);
     ITHMainNeedLoad := False;
 
   end;
@@ -931,11 +915,11 @@ begin
   ScrollControl(BashOrgRuHtmlViewer,WheelDelta);
 end;
 
-procedure TMainForm.ITHappensMainHtmlViewerMouseWheel(Sender: TObject;
+procedure TMainForm.ITHHtmlViewerMouseWheel(Sender: TObject;
   Shift: TShiftState; WheelDelta: Integer; MousePos: TPoint;
   var Handled: Boolean);
 begin
-   ScrollControl2(ITHappensMainHtmlViewer,WheelDelta);
+   ScrollControl2(CurrentHtmlViewer,WheelDelta);
 end;
 
 ///////////////////////////////////////////////////////////////////////////////
