@@ -1,6 +1,6 @@
 object MainForm: TMainForm
-  Left = 766
-  Top = 330
+  Left = 852
+  Top = 261
   Width = 366
   Height = 527
   Caption = 'bClient'
@@ -23,7 +23,7 @@ object MainForm: TMainForm
     Top = 0
     Width = 358
     Height = 493
-    ActivePage = IThappensTabSheet
+    ActivePage = BashTabSheet
     Align = alClient
     Style = tsFlatButtons
     TabOrder = 0
@@ -92,7 +92,7 @@ object MainForm: TMainForm
       object BashPageSelectComboBox: TComboBox
         Left = 0
         Top = 0
-        Width = 350
+        Width = 329
         Height = 21
         Style = csDropDownList
         Anchors = [akLeft, akTop, akRight]
@@ -119,10 +119,22 @@ object MainForm: TMainForm
         DoInPaletteMode = rvpaCreateCopies
         Style = HtmlViewerStyle
       end
+      object BashRefreshButton: TBitBtn
+        Left = 328
+        Top = 0
+        Width = 21
+        Height = 21
+        Anchors = [akTop, akRight]
+        Caption = '&'
+        TabOrder = 3
+        OnClick = BashRefreshButtonClick
+        Kind = bkRetry
+      end
     end
     object IThappensTabSheet: TTabSheet
       Caption = 'IT happens'
       ImageIndex = 1
+      OnEnter = IThappensTabSheetEnter
       DesignSize = (
         350
         462)
@@ -179,7 +191,7 @@ object MainForm: TMainForm
       object ITHPageSelectComboBox: TComboBox
         Left = 0
         Top = 0
-        Width = 350
+        Width = 329
         Height = 21
         Style = csDropDownList
         Anchors = [akLeft, akTop, akRight]
@@ -188,7 +200,7 @@ object MainForm: TMainForm
         TabOrder = 1
         Text = #1043#1083#1072#1074#1085#1072#1103
         OnChange = BashPageSelectComboBoxChange
-        OnClick = BashPageSelectComboBoxClick
+        OnClick = ITHPageSelectComboBoxClick
         Items.Strings = (
           #1043#1083#1072#1074#1085#1072#1103)
       end
@@ -203,10 +215,35 @@ object MainForm: TMainForm
         DoInPaletteMode = rvpaCreateCopies
         Style = HtmlViewerStyle
       end
+      object ITHRefreshButton: TBitBtn
+        Left = 328
+        Top = 0
+        Width = 21
+        Height = 21
+        Anchors = [akTop, akRight]
+        Caption = '&'
+        TabOrder = 3
+        OnClick = BashRefreshButtonClick
+        Kind = bkRetry
+      end
     end
     object OptionsTabSheet: TTabSheet
       Caption = #1053#1072#1089#1090#1088#1086#1081#1082#1080
       ImageIndex = 2
+      object lbl2: TLabel
+        Left = 168
+        Top = 48
+        Width = 98
+        Height = 13
+        Caption = 'HttpConnectTimeout'
+      end
+      object lbl3: TLabel
+        Left = 184
+        Top = 72
+        Width = 84
+        Height = 13
+        Caption = 'HttpReadTimeout'
+      end
       object FontSelectButton: TButton
         Left = 8
         Top = 32
@@ -229,6 +266,35 @@ object MainForm: TMainForm
           #1058#1086#1087' '#1041#1077#1079#1076#1085#1099
           #1041#1077#1079#1076#1085#1072)
         TabOrder = 1
+      end
+      object TestModeCheckBox: TCheckBox
+        Left = 8
+        Top = 128
+        Width = 97
+        Height = 17
+        Caption = 'Test Mode'
+        Checked = True
+        State = cbChecked
+        TabOrder = 2
+        OnClick = TestModeCheckBoxClick
+      end
+      object edt1: TEdit
+        Left = 272
+        Top = 40
+        Width = 41
+        Height = 21
+        TabOrder = 3
+        Text = '2000'
+        OnChange = edt1Change
+      end
+      object edt2: TEdit
+        Left = 272
+        Top = 64
+        Width = 41
+        Height = 21
+        TabOrder = 4
+        Text = '2000'
+        OnChange = edt2Change
       end
     end
     object AboutTabSheet: TTabSheet

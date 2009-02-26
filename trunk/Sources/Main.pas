@@ -6,7 +6,7 @@ interface
 uses
   Windows, Messages, Forms, SysUtils, Dialogs, rvhtmlimport, Graphics, RVStyle, ExtCtrls,
   IdBaseComponent, IdAntiFreezeBase, IdHTTP, IdAntiFreeze, StdCtrls, Controls,
-  CheckLst, RVScroll, RichView, ComCtrls, Classes;
+  CheckLst, RVScroll, RichView, ComCtrls, Classes, Buttons;
 
 type
   TMainForm = class(TForm)
@@ -54,6 +54,13 @@ type
     BashOrgRuHtmlViewer: TRichView;
     ITHPageSelectComboBox: TComboBox;
     ITHHtmlViewer: TRichView;
+    BashRefreshButton: TBitBtn;
+    TestModeCheckBox: TCheckBox;
+    ITHRefreshButton: TBitBtn;
+    edt1: TEdit;
+    edt2: TEdit;
+    lbl2: TLabel;
+    lbl3: TLabel;
     procedure wmGetMinMaxInfo(var Msg : TMessage); message wm_GetMinMaxInfo; // Ограничение размеров формы
     procedure FormCreate(Sender: TObject);
     procedure FormShow(Sender: TObject);
@@ -74,9 +81,15 @@ type
     procedure BashOrgRuHtmlViewerMouseWheel(Sender: TObject;
       Shift: TShiftState; WheelDelta: Integer; MousePos: TPoint;
       var Handled: Boolean);
-    procedure BashPageSelectComboBoxClick(Sender: TObject);
     procedure ITHHtmlViewerMouseWheel(Sender: TObject; Shift: TShiftState;
       WheelDelta: Integer; MousePos: TPoint; var Handled: Boolean);
+    procedure BashPageSelectComboBoxClick(Sender: TObject);
+    procedure ITHPageSelectComboBoxClick(Sender: TObject);
+    procedure IThappensTabSheetEnter(Sender: TObject);
+    procedure BashRefreshButtonClick(Sender: TObject);
+    procedure TestModeCheckBoxClick(Sender: TObject);
+    procedure edt1Change(Sender: TObject);
+    procedure edt2Change(Sender: TObject);
   private
     { Private declarations }
   public
@@ -128,6 +141,12 @@ var
   CurrentITHQuoteNumber: Integer;
   CurrentITHPagesArray: PageArray;
   Connection: Boolean;
+  TestMode: Boolean;
+  LastBashMainPageNum: string;
+  LastBashAbyssBestPageNum: string;
+  LastITHMainPageNum: string;
+  HttpConnectTimeout: Integer;
+  HttpReadTimeout: Integer;
 
 implementation
 
@@ -152,19 +171,51 @@ begin
   Writeln(LogFile,Str);
 end;
 
+// Присваем переменным начальные значения
+procedure SetVariables;
+begin
+  Assign(LogFile,'Log.txt');
+  Rewrite(LogFile);
+  Close(LogFile);
+  WriteLog('Загрузка переменных');
+  CurrentMainQuoteNumber := 0;
+  CurrentAbyssQuoteNumber := 0;
+  MainNeedLoad := False;
+  AbyssNeedLoad := False;
+  AbyssBestNeedLoad := False;
+  AbyssTopNeedLoad := False;
+  ITHMainNeedLoad := False;
+  MainForm.QuoteNumberLabel.Caption := '?/?';
+  MainForm.ITHQuoteNumberLabel.Caption := '?/?';
+  TestMode := MainForm.TestModeCheckBox.Checked;
+  LastBashMainPageNum := 'none';
+  LastBashAbyssBestPageNum := 'none';
+  LastITHMainPageNum := 'none';
+  HttpConnectTimeout := StrToInt(MainForm.edt1.Text);
+  HttpReadTimeout := StrToInt(MainForm.edt2.Text);
+end;
+
 // Получаем текущий HtmlViewer
 function CurrentHtmlViewer:TRichView;
 begin
   case MainForm.MainPageControl.ActivePageIndex of
-  0: CurrentHtmlViewer := MainForm.BashOrgRuHtmlViewer;
+  0: begin
+       CurrentHtmlViewer := MainForm.BashOrgRuHtmlViewer;
+       WriteLog('Текущий HtmlViewer: BashOrgRuHtmlViewer');
+     end;
 
-  1: CurrentHtmlViewer := MainForm.ITHHtmlViewer;
+  1: begin
+       CurrentHtmlViewer := MainForm.ITHHtmlViewer;
+       WriteLog('Текущий HtmlViewer: ITHHtmlViewer');
+     end;
   end;
+
 end;
 
 // Загрузка строки в HtmlViewer
 procedure ChangeHtmlViewerText(HV:TRichView; LoadText:String);
 begin
+  WriteLog('Загружаем текст "'+ LoadText +'" в ' + HV.Name);
   MainForm.HtmlImporter.RichView := HV;
   MainForm.HtmlImporter.LoadHtml(LoadText);
   HV.Format;
@@ -186,8 +237,9 @@ begin
       with TIdHTTP.Create(nil) do
       begin
 
-        ConnectTimeout := 2000;
-
+        ConnectTimeout := HttpConnectTimeout;
+        ReadTimeout := HttpReadTimeout;
+     
         //ReadTimeout := 1000;
         //Head(GetUrl);
         try
@@ -211,13 +263,14 @@ begin
   case MainForm.BashPageSelectComboBox.ItemIndex of
    0: CurrentBashPagesArray := CurrentMainPagesArray;
    1: CurrentBashPagesArray := CurrentAbyssBestPagesArray;
-   end;
+  end;
 end;
 
 // Отображение страниц
 procedure ChangePages;
 var  i: Integer;
 begin
+   WriteLog('Меняем страницы баша');
    i:=1;
    MainForm.PagesRichView.Visible:= True;
    MainForm.PagesRichView.Clear;
@@ -241,6 +294,7 @@ end;
 procedure ChangeITHPages;
 var  i: Integer;
 begin
+   WriteLog('Меняем страницы ITH');
    i:=1;
    MainForm.ITHPagesRichView.Visible:= True;
    MainForm.ITHPagesRichView.Clear;
@@ -267,6 +321,7 @@ var  ptype: array[1..13] of string; // Тип страницы: linc, dots, currentpage, pr
      num: integer; // Номер записи
      StartPoint: string;
 begin
+  WriteLog('Извлекаем номера страниц ITH');
   StartPoint := 'e/';
   S := Copy(S, Pos('<sp',S),Length(S));
   num:=1;
@@ -306,7 +361,7 @@ var
   num: integer; // Номер записи
   StartPoint: string;
 begin
-  WriteLog('Извлекаем номера страниц');
+  WriteLog('Извлекаем номера страниц баша');
   if From = 'Main' then StartPoint := 'x/';
   if From = 'AbyssBest' then StartPoint := 't/';
   S := Copy(S, Pos('/sp',S)+6,Length(S));
@@ -344,24 +399,6 @@ begin
   WriteLog('Все страницы извлечены');
 end;
 
-// Присваем переменным начальные значения
-procedure SetVariables;
-begin
-  Assign(LogFile,'Log.txt');
-  Rewrite(LogFile);
-  Close(LogFile);
-  WriteLog('Загрузка переменных');
-  CurrentMainQuoteNumber := 0;
-  CurrentAbyssQuoteNumber := 0;
-  MainNeedLoad := False;
-  AbyssNeedLoad := False;
-  AbyssBestNeedLoad := False;
-  AbyssTopNeedLoad := False;
-  ITHMainNeedLoad := False;
-  MainForm.QuoteNumberLabel.Caption := '?/?';
-  MainForm.ITHQuoteNumberLabel.Caption := '?/?';
-end;
-
 // Получаем обработанный текст в TRichView
 function GetRVText(RV:TRichView):string;
 begin
@@ -373,6 +410,7 @@ end;
 // Номер текущей цитаты баша
 function CurrentBashQuoteNumber: Integer;
 begin
+  WriteLog('Получаем номер текущей цитаты');
   case MainForm.BashPageSelectComboBox.ItemIndex of
   0: CurrentBashQuoteNumber := CurrentMainQuoteNumber;
   1: CurrentBashQuoteNumber := CurrentAbyssBestQuoteNumber;
@@ -384,6 +422,7 @@ end;
 // Меняем номер текущей цитаты баша на delta
 procedure ChangeCurrentBashQuoteNumber(delta:Integer);
 begin
+  WriteLog('Меняем номер текущей цитаты на' + IntToStr(delta));
   case MainForm.BashPageSelectComboBox.ItemIndex of
   0: CurrentMainQuoteNumber := CurrentMainQuoteNumber + delta;
   1: CurrentAbyssBestQuoteNumber := CurrentAbyssBestQuoteNumber + delta;
@@ -395,6 +434,7 @@ end;
 // Получаем  текущий массив цитат баша
 function CurrentBashQuotesArray: QuoteArray;
 begin
+  WriteLog('Получаем  текущий массив цитат баша');
   case MainForm.BashPageSelectComboBox.ItemIndex of
   0: CurrentBashQuotesArray := CurrentMainQuotesArray;
   1: CurrentBashQuotesArray := CurrentAbyssBestQuotesArray;
@@ -660,71 +700,85 @@ function ITHQuoteParser(S: string; qtype: integer):ITHQuoteArray;
 var num: Integer;
     buf: ITHQuoteArray;
 begin
-  WriteLog('ITH Parser on');
-  num:=0;
-  S := Copy(S, Pos('<div class="selector">',S),Length(S));
-  CurrentITHPagesArray := ExtractITHPages(Copy(S, 0,Pos('</div>',S)-Pos('<div class="selector">',S)+6));
-  while not(Pos('<div class="text">',S) = 0)  do
+  if not(S = 'error') then
   begin
-     num := num + 1;
-     // В рот мне ноги!
-     S := Copy(S, Pos('<div class="text">',S),Length(S));
-     S := Copy(S, Pos('<a href="/story/' ,S)+ 16,Length(S));
-     buf[num,1] := Copy(S, 0,Pos('"',S)-1);
-     S := Copy(S, Pos(':' ,S) + 2,Length(S));
-     buf[num,4] := Copy(S, 0,Pos('</a>',S)-1);
-     // Удаляем символ перехода на новую строку
-     Delete(buf[num,4], pos(Chr(13), buf[num,4]), 1);
-     Delete(buf[num,4], pos(Chr(10), buf[num,4]), 1);
-     S := Copy(S, Pos('<p class="date">' ,S) + 17,Length(S));
-     buf[num,3] := Copy(S, 0,Pos('<',S)-1);
-     S := Copy(S, Pos('рейтинг:' ,S) + 9,Length(S));
-     //WriteLog(S);
-     buf[num,2] := Copy(S, 0,Pos('<',S)-1);
-     Delete(buf[num,2], pos(Chr(13), buf[num,2]), 1);
-     Delete(buf[num,2], pos(Chr(10), buf[num,2]), 1);
-     Delete(buf[num,2], pos(Chr(13), buf[num,2]), 1);
-     Delete(buf[num,2], pos(Chr(10), buf[num,2]), 1);
-     buf[num,0] := Copy(S, Pos('<p class="text">',S),Pos('</p>',S) - Pos('<p class="text">',S)+4);
-     S := Copy(S, Pos('</div>',S),Length(S));
+    WriteLog('ITH Parser on');
+    num:=0;
+    S := Copy(S, Pos('<div class="selector">',S),Length(S));
+    CurrentITHPagesArray := ExtractITHPages(Copy(S, 0,Pos('</div>',S)-Pos('<div class="selector">',S)+6));
+    while not(Pos('<div class="text">',S) = 0)  do
+    begin
+       num := num + 1;
+       // В рот мне ноги!
+       S := Copy(S, Pos('<div class="text">',S),Length(S));
+       S := Copy(S, Pos('<a href="/story/' ,S)+ 16,Length(S));
+       buf[num,1] := Copy(S, 0,Pos('"',S)-1);
+       S := Copy(S, Pos(':' ,S) + 2,Length(S));
+       buf[num,4] := Copy(S, 0,Pos('</a>',S)-1);
+       // Удаляем символ перехода на новую строку
+       Delete(buf[num,4], pos(Chr(13), buf[num,4]), 1);
+       Delete(buf[num,4], pos(Chr(10), buf[num,4]), 1);
+       S := Copy(S, Pos('<p class="date">' ,S) + 17,Length(S));
+       buf[num,3] := Copy(S, 0,Pos('<',S)-1);
+       S := Copy(S, Pos('рейтинг:' ,S) + 9,Length(S));
+       //WriteLog(S);
+       buf[num,2] := Copy(S, 0,Pos('<',S)-1);
+       Delete(buf[num,2], pos(Chr(13), buf[num,2]), 1);
+       Delete(buf[num,2], pos(Chr(10), buf[num,2]), 1);
+       Delete(buf[num,2], pos(Chr(13), buf[num,2]), 1);
+       Delete(buf[num,2], pos(Chr(10), buf[num,2]), 1);
+       buf[num,0] := Copy(S, Pos('<p class="text">',S),Pos('</p>',S) - Pos('<p class="text">',S)+4);
+       S := Copy(S, Pos('</div>',S),Length(S));
+    end;
+    WriteLog('ITH Parser off');
+    buf[0,0] := IntToStr(num);
+    ITHQuoteParser := buf;
+  end
+  else
+  begin
+    buf[0,0] := '1';
+    buf[1,0] := 'Ошибка';
+    ITHQuoteParser := buf;
   end;
-  WriteLog('ITH Parser off');
-  buf[0,0] := IntToStr(num);
-  ITHQuoteParser := buf;
 end;
 
 function GetCurrentITHMainQuotes: ITHQuoteArray;
 begin
-  //GetCurrentITHMainQuotes := ITHQuoteParser(MainForm.TestITHappensMemo.Text, 0); // для тестов
-  GetCurrentITHMainQuotes := ITHQuoteParser(ITHGetMainAsString, 0);
+   if TestMode
+   then GetCurrentITHMainQuotes := ITHQuoteParser(MainForm.TestITHappensMemo.Text, 0)
+   else GetCurrentITHMainQuotes := ITHQuoteParser(ITHGetMainAsString, 0);
 end;
 
 // Получаем массив цитат с главной
 function GetCurrentMainQuotes: QuoteArray;
 begin
-  //GetCurrentMainQuotes := BashQuoteParser(MainForm.TestMainMemo.Text, 0); // для тестов
-  GetCurrentMainQuotes := BashQuoteParser(BashGetMainAsString, 0);
+  if TestMode
+  then GetCurrentMainQuotes := BashQuoteParser(MainForm.TestMainMemo.Text, 0)
+  else GetCurrentMainQuotes := BashQuoteParser(BashGetMainAsString, 0);
 end;
 
 // Получаем массив цитат с бездны
 function GetCurrentAbyssQuotes: QuoteArray;
 begin
-  //GetCurrentAbyssQuotes := BashQuoteParser(MainForm.TestAbyssMemo.Text, 3); // для тестов
-  GetCurrentAbyssQuotes := BashQuoteParser(BashGetAbyssAsString, 3);
+  if TestMode
+  then GetCurrentAbyssQuotes := BashQuoteParser(MainForm.TestAbyssMemo.Text, 3)
+  else GetCurrentAbyssQuotes := BashQuoteParser(BashGetAbyssAsString, 3);
 end;
 
 // Получаем массив цитат с лучшего бездны
 function GetCurrentAbyssBestQuotes: QuoteArray;
 begin
-  //GetCurrentAbyssBestQuotes := BashQuoteParser(MainForm.TestAbyssBestMemo.Text, 1); // для тестов
-  GetCurrentAbyssBestQuotes := BashQuoteParser(BashGetAbyssBestAsString, 1);
+  if TestMode
+  then GetCurrentAbyssBestQuotes := BashQuoteParser(MainForm.TestAbyssBestMemo.Text, 1)
+  else GetCurrentAbyssBestQuotes := BashQuoteParser(BashGetAbyssBestAsString, 1);
 end;
 
 // Получаем массив цитат с топа бездны
 function GetCurrentAbyssTopQuotes: QuoteArray;
 begin
-  //GetCurrentAbyssTopQuotes := BashQuoteParser(MainForm.TestAbyssTopMemo.Text, 2); // для тестов
-  GetCurrentAbyssTopQuotes := BashQuoteParser(BashGetAbyssTopAsString, 2);
+  if TestMode
+  then GetCurrentAbyssTopQuotes := BashQuoteParser(MainForm.TestAbyssTopMemo.Text, 2)
+  else GetCurrentAbyssTopQuotes := BashQuoteParser(BashGetAbyssTopAsString, 2);
 end;
 
 //
@@ -745,6 +799,7 @@ begin
   ChangeHtmlViewerText(CurrentHtmlViewer, CurrentMainQuotesArray[CurrentMainQuoteNumber,0]);
   ChangeQuoteInformation;
   ChangePages;
+  LastBashMainPageNum := Num;
 end;
 
 procedure OpenBashAbyssBestPageNum(Num: string);
@@ -754,6 +809,7 @@ begin
   ChangeHtmlViewerText(CurrentHtmlViewer, CurrentAbyssBestQuotesArray[CurrentAbyssBestQuoteNumber,0]);
   ChangeQuoteInformation;
   ChangePages;
+  LastBashAbyssBestPageNum := Num;
 end;
 
 procedure OpenITHMainPageNum(Num: string);
@@ -763,6 +819,7 @@ begin
   ChangeHtmlViewerText(CurrentHtmlViewer, CurrentITHQuotesArray[CurrentITHQuoteNumber,0]);
   ChangeITHQuoteInformation;
   ChangeITHPages;
+  LastITHMainPageNum := Num;
 end;
 
 procedure OpenITH;
@@ -1052,6 +1109,97 @@ end;
 procedure TMainForm.BashPageSelectComboBoxClick(Sender: TObject);
 begin
   FindFocus;
+end;
+
+procedure TMainForm.ITHPageSelectComboBoxClick(Sender: TObject);
+begin
+  FindFocus;
+end;
+
+procedure TMainForm.IThappensTabSheetEnter(Sender: TObject);
+begin
+  FindFocusDelayTimer.Enabled := True;
+end;
+
+procedure TMainForm.BashRefreshButtonClick(Sender: TObject);
+begin
+  FindFocus;
+  case MainPageControl.ActivePageIndex of
+  0:begin
+      case BashPageSelectComboBox.ItemIndex of
+      0:begin
+           if LastBashMainPageNum = 'none' then
+           begin
+             CurrentMainQuotesArray := GetCurrentMainQuotes;
+             CurrentMainQuoteNumber := 1;
+             ChangeHtmlViewerText(CurrentHtmlViewer, CurrentMainQuotesArray[CurrentMainQuoteNumber,0]);
+           end
+           else
+           begin
+             OpenBashMainPageNum(LastBashMainPageNum);
+           end;
+        end;
+      1:begin
+           if LastBashAbyssBestPageNum = 'none' then
+           begin
+             CurrentAbyssBestQuotesArray := GetCurrentAbyssBestQuotes;
+             CurrentAbyssBestQuoteNumber := 1;
+             ChangeHtmlViewerText(CurrentHtmlViewer, CurrentAbyssBestQuotesArray[CurrentAbyssBestQuoteNumber,0]);
+           end
+           else
+           begin
+             OpenBashAbyssBestPageNum(LastBashAbyssBestPageNum);
+           end;
+        end;
+      2:begin
+           CurrentAbyssTopQuotesArray := GetCurrentAbyssTopQuotes;
+           CurrentAbyssTopQuoteNumber := 1;
+           ChangeHtmlViewerText(CurrentHtmlViewer, CurrentAbyssTopQuotesArray[CurrentAbyssTopQuoteNumber,0]);
+        end;
+      3:begin
+           CurrentAbyssQuotesArray := GetCurrentAbyssQuotes;
+           CurrentAbyssQuoteNumber := 1;
+           ChangeHtmlViewerText(CurrentHtmlViewer, CurrentAbyssQuotesArray[CurrentAbyssQuoteNumber,0]);
+        end;
+      end;
+    ChangeQuoteInformation;
+    ChangePages;
+    end;
+
+  1:begin
+      case ITHPageSelectComboBox.ItemIndex of
+      0: begin
+           if LastITHMainPageNum = 'none' then
+           begin
+             CurrentITHQuotesArray := GetCurrentITHMainQuotes;
+             CurrentITHQuoteNumber := 1;
+             ChangeHtmlViewerText(CurrentHtmlViewer, CurrentITHQuotesArray[CurrentITHQuoteNumber,0]);
+           end
+           else
+           begin
+             OpenITHMainPageNum(LastITHMainPageNum);
+           end;
+         end;
+      end;
+    ChangeITHQuoteInformation;
+    ChangeITHPages;
+    end;
+  end;
+end;
+
+procedure TMainForm.TestModeCheckBoxClick(Sender: TObject);
+begin
+  TestMode := TestModeCheckBox.Checked;
+end;
+
+procedure TMainForm.edt1Change(Sender: TObject);
+begin
+  HttpConnectTimeout := StrToInt(edt1.Text);
+end;
+
+procedure TMainForm.edt2Change(Sender: TObject);
+begin
+  HttpReadTimeout := StrToInt(edt2.Text);
 end;
 
 end.
