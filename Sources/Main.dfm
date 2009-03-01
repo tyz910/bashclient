@@ -1,6 +1,6 @@
 object MainForm: TMainForm
-  Left = 852
-  Top = 261
+  Left = 288
+  Top = 315
   Width = 366
   Height = 527
   Caption = 'bClient'
@@ -23,7 +23,7 @@ object MainForm: TMainForm
     Top = 0
     Width = 358
     Height = 493
-    ActivePage = BashTabSheet
+    ActivePage = WoWBashTabSheet
     Align = alClient
     Style = tsFlatButtons
     TabOrder = 0
@@ -44,12 +44,11 @@ object MainForm: TMainForm
         Caption = '50/50'
       end
       object QuoteBashNumberLabel: TLabel
-        Left = 32
-        Top = 449
+        Left = 0
+        Top = 25
         Width = 43
         Height = 13
         Align = alCustom
-        Anchors = [akLeft, akBottom]
         Caption = '#999999'
         Font.Charset = DEFAULT_CHARSET
         Font.Color = clBlue
@@ -73,9 +72,9 @@ object MainForm: TMainForm
         ParentBiDiMode = False
       end
       object PagesRichView: TRichView
-        Left = 80
+        Left = 32
         Top = 442
-        Width = 240
+        Width = 281
         Height = 20
         Anchors = [akLeft]
         TabOrder = 0
@@ -110,9 +109,9 @@ object MainForm: TMainForm
       end
       object BashOrgRuHtmlViewer: TRichView
         Left = 0
-        Top = 24
+        Top = 40
         Width = 350
-        Height = 417
+        Height = 401
         Anchors = [akLeft, akTop, akRight, akBottom]
         TabOrder = 2
         OnMouseWheel = BashOrgRuHtmlViewerMouseWheel
@@ -227,6 +226,88 @@ object MainForm: TMainForm
         Kind = bkRetry
       end
     end
+    object WoWBashTabSheet: TTabSheet
+      Caption = 'WoW Bash'
+      ImageIndex = 5
+      DesignSize = (
+        350
+        462)
+      object WoWBashQuoteNumberLabel: TLabel
+        Left = 0
+        Top = 449
+        Width = 29
+        Height = 13
+        Align = alCustom
+        Anchors = [akLeft, akBottom]
+        Caption = '50/50'
+      end
+      object QuoteWoWBashNumberLabel: TLabel
+        Left = 32
+        Top = 449
+        Width = 31
+        Height = 13
+        Align = alCustom
+        Anchors = [akLeft, akBottom]
+        Caption = '#9999'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlue
+        Font.Height = -11
+        Font.Name = 'MS Sans Serif'
+        Font.Style = [fsUnderline]
+        ParentFont = False
+      end
+      object QuoteWoWBashRatingLabel: TLabel
+        Left = 320
+        Top = 449
+        Width = 30
+        Height = 13
+        Align = alCustom
+        Alignment = taRightJustify
+        Anchors = [akRight, akBottom]
+        BiDiMode = bdLeftToRight
+        Caption = '[9999]'
+        ParentBiDiMode = False
+      end
+      object WoWBashHtmlViewer: TRichView
+        Left = 0
+        Top = 24
+        Width = 350
+        Height = 417
+        Anchors = [akLeft, akTop, akRight, akBottom]
+        TabOrder = 0
+        OnMouseWheel = WoWBashHtmlViewerMouseWheel
+        DoInPaletteMode = rvpaCreateCopies
+        Style = HtmlViewerStyle
+      end
+      object WoWBashPageSelectComboBox: TComboBox
+        Left = 0
+        Top = 0
+        Width = 329
+        Height = 21
+        Style = csDropDownList
+        Anchors = [akLeft, akTop, akRight]
+        ItemHeight = 13
+        ItemIndex = 0
+        TabOrder = 1
+        Text = #1043#1083#1072#1074#1085#1072#1103
+        OnChange = BashPageSelectComboBoxChange
+        OnClick = ITHPageSelectComboBoxClick
+        Items.Strings = (
+          #1043#1083#1072#1074#1085#1072#1103
+          'Other')
+      end
+      object WoWBashRefreshButton: TBitBtn
+        Left = 328
+        Top = 0
+        Width = 21
+        Height = 21
+        Anchors = [akTop, akRight]
+        Caption = '&'
+        TabOrder = 2
+        OnClick = WoWBashRefreshButtonClick
+        Kind = bkRetry
+      end
+    end
     object OptionsTabSheet: TTabSheet
       Caption = #1053#1072#1089#1090#1088#1086#1081#1082#1080
       ImageIndex = 2
@@ -321,7 +402,7 @@ object MainForm: TMainForm
         Top = 26
         Width = 350
         Height = 436
-        ActivePage = ts2
+        ActivePage = ts3
         Align = alClient
         TabOrder = 0
         object LogTabSheet: TTabSheet
@@ -5050,6 +5131,410 @@ object MainForm: TMainForm
             TabOrder = 0
           end
         end
+        object ts3: TTabSheet
+          Caption = 'TestWoWBash'
+          ImageIndex = 6
+          object TestWoWBashMemo: TMemo
+            Left = 0
+            Top = 0
+            Width = 342
+            Height = 408
+            Align = alClient
+            Lines.Strings = (
+              '<html>'
+              '<head>'
+              '<title>'
+              'WoW.Bash</title>'
+              '<meta http-equiv="content-type" content="text/html; '
+              'charset=windows-1251">'
+              '<META NAME="keywords" CONTENT="wow, warcraft, level, lvl, '
+              
+                'bash, gold, free, server, mangos, '#1074#1086#1074', '#1087#1088#1086#1082#1072#1095#1082#1072', '#1101#1087#1080#1082', '#1073#1077#1089#1087#1083#1072#1090#1085#1099 +
+                #1081', '
+              #1073#1077#1079#1087#1083#1072#1090#1085#1099#1081', '#1073#1077#1079#1087#1083#1072#1090#1085#1080#1081'">'
+              
+                '<link href="../../../inc/style.css" type="text/css" rel="stylesh' +
+                'eet">'
+              '</head>'
+              '<body>'
+              '<center>'
+              '<img src=http://i027.radikal.ru/0805/ce/77ec40f53c5a.gif '
+              'alt=wowbash ><h1> <FONT color="#dc1400">-</FONT><FONT '
+              'color="#dc2800">|</FONT> <FONT '
+              'color="#dc5000">'#1055'</FONT><FONT '
+              'color="#dc6400">'#1077'</FONT><FONT '
+              'color="#dc7800">'#1088'</FONT><FONT '
+              'color="#dc8c00">'#1074'</FONT><FONT '
+              'color="#dca000">'#1099'</FONT><FONT color="#dcb400">'#1081'</FONT> '
+              '<FONT color="#dcdc00">'#1074'</FONT> <FONT '
+              'color="#b4dc00">'#1057'</FONT><FONT '
+              'color="#a0dc00">'#1053'</FONT><FONT color="#8cdc00">'#1043'</FONT> '
+              '<FONT color="#64dc00">W</FONT><FONT '
+              'color="#50dc00">o</FONT><FONT color="#3cdc00">W</FONT> '
+              '<FONT color="#14dc00">'#1062'</FONT><FONT '
+              'color="#00dc00">'#1080'</FONT><FONT '
+              'color="#00dc14">'#1090'</FONT><FONT '
+              'color="#00dc28">'#1072'</FONT><FONT '
+              'color="#00dc3c">'#1090'</FONT><FONT '
+              'color="#00dc50">'#1085'</FONT><FONT '
+              'color="#00dc64">'#1080'</FONT><FONT color="#00dc78">'#1082'</FONT> '
+              '<FONT color="#00dca0">|</FONT><FONT '
+              'color="#00dcb4">-</FONT><BR> </h1>'
+              ''
+              '<br><br>'
+              '-| <a href="/">'#1062#1080#1090#1072#1090#1099'</a> |- &nbsp; -| <a '
+              'href="/add.php">'#1044#1086#1073#1072#1074#1080#1090#1100'</a> |- &nbsp; -| <a href="/up.php">20 '
+              #1083#1091#1095#1096#1080#1093'</a> |- &nbsp; -| <a href="/about.php">'#1054' '#1089#1072#1081#1090#1077'</a> |-'
+              ''
+              '<br><br>'
+              '<font color="#B8EE16">'#1055#1088#1086#1074#1077#1088#1077#1085#1085#1099#1093' '#1094#1080#1090#1072#1090': 755 | '#1053#1072' '#1087#1088#1086#1074#1077#1088#1082#1077': 0 | '
+              #1052#1086#1076#1077#1088#1072#1090#1086#1088#1086#1074': 4</font><br>'
+              ''
+              ''
+              
+                ' <table width=500><tr><td><a href="http://www.wow-loot.narod.ru/' +
+                '" '
+              'target="_blank"><img '
+              
+                'src="http://s45.radikal.ru/i107/0901/5d/9a2231442827.gif"></a></' +
+                'td'
+              '><td width=500>'
+              #9#9#9'<blockquote> <font size=3></font>'
+              ''
+              '</blockquote>'
+              #9#9#9'</td><td><embed '
+              
+                'src="http://igrotrade.ru/UserFiles/Image/inzerat/igrotrade001.sw' +
+                'f" '#9#9
+              'width="468" '#9#9'height="60" '#9#9
+              'play="true" '#9#9'loop="true" '#9#9
+              'wmode="Opaque" '#9#9'quality="high" '#9#9
+              'bgcolor="" '#9#9'align="" '#9#9
+              'pluginspage="http://www.macromedia.com/shockwave/download/ind'
+              'ex.cgi?P1_Prod_Version=ShockwaveFlash">'#9
+              '</embed></td></tr></table>'
+              '<br> '
+              ''
+              '<hr>'
+              ''
+              '<table width=750>'
+              '<tr>'
+              '<td>'
+              ''
+              '<table width=500><tr><td width=500>'
+              #9#9#9'<br><b><a '
+              'href=index.php?id=1178>#1178</a> | '#1059#1090#1074#1077#1088#1076#1080#1083': andred | 26.02.09 '
+              '07:05 | '#1056#1077#1081#1090#1080#1085#1075': <a href=index.php?id=1178&rating=plus>+</a>'
+              ' '
+              ''
+              ''
+              ''
+              ''
+              '<a href=index.php?id=1178&rating=minus>-</a><br><br>'
+              #9#9#9'<blockquote><font size=2>1: '#1055#1086#1095#1077#1084#1091' '
+              #1043#1052#1099' '#1085#1080#1095#1077#1075#1086' '#1085#1077' '#1076#1077#1083#1072#1102#1090' '#1089' '#1084#1072#1090#1086#1084' '#1085#1072' '#1082#1072#1085#1072#1083#1072#1093'?<br>2: '#1086#1085#1080' '#1085#1072' '#1085#1077#1084' '
+              #1075#1086#1074#1086#1088#1103#1090'<br>1: '#1099'<br></font></blockquote>'
+              ''
+              #9#9#9'</td></tr><tr><td width=500>'
+              #9#9#9'<br><b><a '
+              'href=index.php?id=1176>#1176</a> | '#1059#1090#1074#1077#1088#1076#1080#1083': admin | 26.02.09 '
+              '06:49 | '#1056#1077#1081#1090#1080#1085#1075': <a href=index.php?id=1176&rating=plus>+</a>'
+              ' '
+              ''
+              ''
+              ''
+              ''
+              '<a href=index.php?id=1176&rating=minus>-</a><br><br>'
+              #9#9#9'<blockquote><font size=2>{'#1084#1072#1090' '#1074' '#1090#1080#1084' '
+              #1089#1087#1080#1082#1077'}<br>1: '#1056#1077#1073#1103#1090' '#1076#1072#1074#1072#1081#1090#1077' '#1073#1077#1079' '#1084#1072#1090#1072' '#1087#1083#1079' =))<br>2: '#1076#1072' '#1073#1077#1079' '
+              #1087#1088#1086#1073#1083#1077#1084','#1103' '#1074#1089#1077#1075#1076#1072' '#1079#1072' '#1101#1090#1086'<br>3: '#1086#1082#1077#1081'<br>4: '#1101#1090#1086' '#1086#1095#1077#1085#1100' '#1090#1088#1091#1076#1085#1072' '
+              #1082#1086#1085#1077#1095#1085#1086'-))<br>1: '#1103' '#1089#1072#1084' '#1090#1086' '#1085#1086#1088#1084#1072#1083#1100#1085#1086' '#1074#1086#1089#1087#1088#1080#1085#1080#1084#1072#1102' =) '#1072' '#1074#1086#1090' '#1084#1072#1084#1082#1072' '
+              #1082#1086#1090#1086#1088#1072#1103' '#1089' '#1073#1088#1072#1090#1086#1084' '#1074' '#1084#1086#1077#1081' '#1082#1086#1084#1085#1072#1090#1077' '#1089#1080#1076#1103#1090' '#1080' '#1076#1077#1083#1072#1102#1090' '#1073#1088#1072#1090#1086#1074#1099' '#1091#1088#1086#1082#1080' '
+              #1085#1077' '#1089#1086#1074#1089#1077#1084' =D<br>2:'#1076#1072' '#1091#1078'<br>5:'#1079#1072#1090#1086' '#1086#1085#1080' '#1073#1091#1076#1091#1090' '#1079#1085#1072#1090#1100' '#1090#1072#1082#1090#1080#1082#1091' '#1085#1072' '
+              #1061#1077#1081#1075#1072#1085#1072'</font></blockquote>'
+              ''
+              #9#9#9'</td></tr><tr><td width=500>'
+              #9#9#9'<br><b><a '
+              'href=index.php?id=1175>#1175</a> | '#1059#1090#1074#1077#1088#1076#1080#1083': admin | 26.02.09 '
+              '06:36 | '#1056#1077#1081#1090#1080#1085#1075': <a href=index.php?id=1175&rating=plus>+</a>'
+              ' '
+              ''
+              ''
+              ''
+              ''
+              '<a href=index.php?id=1175&rating=minus>-</a><br><br>'
+              #9#9#9'<blockquote><font size=2>gardy: '#1063#1090#1086' '
+              #1084#1085#1077' '#1076#1077#1083#1072#1090#1100'!? '#1042#1089#1077' '#1084#1086#1080' '#1076#1088#1091#1079#1100#1103' '#1079#1072#1076#1088#1086#1090#1099'!<br>Jackob: '#1093#1079')<br>gardy: '
+              #1084#1086#1078#1077#1090' '#1087#1086#1091#1073#1080#1074#1072#1090#1100' '#1085#1072#1092#1080#1075'?<br>Jackob: '#1088#1077#1089#1085#1091#1094#1094#1086')))<br>gardy: '#1073#1083#1103' '
+              ')<br></font></blockquote>'
+              ''
+              #9#9#9'</td></tr><tr><td width=500>'
+              #9#9#9'<br><b><a '
+              'href=index.php?id=1174>#1174</a> | '#1059#1090#1074#1077#1088#1076#1080#1083': admin | 26.02.09 '
+              '05:39 | '#1056#1077#1081#1090#1080#1085#1075': <a href=index.php?id=1174&rating=plus>+</a>'
+              ' '
+              ''
+              ''
+              ''
+              ''
+              '<a href=index.php?id=1174&rating=minus>-</a><br><br>'
+              #9#9#9'<blockquote><font size=2>'#1057' '#1086#1092#1092#1072', '
+              #1088#1072#1079#1076#1077#1083' '#1096#1072#1084#1072#1085#1086#1074':<br><br> '#1044#1050' '#1074#1086#1087#1103#1090' '#1095#1090#1086' '#1080#1093' '#1087#1086#1085#1077#1088#1092#1080#1083#1080' '#1080' '#1090#1077#1087#1077#1088#1100' '
+              #1086#1085#1080' '#1085#1077' '#1089#1084#1086#1075#1091#1090' '#1089#1088#1072#1079#1091' 5'#1099#1093' '#1089#1085#1086#1089#1080#1090#1100'. '#1056#1086#1075#1080' '#1074' '#1091#1078#1072#1089#1077' '#1086#1090' '#1085#1077#1088#1092#1072' - '#1090#1077#1087#1077#1088#1100' '
+              #1087#1088#1080#1076#1077#1090#1089#1103' '#1073#1080#1090#1100' '#1087#1088#1086#1090#1080#1074#1085#1080#1082#1072' '#1085#1077' 3 '#1089#1077#1082#1091#1085#1076#1099', '#1072' '#1095#1077#1090#1099#1088#1077' '#1089' '#1087#1086#1083#1086#1074#1080#1085#1086#1081'. '
+              #1055#1072#1083#1099' '#1074#1086#1086#1073#1097#1077' '#1090#1086#1083#1082#1086#1084' '#1085#1077' '#1084#1086#1075#1091#1090' '#1087#1086#1085#1103#1090#1100' '#1095#1090#1086' '#1089' '#1085#1080#1084#1080' '#1089#1076#1077#1083#1072#1083#1080', '#1085#1086' '#1085#1072' '
+              #1074#1089#1103#1082#1080#1081' '#1089#1083#1091#1095#1072#1081' '#1087#1086#1076#1074#1099#1074#1072#1102#1090'.<br>'#1040' '#1096#1072#1084#1072#1085#1099' '#1090#1086#1083#1100#1082#1086' '#1087#1088#1080#1082#1072#1083#1099#1074#1072#1102#1090#1089#1103' '
+              #1089#1072#1084#1080' '#1085#1072#1076' '#1089#1086#1073#1086#1081'. '#1052#1085#1077' '#1085#1088#1072#1074#1080#1090#1089#1103') '#1042#1080#1076#1085#1086' '#1095#1090#1086' '#1082#1083#1072#1089#1089' '#1083#1102#1073#1080#1084' '
+              #1072#1076#1077#1082#1074#1072#1090#1085#1099#1084#1080' '#1083#1102#1076#1100#1084#1080' '#1074' '#1086#1089#1085#1086#1074#1085#1086#1084'.</font></blockquote>'
+              ''
+              #9#9#9'</td></tr><tr><td width=500>'
+              #9#9#9'<br><b><a '
+              'href=index.php?id=1172>#1172</a> | '#1059#1090#1074#1077#1088#1076#1080#1083': admin | 24.02.09 '
+              '10:10 | '#1056#1077#1081#1090#1080#1085#1075': <a href=index.php?id=1172&rating=plus>+</a>'
+              ' '
+              ''
+              ''
+              ''
+              ''
+              '<a href=index.php?id=1172&rating=minus>-</a><br><br>'
+              #9#9#9'<blockquote><font size=2>'#1053#1072' '#1086#1092#1092' '
+              #1089#1072#1081#1090#1077' '#1093#1086#1090#1077#1083' '#1087#1077#1088#1077#1085#1077#1089#1090#1080' '#1095#1072#1088#1072' '#1089' '#1086#1076#1085#1086#1075#1086' '#1084#1080#1088#1072' '#1085#1072' '#1076#1088#1091#1075#1086#1081'. '#1074#1086' '#1095#1086' '
+              #1074#1099#1076#1072#1083#1086':<br><br>Nos pages de gestion de compte sont '
+              'temporairement inaccessibles.<br>Veuillez reessayer plus tard. '
+              
+                '<br><br>Nous vous remercions de votre comprehension. <br><br>Die' +
+                ' '
+              
+                'Seiten der Accountverwaltung sind momentan nicht verfugbar.<br>B' +
+                'itte '
+              
+                'versuchen Sie es spater noch einmal. <br><br>Vielen Dank fur Ihr' +
+                ' '
+              
+                'Verstandnis <br><br>Nuestra pagina de gestion de cuentas no esta' +
+                ' '
+              
+                'disponible en este momento.<br>Por favor, vuelve a comprobarlo m' +
+                'as '
+              
+                'tarde <br><br>Gracias por vuestra comprension. <br><br>'#1041#1083#1072#1075#1086#1076#1072#1088#1080 +
+                #1084' '
+              #1079#1072' '#1087#1086#1085#1080#1084#1072#1085#1080#1077'.</font></blockquote>'
+              ''
+              #9#9#9'</td></tr><tr><td width=500>'
+              #9#9#9'<br><b><a '
+              'href=index.php?id=1169>#1169</a> | '#1059#1090#1074#1077#1088#1076#1080#1083': Beaver | 23.02.09 '
+              '18:35 | '#1056#1077#1081#1090#1080#1085#1075': <a href=index.php?id=1169&rating=plus>+</a>'
+              ' '
+              ''
+              ''
+              ''
+              ''
+              '<a href=index.php?id=1169&rating=minus>-</a><br><br>'
+              #9#9#9'<blockquote><font size=2>'#1050#1091#1088#1102' '#1085#1072' '
+              #1073#1072#1083#1082#1086#1085#1077'. '#1057#1083#1099#1096#1091' '#1078#1077#1085#1089#1082#1080#1081' '#1082#1088#1080#1082' '#1089#1074#1077#1088#1093#1091':<br>'#1050#1072#1082' '#1053#1072#1082#1089' '#1077#1073#1072#1090#1100', '#1091' '#1090#1077#1073#1103' '
+              #1089#1080#1083#1099' '#1077#1089#1090#1100'! '#1040' '#1082#1072#1082' '#1076#1077#1074#1091#1096#1082#1091' '#1089#1074#1086#1102' '#1077#1076#1080#1085#1089#1090#1074#1077#1085#1085#1091#1102', '#1090#1072#1082': '#1086#1081' '#1087#1088#1086#1089#1090#1080' '
+              #1084#1080#1083#1072#1103', '#1103' '#1041#1086#1083#1077#1102'!?<br></font></blockquote>'
+              #9#9#9'</td></tr><tr><td width=500>'
+              ''
+              #9#9#9'<br><b><a '
+              'href=index.php?id=1166>#1166</a> | '#1059#1090#1074#1077#1088#1076#1080#1083': andred | 22.02.09 '
+              '18:09 | '#1056#1077#1081#1090#1080#1085#1075': <a href=index.php?id=1166&rating=plus>+</a>'
+              ' '
+              ''
+              ''
+              ''
+              ''
+              '<a href=index.php?id=1166&rating=minus>-</a><br><br>'
+              #9#9#9'<blockquote><font size=2>'#1085#1077'.. '#1103' '
+              #1082#1086#1085#1077#1095#1085#1086' '#1074#1089#1077' '#1087#1086#1085#1080#1084#1072#1102'.. '#1085#1072' '#1096#1072#1085#1089' '#1093#1086#1083#1080' '#1082#1088#1080#1090#1072' '#1074' 6,66% - '#1101#1090#1086' '
+              #1089#1080#1084#1074#1086#1083#1080#1095#1085#1086'...</font></blockquote>'
+              #9#9#9'</td></tr><tr><td width=500>'
+              #9#9#9'<br><b><a '
+              'href=index.php?id=1164>#1164</a> | '#1059#1090#1074#1077#1088#1076#1080#1083': Beaver | 22.02.09 '
+              '13:31 | '#1056#1077#1081#1090#1080#1085#1075': <a href=index.php?id=1164&rating=plus>+</a>'
+              ''
+              ' '
+              ''
+              ''
+              ''
+              ''
+              '<a href=index.php?id=1164&rating=minus>-</a><br><br>'
+              #9#9#9'<blockquote><font size=2>'#1044#1086#1081#1076#1103' '#1076#1086' '
+              #1073#1086#1089#1089#1072', '#1088#1077#1081#1076' '#1087#1086#1085#1103#1083', '#1095#1090#1086' '#1088#1077#1081#1076' '#1083#1080#1076#1077#1088' '#1072#1092#1082' '#1080' '#1076#1072#1078#1077' '#1085#1077' '#1074' '
+              #1080#1085#1089#1090#1077'</font></blockquote>'
+              #9#9#9'</td></tr><tr><td width=500>'
+              #9#9#9'<br><b><a '
+              'href=index.php?id=1162>#1162</a> | '#1059#1090#1074#1077#1088#1076#1080#1083': andred | 22.02.09 '
+              '10:22 | '#1056#1077#1081#1090#1080#1085#1075': <a href=index.php?id=1162&rating=plus>+</a>'
+              ' '
+              ''
+              ''
+              ''
+              ''
+              '<a href=index.php?id=1162&rating=minus>-</a><br><br>'
+              ''
+              #9#9#9'<blockquote><font size=2>1: you '
+              'pidar?<br>2: what is pidar?<br>1: pidar is very good player in '
+              'wow<br>1: you pidar?<br>2: yes</font></blockquote>'
+              #9#9#9'</td></tr><tr><td width=500>'
+              #9#9#9'<br><b><a '
+              'href=index.php?id=1160>#1160</a> | '#1059#1090#1074#1077#1088#1076#1080#1083': andred | 21.02.09 '
+              '18:12 | '#1056#1077#1081#1090#1080#1085#1075': <a href=index.php?id=1160&rating=plus>+</a>'
+              ' '
+              ''
+              ''
+              ''
+              ''
+              '<a href=index.php?id=1160&rating=minus>-</a><br><br>'
+              ''
+              #9#9#9'<blockquote><font size=2>[1. '#1054#1073#1097#1080#1081': '
+              #1053#1072#1082#1089#1088#1072#1084#1072#1089'] ['#1041#1083#1091#1076#1077#1085#1100']: '#1050#1072#1082' '#1091#1073#1080#1090#1100' '#1040#1085#1091#1087#1088#1080#1082#1072#1085#1072'?<br>[1. '#1054#1073#1097#1080#1081': '
+              #1053#1072#1082#1089#1088#1072#1084#1072#1089'] ['#1056#1099#1078#1099#1082']: '#1041#1083#1091#1076#1077#1085#1100' '#1056#1072#1089#1084#1077#1096#1080' '#1077#1075#1086'</font></blockquote>'
+              #9#9#9'</td></tr><tr><td width=500>'
+              #9#9#9'<br><b><a '
+              'href=index.php?id=1159>#1159</a> | '#1059#1090#1074#1077#1088#1076#1080#1083': andred | 21.02.09 '
+              '14:32 | '#1056#1077#1081#1090#1080#1085#1075': <a href=index.php?id=1159&rating=plus>+</a>'
+              ' '
+              ''
+              ''
+              ''
+              ''
+              '<a href=index.php?id=1159&rating=minus>-</a><br><br>'
+              #9#9#9'<blockquote><font '
+              'size=2>xxx:'#1055#1072#1094#1072#1085#1099'!!!, '#1072' '#1095#1077' '#1087#1072#1083#1072#1076#1080#1085#1091' '#1074' '#1090#1088#1077#1090#1100#1102' '
+              #1088#1091#1082#1091'???</font></blockquote>'
+              ''
+              #9#9#9'</td></tr><tr><td width=500>'
+              #9#9#9'<br><b><a '
+              
+                'href=index.php?id=1157>#1157</a> | '#1059#1090#1074#1077#1088#1076#1080#1083': Kelthuzed | 21.02.0' +
+                '9 '
+              '10:35 | '#1056#1077#1081#1090#1080#1085#1075': <a href=index.php?id=1157&rating=plus>+</a>'
+              ' '
+              ''
+              ''
+              ''
+              ''
+              '<a href=index.php?id=1157&rating=minus>-</a><br><br>'
+              #9#9#9'<blockquote><font '
+              
+                'size=2>&lt;GM&gt;[Cerdenn] whispers: For violating our harassmen' +
+                't '
+              
+                'policy, I am suspending this account. An email will be sent to y' +
+                'ou '
+              'shortly regarding this.<br>To [Cerdenn]: shut the fuck up<br>To '
+              '[Cerdenn]: nigger</font></blockquote>'
+              ''
+              #9#9#9'</td></tr><tr><td width=500>'
+              #9#9#9'<br><b><a '
+              'href=index.php?id=1155>#1155</a> | '#1059#1090#1074#1077#1088#1076#1080#1083': Beaver | 20.02.09 '
+              '19:06 | '#1056#1077#1081#1090#1080#1085#1075': <a href=index.php?id=1155&rating=plus>+</a>'
+              ' '
+              ''
+              ''
+              ''
+              ''
+              '<a href=index.php?id=1155&rating=minus>-</a><br><br>'
+              #9#9#9'<blockquote><font size=2>[21:11:03] '
+              '&lt;dR1ve&gt; [E'#1073'] '#1057' '#1050#1040#1050#1054#1043#1054' '#1059#1056#1040#1042#1053#1071' '#1053#1040' '#1041#1054#1057#1040#1042' '#1052#1054#1046#1053#1054' '
+              #1061#1040#1044#1048#1058#1068'?</font></blockquote>'
+              ''
+              #9#9#9'</td></tr><tr><td width=500>'
+              #9#9#9'<br><b><a '
+              'href=index.php?id=1154>#1154</a> | '#1059#1090#1074#1077#1088#1076#1080#1083': andred | 20.02.09 '
+              '10:25 | '#1056#1077#1081#1090#1080#1085#1075': <a href=index.php?id=1154&rating=plus>+</a>'
+              ' '
+              ''
+              ''
+              ''
+              ''
+              '<a href=index.php?id=1154&rating=minus>-</a><br><br>'
+              #9#9#9'<blockquote><font '
+              'size=2>['#1075#1080#1083#1100#1076#1080#1103']'#1055#1101#1076#1088#1086#1089' '#1079#1072#1089#1083#1091#1078#1080#1083' '#1076#1086#1089#1090#1080#1078#1077#1085#1080#1077' ['#1042' '#1075#1086#1083#1091#1073#1091#1102' '
+              #1074#1099#1089#1100'!]<br>('#1089') '#1060#1083#1086#1074'</font></blockquote>'
+              #9#9#9'</td></tr><tr><td width=500>'
+              ''
+              #9#9#9'<br><b><a '
+              
+                'href=index.php?id=1153>#1153</a> | '#1059#1090#1074#1077#1088#1076#1080#1083': Kelthuzed | 20.02.0' +
+                '9 '
+              '03:55 | '#1056#1077#1081#1090#1080#1085#1075': <a href=index.php?id=1153&rating=plus>+</a>'
+              ' '
+              ''
+              ''
+              ''
+              ''
+              '<a href=index.php?id=1153&rating=minus>-</a><br><br>'
+              #9#9#9'<blockquote><font size=2>[SERVER] '
+              'Shutdown in 1:15<br>[SERVER] Shutdown in 1:10<br>Patchwerk '
+              'yells: What... happen to-<br>[SERVER] Shutdown in '
+              '0:45<br>[SERVER] Shutdown in 0:30<br>Patchwerk yells: No more '
+              'play?</font></blockquote>'
+              ''
+              #9#9#9'</td></tr></table><br><br><div '
+              'align=right><b>1</b> | <a href=index.php?page=2>2</a> | <a '
+              'href=index.php?page=3>3</a> <a '
+              'href=index.php?page=2>'#1074#1087#1077#1088#1077#1076'</a> <a href=index.php?page=51>'#1074' '
+              #1082#1086#1085#1077#1094'</a></div></td>'
+              '</tr>'
+              '</table>'
+              '<hr>'
+              '<table width=750>'
+              ''
+              '<tr><td align="left" width="50%"><font '
+              'color="#B8EE16">2008</font></td><td align="right">'#169' <a '
+              'href="http://wowbash.org.ru" target="_blank"><FONT '
+              'color="#dc1400">W</FONT><FONT '
+              'color="#dc2800">o</FONT><FONT '
+              'color="#dc3c00">W</FONT><FONT '
+              'color="#dc5000">B</FONT><FONT '
+              'color="#dc6400">a</FONT><FONT '
+              'color="#dc7800">s</FONT><FONT '
+              'color="#dc8c00">h</FONT><FONT '
+              'color="#dca000">.</FONT><FONT '
+              'color="#dcb400">O</FONT><FONT '
+              'color="#dcc800">r</FONT><FONT '
+              'color="#dcdc00">g</FONT><FONT '
+              'color="#c8dc00">.</FONT><FONT '
+              'color="#b4dc00">R</FONT><FONT '
+              'color="#a0dc00">u</FONT><BR></a></td></tr>'
+              ''
+              '</table>'
+              '<!--Rating@Mail.ru COUNTEr--><script language="JavaScript" '
+              'type="text/javascript"><!--'
+              'd=document;var a='#39#39';a+='#39';r='#39'+escape(d.referrer)'
+              'js=10//--></script><script language="JavaScript1.1" '
+              'type="text/javascript"><!--'
+              'a+='#39';j='#39'+navigator.javaEnabled()'
+              'js=11//--></script><script language="JavaScript1.2" '
+              'type="text/javascript"><!--'
+              's=screen;a+='#39';s='#39'+s.width+'#39'*'#39'+s.height'
+              'a+='#39';d='#39'+(s.colorDepth?s.colorDepth:s.pixelDepth)'
+              'js=12//--></script><script language="JavaScript1.3" '
+              'type="text/javascript"><!--'
+              'js=13//--></script><script language="JavaScript" '
+              'type="text/javascript"><!--'
+              'd.write('#39'<a href="http://top.mail.ru/jump?from=1377026"'#39'+'
+              #39' target=_top><img src="http://d3.c0.b5.a1.top.list.ru/counter'#39'+'
+              #39'?id=1377026;t=135;js='#39'+js+a+'#39';rand='#39'+Math.random()+'
+              #39'" alt="'#1056#1077#1081#1090#1080#1085#1075'@Mail.ru"'#39'+'#39' border=0 height=40 width=88/><\/a>'#39')'
+              'if(11<js)d.write('#39'<'#39'+'#39'!-- '#39')//--></script><noscript><a'
+              'target=_top href="http://top.mail.ru/jump?from=1377026"><img'
+              
+                'src="http://d3.c0.b5.a1.top.list.ru/counter?js=na;id=1377026;t=1' +
+                '35"'
+              'border=0 height=40 width=88'
+              'alt="'#1056#1077#1081#1090#1080#1085#1075'@Mail.ru"/></a></noscript><script '
+              'language="JavaScript" type="text/javascript"><!--'
+              'if(11<js)d.write('#39'--'#39'+'#39'>'#39')//--></script><!--/COUNTER-->'
+              '</center>'
+              '</body>'
+              '</html>')
+            TabOrder = 0
+          end
+        end
       end
     end
   end
@@ -5257,6 +5742,7 @@ object MainForm: TMainForm
     Top = 424
   end
   object HtmlImporter: TRvHtmlImporter
+    ClearDocument = False
     RichView = BashOrgRuHtmlViewer
     DefaultFontName = 'Times New Roman'
     DefaultCFontName = 'Courier New'

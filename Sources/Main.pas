@@ -61,6 +61,15 @@ type
     edt2: TEdit;
     lbl2: TLabel;
     lbl3: TLabel;
+    ts3: TTabSheet;
+    TestWoWBashMemo: TMemo;
+    WoWBashTabSheet: TTabSheet;
+    WoWBashHtmlViewer: TRichView;
+    WoWBashPageSelectComboBox: TComboBox;
+    WoWBashQuoteNumberLabel: TLabel;
+    QuoteWoWBashNumberLabel: TLabel;
+    QuoteWoWBashRatingLabel: TLabel;
+    WoWBashRefreshButton: TBitBtn;
     procedure wmGetMinMaxInfo(var Msg : TMessage); message wm_GetMinMaxInfo; // Ограничение размеров формы
     procedure FormCreate(Sender: TObject);
     procedure FormShow(Sender: TObject);
@@ -90,6 +99,10 @@ type
     procedure TestModeCheckBoxClick(Sender: TObject);
     procedure edt1Change(Sender: TObject);
     procedure edt2Change(Sender: TObject);
+    procedure WoWBashHtmlViewerMouseWheel(Sender: TObject;
+      Shift: TShiftState; WheelDelta: Integer; MousePos: TPoint;
+      var Handled: Boolean);
+    procedure WoWBashRefreshButtonClick(Sender: TObject);
   private
     { Private declarations }
   public
@@ -118,6 +131,7 @@ type QuoteArray = array [0..50] of array [0..3] of string; // Массив цитат
 
 type PageArray = array [1..13] of array [1..2] of string; // Массив сраниц
 type ITHQuoteArray = array [0..10] of array [0..4] of string; // Массив цитат
+type WoWBashQuoteArray = array [0..50] of array [0..3] of string;
 
 var
   MainForm: TMainForm;
@@ -147,6 +161,15 @@ var
   LastITHMainPageNum: string;
   HttpConnectTimeout: Integer;
   HttpReadTimeout: Integer;
+  CurrentWoWBashMainQuotesArray: WoWBashQuoteArray;
+  CurrentWoWBashOtherQuotesArray: WoWBashQuoteArray;
+  CurrentWoWBashMainQuoteNumber: Integer;
+  CurrentWoWBashOtherQuoteNumber: Integer;
+  CurrentWoWBashPagesArray: PageArray;
+  WoWBashMainNeedLoad: Boolean;
+  WoWBashOtherNeedLoad: Boolean;
+  LastWoWBashMainPageNum: string;
+  LastWoWBashOtherPageNum: string;
 
 implementation
 
@@ -171,6 +194,36 @@ begin
   Writeln(LogFile,Str);
 end;
 
+// Ищем окно для выставления фокуса, чтобы "не терять скроллинг"
+procedure FindFocus;
+begin
+  case MainForm.MainPageControl.ActivePageIndex of
+  0: begin
+     //CurrentHtmlViewer.SetFocus;
+     MainForm.BashOrgRuHtmlViewer.SetFocus;
+     WriteLog('Передача фокуса на Bash.org.ru');
+     end;
+
+  1: MainForm.ITHHtmlViewer.SetFocus;
+  2: MainForm.WoWBashHtmlViewer.SetFocus;
+  end;
+end;
+
+function ClearText(S:string):string;
+begin
+   while not(Pos(Chr(13),S)=0) do
+   begin
+     Delete(S, pos(Chr(13), S), 1);
+     WriteLog('del');
+   end;
+   while not(Pos(Chr(10),S)=0) do
+   begin
+     Delete(S, pos(Chr(10), S), 1);
+     WriteLog('del');
+   end;
+   ClearText:=S;
+end;
+
 // Присваем переменным начальные значения
 procedure SetVariables;
 begin
@@ -193,7 +246,241 @@ begin
   LastITHMainPageNum := 'none';
   HttpConnectTimeout := StrToInt(MainForm.edt1.Text);
   HttpReadTimeout := StrToInt(MainForm.edt2.Text);
+  WoWBashMainNeedLoad := False;
+  WoWBashOtherNeedLoad := False;
+  LastWoWBashMainPageNum := 'none';
+  LastWoWBashOtherPageNum := 'none';
 end;
+
+(*
+ШАБЛОН ДОБАВЛЕНИЯ ЦИТАТНИКА
+%name%
+Main
+Other
+
++ type %name%QuoteArray = array [0..?] of array [0..?] of string;
+
++ var
+  Current%name%MainQuotesArray: %name%QuoteArray;
+  Current%name%OtherQuotesArray: %name%QuoteArray;
+  Current%name%MainQuoteNumber: Integer;
+  Current%name%OtherQuoteNumber: Integer;
+  Current%name%PagesArray: PageArray;
+  %name%MainNeedLoad: Boolean;
+  %name%OtherNeedLoad: Boolean;
+  Last%name%MainPageNum: string;
+  Last%name%OtherPageNum: string;
+
+* TMainForm.TabChangeDelayTimerTimer
+  n: Open%name%Main;
+
+* TMainForm.StartUpTimerTimer
+  %name%MainNeedLoad := True;
+  %name%OtherNeedLoad := True;
+
+* FindFocus
+  n: MainForm.%name%HtmlViewer.SetFocus;
+
+* SetVariables
+  %name%MainNeedLoad := False;
+  %name%OtherNeedLoad := False;
+  Last%name%MainPageNum := 'none';
+  Last%name%OtherPageNum := 'none';
+
+* CurrentHtmlViewer
+  n: begin
+       CurrentHtmlViewer := MainForm.%name%HtmlViewer;
+       WriteLog('Текущий HtmlViewer: %name%HtmlViewer');
+     end;
+
++ procedure Change%name%Pages;
++ function Extract%name%Pages(S:string):PageArray;
++ function Current%name%QuoteNumber: Integer;
++ procedure Change%name%QuoteInformation;
+
++
+function Current%name%QuotesArray: %name%QuoteArray;
+begin
+  WriteLog('Получаем  текущий массив цитат %name%');
+  case MainForm.%name%PageSelectComboBox.ItemIndex of
+    0: Current%name%QuotesArray := Current%name%MainQuotesArray;
+    1: Current%name%QuotesArray := Current%name%OtherQuotesArray;
+  end;
+end;
+
++
+// в помощь, основные конструкции:
+// S := Copy(S, Pos('text',S), Length(S));
+// S := Copy(S, Pos('text',S) + n, Length(S));
+// buf[num,?] := Copy(S, 0,Pos('text',S)-n);
+function %name%QuoteParser(S: string; qtype: integer):%name%QuoteArray;
+var num: Integer;
+    buf: %name%QuoteArray;
+begin
+  if not(S = 'error') then
+  begin
+    WriteLog('%name% Parser on');
+    num:=0;
+    // Обрезаем строку до блока страниц и обрабатываем
+    case qtype of
+      0: Current%name%MainPagesArray := Extract%name%Pages('text');
+    end;
+    while условие окончания  do
+    begin
+       num := num + 1;
+       // Код заполняющий buf
+       // Не забываем удалять все, относящееся к данной цитате
+    end;
+    WriteLog('%name% Parser off');
+    buf[0,0] := IntToStr(num);
+  end
+  else
+  begin
+    buf[0,0] := '1';
+    buf[1,0] := 'Ошибка';
+  end;
+%name%QuoteParser := buf;
+end;
+
++
+function %name%GetMainAsString: string;
+begin
+  WriteLog('Загрузка html главной %name% в строку');
+  %name%GetMainAsString := GetStringFromUrl('http://');
+end;
+
++
+function GetCurrent%name%MainQuotes: %name%QuoteArray;
+begin
+   if TestMode
+   then GetCurrent%name%MainQuotes := %name%QuoteParser(MainForm.Test%name%Memo.Text, 0)
+   else GetCurrent%name%MainQuotes := %name%QuoteParser(%name%GetMainAsString, 0);
+end;
+
++
+function Current%name%QuoteNumber: Integer;
+begin
+  WriteLog('Получаем номер текущей цитаты %name%');
+  case MainForm.%name%PageSelectComboBox.ItemIndex of
+    0: Current%name%QuoteNumber := Current%name%MainQuoteNumber;
+    1: Current%name%QuoteNumber := Current%name%OtherQuoteNumber;
+  end;
+end;
+
++
+procedure Change%name%QuoteInformation;
+var lCaption1: string;
+    lCaption2: string;
+    lCaption3: string;
+begin
+   lCaption1 := IntToStr(Current%name%QuoteNumber) + '/' + Current%name%QuotesArray[0,0];
+   lCaption2 := Current%name%QuotesArray[Current%name%QuoteNumber,1];
+   lCaption3 := Current%name%QuotesArray[Current%name%QuoteNumber,2];
+   MainForm.%name%QuoteNumberLabel.Caption := lCaption1;
+   MainForm.Quote%name%NumberLabel.Caption := '#' + lCaption2;
+   MainForm.Quote%name%RatingLabel.Caption := '[' + lCaption3 + ']';
+end;
+
++
+procedure Open%name%Main;
+begin
+  if %name%MainNeedLoad = True then
+  begin
+    Current%name%MainQuotesArray := GetCurrent%name%MainQuotes;
+    Current%name%QuoteNumber := 1;
+    ChangeHtmlViewerText(MainForm.%name%HtmlViewer, Current%name%QuotesArray[Current%name%QuoteNumber,0]);
+    %name%MainNeedLoad := False;
+  end;
+  Change%name%QuoteInformation;
+  Change%name%Pages;
+end;
+
++
+procedure ChangeCurrent%name%QuoteNumber(delta:Integer);
+begin
+  WriteLog('Меняем номер текущей цитаты %name% на' + IntToStr(delta));
+  case MainForm.%name%PageSelectComboBox.ItemIndex of
+    0: Current%name%MainQuoteNumber := Current%name%MainQuoteNumber + delta;
+    1: Current%name%OtherQuoteNumber := Current%name%OtherQuoteNumber + delta;
+  end;
+end;
+
++
+procedure %name%Next;
+begin
+    if NOT(Current%name%QuoteNumber = StrToInt(Current%name%QuotesArray[0,0])) then
+          begin
+             ChangeCurrent%name%QuoteNumber(+1);
+             ChangeHtmlViewerText(MainForm.%name%HtmlViewer,Current%name%QuotesArray[Current%name%QuoteNumber,0]);
+          end;
+    WriteLog('Переход на след. цитату %name% с CurrentNumber ' + IntToStr(Current%name%QuoteNumber));
+    Change%name%QuoteInformation;
+end;
+
++
+procedure %name%Previous;
+begin
+    if NOT(Current%name%QuoteNumber = 1) then
+          begin
+             ChangeCurrent%name%QuoteNumber(-1);
+             ChangeHtmlViewerText(MainForm.%name%HtmlViewer,Current%name%QuotesArray[Current%name%QuoteNumber,0]);
+          end;
+    WriteLog('Переход на пред. цитату %name% с CurrentNumber ' + IntToStr(Current%name%QuoteNumber));
+    Change%name%QuoteInformation;
+end;
+
++
+procedure %name%ScrollControl(hv: TRichView; WheelDelta: integer);
+begin
+  if ((hv.VScrollPos = hv.VScrollMax) or (hv.VScrollMax < 0)) and (WheelDelta < 0)
+  then %name%Next;
+  if ((hv.VScrollPos = 0) and (WheelDelta > 0))
+  then %name%Previous;
+end;
+
++*
+procedure TMainForm.%name%HtmlViewerMouseWheel(Sender: TObject;
+  Shift: TShiftState; WheelDelta: Integer; MousePos: TPoint;
+  var Handled: Boolean);
+begin
+  %name%ScrollControl(MainForm.%name%HtmlViewer,WheelDelta);
+end;
+
++*
+procedure TMainForm.%name%RefreshButtonClick(Sender: TObject);
+begin
+  FindFocus;
+      case %name%PageSelectComboBox.ItemIndex of
+      0:begin
+           if Last%name%MainPageNum = 'none' then
+           begin
+             Current%name%MainQuotesArray := GetCurrent%name%MainQuotes;
+             Current%name%MainQuoteNumber := 1;
+             ChangeHtmlViewerText(MainForm.%name%HtmlViewer, Current%name%MainQuotesArray[Current%name%MainQuoteNumber,0]);
+           end
+           else
+           begin
+             Open%name%MainPageNum(Last%name%MainPageNum);
+           end;
+        end;
+      1:begin
+           if Last%name%OtherPageNum = 'none' then
+           begin
+             Current%name%OtherQuotesArray := GetCurrent%name%OtherQuotes;
+             Current%name%OtherQuoteNumber := 1;
+             ChangeHtmlViewerText(MainForm.%name%HtmlViewer, Current%name%OtherQuotesArray[Current%name%OtherQuoteNumber,0]);
+           end
+           else
+           begin
+             Open%name%OtherPageNum(Last%name%OtherPageNum);
+           end;
+        end;
+      end;
+  Change%name%QuoteInformation;
+  Change%name%Pages;
+end;
+
+*)
 
 // Получаем текущий HtmlViewer
 function CurrentHtmlViewer:TRichView;
@@ -208,6 +495,10 @@ begin
        CurrentHtmlViewer := MainForm.ITHHtmlViewer;
        WriteLog('Текущий HtmlViewer: ITHHtmlViewer');
      end;
+  2: begin
+       CurrentHtmlViewer := MainForm.WoWBashHtmlViewer;
+       WriteLog('Текущий HtmlViewer: WoWBashHtmlViewer');
+     end;
   end;
 
 end;
@@ -215,9 +506,17 @@ end;
 // Загрузка строки в HtmlViewer
 procedure ChangeHtmlViewerText(HV:TRichView; LoadText:String);
 begin
+  //LoadText := ClearText(LoadText);
   WriteLog('Загружаем текст "'+ LoadText +'" в ' + HV.Name);
+
+  hv.Clear;
   MainForm.HtmlImporter.RichView := HV;
   MainForm.HtmlImporter.LoadHtml(LoadText);
+  HV.Format;
+  MainForm.ScrollDelayTimer.Enabled := True;
+
+
+
   HV.Format;
   MainForm.ScrollDelayTimer.Enabled := True;
   // Меняем шрифт
@@ -257,6 +556,191 @@ begin
 
 end;
 
+//////
+
+function CurrentWoWBashQuotesArray: WoWBashQuoteArray;
+begin
+  WriteLog('Получаем  текущий массив цитат WoWBash');
+  case MainForm.WoWBashPageSelectComboBox.ItemIndex of
+    0: CurrentWoWBashQuotesArray := CurrentWoWBashMainQuotesArray;
+    1: CurrentWoWBashQuotesArray := CurrentWoWBashOtherQuotesArray;
+  end;
+end;
+
+// в помощь, основные конструкции:
+// S := Copy(S, Pos('text',S), Length(S));
+// S := Copy(S, Pos('text',S) + n, Length(S));
+// buf[num,?] := Copy(S, 0,Pos('text',S)-n);
+function WoWBashQuoteParser(S: string; qtype: integer):WoWBashQuoteArray;
+var num: Integer;
+    buf: WoWBashQuoteArray;
+begin
+  if not(S = 'error') then
+  begin
+    WriteLog('WoWBash Parser on');
+    num:=0;
+    // Обрезаем строку до блока страниц и обрабатываем
+    //case qtype of
+    //  0: CurrentWoWBashMainPagesArray := ExtractWoWBashPages('text');
+    //end;
+    S := Copy(S, Pos('<table width=500>',S) + 1, Length(S));
+    S := Copy(S, Pos('<table width=500>',S), Length(S));
+    WriteLog(S);
+
+    while not(Pos('blockquote',S)=0)  do
+    begin
+       num := num + 1;
+       S := Copy(S, Pos('index.php?id=',S) + 13, Length(S));
+       buf[num,1] := Copy(S, 0,Pos('>',S) - 1);
+       WriteLog(buf[num,1]);
+       S := Copy(S, Pos('<blockquote>',S) + 25, Length(S));
+       buf[num,0] := Copy(S, 0,Pos('</blockquote>',S) - 8);
+       S := Copy(S, Pos('</blockquote>',S) + 13, Length(S));
+       WriteLog(buf[num,0]);
+
+       // Код заполняющий buf
+       // Не забываем удалять все, относящееся к данной цитате
+    end;
+    WriteLog('WoWBash Parser off');
+    buf[0,0] := IntToStr(num);
+  end
+  else
+  begin
+    buf[0,0] := '1';
+    buf[1,0] := 'Ошибка';
+  end;
+WoWBashQuoteParser := buf;
+end;
+
+function WoWBashGetMainAsString: string;
+begin
+  WriteLog('Загрузка html главной WoWBash в строку');
+  WoWBashGetMainAsString := GetStringFromUrl('http://wowbash.org.ru/');
+end;
+
+function GetCurrentWoWBashMainQuotes: WoWBashQuoteArray;
+begin
+   if TestMode
+   then GetCurrentWoWBashMainQuotes := WoWBashQuoteParser(MainForm.TestWoWBashMemo.Text, 0)
+   else GetCurrentWoWBashMainQuotes := WoWBashQuoteParser(WoWBashGetMainAsString, 0);
+end;
+
+function CurrentWoWBashQuoteNumber: Integer;
+begin
+  WriteLog('Получаем номер текущей цитаты WoWBash');
+  case MainForm.WoWBashPageSelectComboBox.ItemIndex of
+    0: CurrentWoWBashQuoteNumber := CurrentWoWBashMainQuoteNumber;
+    1: CurrentWoWBashQuoteNumber := CurrentWoWBashOtherQuoteNumber;
+  end;
+end;
+
+procedure ChangeWoWBashQuoteInformation;
+var lCaption1: string;
+    lCaption2: string;
+    lCaption3: string;
+begin
+   lCaption1 := IntToStr(CurrentWoWBashQuoteNumber) + '/' + CurrentWoWBashQuotesArray[0,0];
+   lCaption2 := CurrentWoWBashQuotesArray[CurrentWoWBashQuoteNumber,1];
+   lCaption3 := CurrentWoWBashQuotesArray[CurrentWoWBashQuoteNumber,2];
+   MainForm.WoWBashQuoteNumberLabel.Caption := lCaption1;
+   MainForm.QuoteWoWBashNumberLabel.Caption := '#' + lCaption2;
+   MainForm.QuoteWoWBashRatingLabel.Caption := '[' + lCaption3 + ']';
+end;
+
+procedure OpenWoWBashMain;
+begin
+  if WoWBashMainNeedLoad = True then
+  begin
+    CurrentWoWBashMainQuotesArray := GetCurrentWoWBashMainQuotes;
+    CurrentWoWBashMainQuoteNumber := 1;
+    ChangeHtmlViewerText(MainForm.WoWBashHtmlViewer, CurrentWoWBashQuotesArray[CurrentWoWBashQuoteNumber,0]);
+    WoWBashMainNeedLoad := False;
+  end;
+  ChangeWoWBashQuoteInformation;
+  //ChangeWoWBashPages;
+end;
+
+procedure ChangeCurrentWoWBashQuoteNumber(delta:Integer);
+begin
+  WriteLog('Меняем номер текущей цитаты WoWBash на' + IntToStr(delta));
+  case MainForm.WoWBashPageSelectComboBox.ItemIndex of
+    0: CurrentWoWBashMainQuoteNumber := CurrentWoWBashMainQuoteNumber + delta;
+    1: CurrentWoWBashOtherQuoteNumber := CurrentWoWBashOtherQuoteNumber + delta;
+  end;
+end;
+
+procedure WoWBashNext;
+begin
+    if NOT(CurrentWoWBashQuoteNumber = StrToInt(CurrentWoWBashQuotesArray[0,0])) then
+          begin
+             ChangeCurrentWoWBashQuoteNumber(+1);
+             ChangeHtmlViewerText(MainForm.WoWBashHtmlViewer,CurrentWoWBashQuotesArray[CurrentWoWBashQuoteNumber,0]);
+          end;
+    WriteLog('Переход на след. цитату WoWBash с CurrentNumber ' + IntToStr(CurrentWoWBashQuoteNumber));
+    ChangeWoWBashQuoteInformation;
+end;
+
+procedure WoWBashPrevious;
+begin
+    if NOT(CurrentWoWBashQuoteNumber = 1) then
+          begin
+             ChangeCurrentWoWBashQuoteNumber(-1);
+             ChangeHtmlViewerText(MainForm.WoWBashHtmlViewer,CurrentWoWBashQuotesArray[CurrentWoWBashQuoteNumber,0]);
+          end;
+    WriteLog('Переход на пред. цитату WoWBash с CurrentNumber ' + IntToStr(CurrentWoWBashQuoteNumber));
+    ChangeWoWBashQuoteInformation;
+end;
+
+procedure WoWBashScrollControl(hv: TRichView; WheelDelta: integer);
+begin
+  if ((hv.VScrollPos = hv.VScrollMax) or (hv.VScrollMax < 0)) and (WheelDelta < 0)
+  then WoWBashNext;
+  if ((hv.VScrollPos = 0) and (WheelDelta > 0))
+  then WoWBashPrevious;
+end;
+
+procedure TMainForm.WoWBashHtmlViewerMouseWheel(Sender: TObject;
+  Shift: TShiftState; WheelDelta: Integer; MousePos: TPoint;
+  var Handled: Boolean);
+begin
+  WoWBashScrollControl(WoWBashHtmlViewer,WheelDelta);
+end;
+
+procedure TMainForm.WoWBashRefreshButtonClick(Sender: TObject);
+begin
+  FindFocus;
+      case WoWBashPageSelectComboBox.ItemIndex of
+      0:begin
+           if LastWoWBashMainPageNum = 'none' then
+           begin
+             CurrentWoWBashMainQuotesArray := GetCurrentWoWBashMainQuotes;
+             CurrentWoWBashMainQuoteNumber := 1;
+             ChangeHtmlViewerText(MainForm.WoWBashHtmlViewer, CurrentWoWBashMainQuotesArray[CurrentWoWBashMainQuoteNumber,0]);
+           end
+           else
+           begin
+             //OpenWoWBashMainPageNum(LastWoWBashMainPageNum);
+           end;
+        end;
+      1:begin
+           if LastWoWBashOtherPageNum = 'none' then
+           begin
+             //CurrentWoWBashOtherQuotesArray := GetCurrentWoWBashOtherQuotes;
+             CurrentWoWBashOtherQuoteNumber := 1;
+             ChangeHtmlViewerText(MainForm.WoWBashHtmlViewer, CurrentWoWBashOtherQuotesArray[CurrentWoWBashOtherQuoteNumber,0]);
+           end
+           else
+           begin
+             //OpenWoWBashOtherPageNum(LastWoWBashOtherPageNum);
+           end;
+        end;
+      end;
+  ChangeWoWBashQuoteInformation;
+  //ChangeWoWBashPages;
+end;
+
+///////
+
 // Получаем  текущий массив страниц баша
 function CurrentBashPagesArray:PageArray;
 begin
@@ -276,6 +760,9 @@ begin
    MainForm.PagesRichView.Clear;
    while not(CurrentBashPagesArray[i,1] = '') do
    begin
+       //WriteLog(IntToStr(i));
+       //WriteLog('"'+CurrentBashPagesArray[i,1]+'"');
+       // Проверить повнимательней
        if (CurrentBashPagesArray[i,1] = 'currentpage') or (CurrentBashPagesArray[i,1] = 'dots') then MainForm.PagesRichView.Add(CurrentBashPagesArray[i,2],5)
        else
            begin
@@ -518,24 +1005,10 @@ begin
   WriteLog('Меняем данные цитаты: ' + lCaption1 + ', '+ lCaption2 + ', '+ lCaption3);
 end;
 
-// Ищем окно для выставления фокуса, чтобы "не терять скроллинг"
-procedure FindFocus;
-begin
-  case MainForm.MainPageControl.ActivePageIndex of
-  0: begin
-     CurrentHtmlViewer.SetFocus;
-     WriteLog('Передача фокуса на Bash.org.ru');
-     end;
-
-  1: MainForm.ITHHtmlViewer.SetFocus;
-  end;
-end;
-
 // Переход на новую цитату
 procedure BashNext;
 begin
-  if not(GetRVText(CurrentHtmlViewer) = 'Загрузка...') then
-  begin
+
     if NOT(CurrentBashQuoteNumber = StrToInt(CurrentBashQuotesArray[0,0]))
           then
           begin
@@ -548,15 +1021,14 @@ begin
           end;
           WriteLog('Переход на след. цитату с CurrentNumber ' + IntToStr(CurrentBashQuoteNumber));
           ChangeQuoteInformation;
-  end;
+  
 
 end;
 
 // Переход на предыдущую цитату
 procedure BashPrevious;
 begin
-  if not(GetRVText(CurrentHtmlViewer) = 'Загрузка...') then
-  begin
+
     if NOT(CurrentBashQuoteNumber = 1)
           then
           begin
@@ -566,7 +1038,7 @@ begin
           end;
           WriteLog('Переход на пред. цитату с CurrentNumber ' + IntToStr(CurrentBashQuoteNumber));
           ChangeQuoteInformation;
-  end;
+
 end;
 
 procedure ITHNext;
@@ -824,8 +1296,7 @@ end;
 
 procedure OpenITH;
 begin
-  if not(GetRVText(CurrentHtmlViewer) = 'Загрузка...') then
-  begin
+
   if ITHMainNeedLoad = true then
   begin
     CurrentITHQuotesArray := GetCurrentITHMainQuotes;
@@ -836,21 +1307,19 @@ begin
   end;
   ChangeITHQuoteInformation;
   ChangeITHPages;
-  end;
+
 
 end;
 
 // Открытие Главной
 procedure OpenMain;
 begin
-  if not(GetRVText(CurrentHtmlViewer) = 'Загрузка...') then
-  begin
+
   if MainNeedLoad = true then
   begin
     CurrentMainQuotesArray := GetCurrentMainQuotes;
     MainNeedLoad := False;
     CurrentMainQuoteNumber := 1;
-  end;
   end;
   ChangeHtmlViewerText(CurrentHtmlViewer, CurrentMainQuotesArray[CurrentMainQuoteNumber,0]);
   ChangePages;
@@ -936,7 +1405,7 @@ end;
 // При заходе на вкладку баша передаем фокус на нужный браузер
 procedure TMainForm.BashTabSheetEnter(Sender: TObject);
 begin
-  FindFocus;
+//  FindFocus;
 end;
 
 
@@ -1009,6 +1478,8 @@ begin
   AbyssBestNeedLoad := True;
   AbyssTopNeedLoad := True;
   ITHMainNeedLoad := True;
+  WoWBashMainNeedLoad := True;
+  WoWBashOtherNeedLoad := True;
 end;
 
 // Задержка перед поиском фокуса
@@ -1080,7 +1551,12 @@ end;
 procedure TMainForm.TabChangeDelayTimerTimer(Sender: TObject);
 begin
   TabChangeDelayTimer.Enabled := False;
-  if MainPageControl.ActivePageIndex = 1 then OpenITH;
+  case MainPageControl.ActivePageIndex of
+   //0: OpenMain;
+   1: OpenITH;
+   2: OpenWoWBashMain;
+  end;
+  FindFocus;
 
 end;
 
@@ -1118,7 +1594,7 @@ end;
 
 procedure TMainForm.IThappensTabSheetEnter(Sender: TObject);
 begin
-  FindFocusDelayTimer.Enabled := True;
+//  FindFocusDelayTimer.Enabled := True;
 end;
 
 procedure TMainForm.BashRefreshButtonClick(Sender: TObject);
