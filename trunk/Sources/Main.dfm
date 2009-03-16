@@ -1,9 +1,9 @@
 object MainForm: TMainForm
-  Left = 844
-  Top = 302
+  Left = 634
+  Top = 315
   Width = 366
   Height = 527
-  Caption = 'bClient'
+  Caption = 'bClient Alpha version'
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -23,7 +23,7 @@ object MainForm: TMainForm
     Top = 0
     Width = 358
     Height = 493
-    ActivePage = IThappensTabSheet
+    ActivePage = OptionsTabSheet
     Align = alClient
     Style = tsFlatButtons
     TabOrder = 0
@@ -233,7 +233,7 @@ object MainForm: TMainForm
         Anchors = [akTop, akRight]
         Caption = '&'
         TabOrder = 3
-        OnClick = BashRefreshButtonClick
+        OnClick = ITHRefreshButtonClick
         Kind = bkRetry
       end
     end
@@ -304,8 +304,7 @@ object MainForm: TMainForm
         OnChange = BashPageSelectComboBoxChange
         OnClick = ITHPageSelectComboBoxClick
         Items.Strings = (
-          #1043#1083#1072#1074#1085#1072#1103
-          'Other')
+          #1043#1083#1072#1074#1085#1072#1103)
       end
       object WoWBashRefreshButton: TBitBtn
         Left = 328
@@ -340,22 +339,22 @@ object MainForm: TMainForm
       Caption = #1053#1072#1089#1090#1088#1086#1081#1082#1080
       ImageIndex = 2
       object lbl2: TLabel
-        Left = 168
-        Top = 48
+        Left = 0
+        Top = 32
         Width = 98
         Height = 13
         Caption = 'HttpConnectTimeout'
       end
       object lbl3: TLabel
-        Left = 184
-        Top = 72
+        Left = 0
+        Top = 56
         Width = 84
         Height = 13
         Caption = 'HttpReadTimeout'
       end
       object FontSelectButton: TButton
-        Left = 8
-        Top = 32
+        Left = 0
+        Top = 0
         Width = 89
         Height = 25
         Caption = #1042#1099#1073#1086#1088' '#1096#1088#1080#1092#1090#1072
@@ -363,8 +362,8 @@ object MainForm: TMainForm
         OnClick = FontSelectButtonClick
       end
       object chklst1: TCheckListBox
-        Left = 8
-        Top = 64
+        Left = 200
+        Top = 248
         Width = 105
         Height = 57
         OnClickCheck = chklst1ClickCheck
@@ -375,10 +374,11 @@ object MainForm: TMainForm
           #1058#1086#1087' '#1041#1077#1079#1076#1085#1099
           #1041#1077#1079#1076#1085#1072)
         TabOrder = 1
+        Visible = False
       end
       object TestModeCheckBox: TCheckBox
-        Left = 8
-        Top = 128
+        Left = 0
+        Top = 80
         Width = 97
         Height = 17
         Caption = 'Test Mode'
@@ -386,8 +386,8 @@ object MainForm: TMainForm
         OnClick = TestModeCheckBoxClick
       end
       object edt1: TEdit
-        Left = 272
-        Top = 40
+        Left = 104
+        Top = 24
         Width = 41
         Height = 21
         TabOrder = 3
@@ -395,13 +395,22 @@ object MainForm: TMainForm
         OnChange = edt1Change
       end
       object edt2: TEdit
-        Left = 272
-        Top = 64
+        Left = 104
+        Top = 48
         Width = 41
         Height = 21
         TabOrder = 4
         Text = '15000'
         OnChange = edt2Change
+      end
+      object isLogCheckBox: TCheckBox
+        Left = 0
+        Top = 96
+        Width = 97
+        Height = 17
+        Caption = #1042#1077#1089#1090#1080' '#1083#1086#1075
+        TabOrder = 5
+        OnClick = isLogCheckBoxClick
       end
     end
     object TestTabSheet: TTabSheet
@@ -424,7 +433,7 @@ object MainForm: TMainForm
         Top = 26
         Width = 350
         Height = 436
-        ActivePage = ts3
+        ActivePage = LogTabSheet
         Align = alClient
         TabOrder = 0
         object LogTabSheet: TTabSheet
