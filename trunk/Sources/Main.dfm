@@ -1,9 +1,9 @@
 object MainForm: TMainForm
-  Left = 634
-  Top = 315
+  Left = 363
+  Top = 334
   Width = 366
-  Height = 527
-  Caption = 'bClient Alpha version'
+  Height = 482
+  Caption = 'bClient Alpha'
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -18,31 +18,25 @@ object MainForm: TMainForm
   OnShow = FormShow
   PixelsPerInch = 96
   TextHeight = 13
-  object MainPageControl: TPageControl
+  object MainPageControl: TJvPageControl
     Left = 0
-    Top = 0
+    Top = 23
     Width = 358
-    Height = 493
-    ActivePage = OptionsTabSheet
+    Height = 425
+    ActivePage = BashTabSheet
     Align = alClient
     Style = tsFlatButtons
     TabOrder = 0
     OnChanging = MainPageControlChanging
+    ParentColor = False
+    ReduceMemoryUse = True
+    HideAllTabs = True
+    Color = clHotLight
     object BashTabSheet: TTabSheet
       Caption = 'Bash'
-      OnEnter = BashTabSheetEnter
       DesignSize = (
         350
-        462)
-      object QuoteNumberLabel: TLabel
-        Left = 0
-        Top = 449
-        Width = 29
-        Height = 13
-        Align = alCustom
-        Anchors = [akLeft, akBottom]
-        Caption = '50/50'
-      end
+        394)
       object QuoteBashNumberLabel: TLabel
         Left = 0
         Top = 25
@@ -59,9 +53,41 @@ object MainForm: TMainForm
         ParentShowHint = False
         ShowHint = True
       end
+      object BashRefreshButton: TJvSpeedButton
+        Left = 329
+        Top = 0
+        Width = 21
+        Height = 21
+        Anchors = [akTop, akRight]
+        ParentColor = True
+        Flat = True
+        GrayedInactive = False
+        GrayNewStyle = False
+        HotTrackFont.Charset = DEFAULT_CHARSET
+        HotTrackFont.Color = clWindowText
+        HotTrackFont.Height = -11
+        HotTrackFont.Name = 'MS Sans Serif'
+        HotTrackFont.Style = []
+        OnClick = BashRefreshButtonClick
+      end
+      object BashQuoteDateLabel: TLabel
+        Left = 56
+        Top = 25
+        Width = 3
+        Height = 13
+      end
+      object QuoteNumberLabel: TLabel
+        Left = 0
+        Top = 381
+        Width = 29
+        Height = 13
+        Align = alCustom
+        Anchors = [akLeft, akBottom]
+        Caption = '50/50'
+      end
       object QuoteBashRatingLabel: TLabel
         Left = 320
-        Top = 449
+        Top = 381
         Width = 30
         Height = 13
         Align = alCustom
@@ -71,39 +97,16 @@ object MainForm: TMainForm
         Caption = '[9999]'
         ParentBiDiMode = False
       end
-      object BashQuoteDateLabel: TLabel
-        Left = 55
-        Top = 25
-        Width = 3
-        Height = 13
-      end
-      object PagesRichView: TRichView
-        Left = 32
-        Top = 442
-        Width = 281
-        Height = 20
-        Anchors = [akLeft]
-        TabOrder = 0
-        OnClick = PagesRichViewClick
-        BorderStyle = bsNone
-        BottomMargin = 0
-        DoInPaletteMode = rvpaCreateCopies
-        HScrollVisible = False
-        LeftMargin = 0
-        Style = rvstyl1
-        VScrollVisible = False
-        OnJump = PagesRichViewJump
-      end
       object BashPageSelectComboBox: TComboBox
         Left = 0
         Top = 0
-        Width = 329
+        Width = 328
         Height = 21
         Style = csDropDownList
         Anchors = [akLeft, akTop, akRight]
         ItemHeight = 13
         ItemIndex = 0
-        TabOrder = 1
+        TabOrder = 0
         Text = #1043#1083#1072#1074#1085#1072#1103
         OnChange = BashPageSelectComboBoxChange
         OnClick = BashPageSelectComboBoxClick
@@ -117,23 +120,30 @@ object MainForm: TMainForm
         Left = 0
         Top = 40
         Width = 350
-        Height = 401
+        Height = 333
         Anchors = [akLeft, akTop, akRight, akBottom]
-        TabOrder = 2
+        TabOrder = 1
         OnMouseWheel = BashOrgRuHtmlViewerMouseWheel
         DoInPaletteMode = rvpaCreateCopies
         Style = HtmlViewerStyle
       end
-      object BashRefreshButton: TBitBtn
-        Left = 328
-        Top = 0
-        Width = 21
-        Height = 21
-        Anchors = [akTop, akRight]
-        Caption = '&'
-        TabOrder = 3
-        OnClick = BashRefreshButtonClick
-        Kind = bkRetry
+      object PagesRichView: TRichView
+        Left = 32
+        Top = 375
+        Width = 281
+        Height = 20
+        Anchors = [akLeft, akBottom]
+        Color = clHotLight
+        TabOrder = 2
+        OnClick = PagesRichViewClick
+        BorderStyle = bsNone
+        BottomMargin = 0
+        DoInPaletteMode = rvpaCreateCopies
+        HScrollVisible = False
+        LeftMargin = 0
+        Style = rvstyl1
+        VScrollVisible = False
+        OnJump = PagesRichViewJump
       end
     end
     object IThappensTabSheet: TTabSheet
@@ -142,16 +152,7 @@ object MainForm: TMainForm
       OnEnter = IThappensTabSheetEnter
       DesignSize = (
         350
-        462)
-      object ITHQuoteNumberLabel: TLabel
-        Left = 0
-        Top = 449
-        Width = 29
-        Height = 13
-        Align = alCustom
-        Anchors = [akLeft, akBottom]
-        Caption = '50/50'
-      end
+        394)
       object QuoteITHNumberLabel: TLabel
         Left = 0
         Top = 25
@@ -166,9 +167,18 @@ object MainForm: TMainForm
         Font.Style = [fsUnderline]
         ParentFont = False
       end
+      object ITHQuoteNumberLabel: TLabel
+        Left = 0
+        Top = 381
+        Width = 29
+        Height = 13
+        Align = alCustom
+        Anchors = [akLeft, akBottom]
+        Caption = '50/50'
+      end
       object QuoteITHRatingLabel: TLabel
         Left = 320
-        Top = 449
+        Top = 381
         Width = 30
         Height = 13
         Align = alCustom
@@ -181,33 +191,31 @@ object MainForm: TMainForm
         Width = 3
         Height = 13
       end
-      object ITHPagesRichView: TRichView
-        Left = 32
-        Top = 442
-        Width = 283
-        Height = 20
-        Anchors = [akLeft]
-        TabOrder = 0
-        OnClick = PagesRichViewClick
-        BorderStyle = bsNone
-        BottomMargin = 0
-        DoInPaletteMode = rvpaCreateCopies
-        HScrollVisible = False
-        LeftMargin = 0
-        Style = rvstyl1
-        VScrollVisible = False
-        OnJump = PagesRichViewJump
+      object ITHRefreshButton: TJvSpeedButton
+        Left = 329
+        Top = 0
+        Width = 21
+        Height = 21
+        Anchors = [akTop, akRight]
+        ParentColor = True
+        Flat = True
+        HotTrackFont.Charset = DEFAULT_CHARSET
+        HotTrackFont.Color = clWindowText
+        HotTrackFont.Height = -11
+        HotTrackFont.Name = 'MS Sans Serif'
+        HotTrackFont.Style = []
+        OnClick = ITHRefreshButtonClick
       end
       object ITHPageSelectComboBox: TComboBox
         Left = 0
         Top = 0
-        Width = 329
+        Width = 328
         Height = 21
         Style = csDropDownList
         Anchors = [akLeft, akTop, akRight]
         ItemHeight = 13
         ItemIndex = 0
-        TabOrder = 1
+        TabOrder = 0
         Text = #1043#1083#1072#1074#1085#1072#1103
         OnChange = BashPageSelectComboBoxChange
         OnClick = ITHPageSelectComboBoxClick
@@ -218,34 +226,55 @@ object MainForm: TMainForm
         Left = 0
         Top = 40
         Width = 350
-        Height = 393
+        Height = 325
         Anchors = [akLeft, akTop, akRight, akBottom]
-        TabOrder = 2
+        TabOrder = 1
         OnMouseWheel = ITHHtmlViewerMouseWheel
         DoInPaletteMode = rvpaCreateCopies
         Style = HtmlViewerStyle
       end
-      object ITHRefreshButton: TBitBtn
-        Left = 328
-        Top = 0
-        Width = 21
-        Height = 21
-        Anchors = [akTop, akRight]
-        Caption = '&'
-        TabOrder = 3
-        OnClick = ITHRefreshButtonClick
-        Kind = bkRetry
+      object ITHPagesRichView: TRichView
+        Left = 32
+        Top = 375
+        Width = 283
+        Height = 20
+        Anchors = [akLeft, akBottom]
+        TabOrder = 2
+        OnClick = PagesRichViewClick
+        BorderStyle = bsNone
+        BottomMargin = 0
+        DoInPaletteMode = rvpaCreateCopies
+        HScrollVisible = False
+        LeftMargin = 0
+        Style = rvstyl1
+        VScrollVisible = False
+        OnJump = PagesRichViewJump
       end
     end
     object WoWBashTabSheet: TTabSheet
       Caption = 'WoW Bash'
-      ImageIndex = 5
+      ImageIndex = 2
       DesignSize = (
         350
-        462)
+        394)
+      object WoWBashRefreshButton: TJvSpeedButton
+        Left = 329
+        Top = 0
+        Width = 21
+        Height = 21
+        Anchors = [akTop, akRight]
+        ParentColor = True
+        Flat = True
+        HotTrackFont.Charset = DEFAULT_CHARSET
+        HotTrackFont.Color = clWindowText
+        HotTrackFont.Height = -11
+        HotTrackFont.Name = 'MS Sans Serif'
+        HotTrackFont.Style = []
+        OnClick = WoWBashRefreshButtonClick
+      end
       object WoWBashQuoteNumberLabel: TLabel
         Left = 0
-        Top = 449
+        Top = 381
         Width = 29
         Height = 13
         Align = alCustom
@@ -254,7 +283,7 @@ object MainForm: TMainForm
       end
       object QuoteWoWBashNumberLabel: TLabel
         Left = 32
-        Top = 449
+        Top = 381
         Width = 31
         Height = 13
         Align = alCustom
@@ -269,7 +298,7 @@ object MainForm: TMainForm
       end
       object QuoteWoWBashRatingLabel: TLabel
         Left = 320
-        Top = 449
+        Top = 381
         Width = 30
         Height = 13
         Align = alCustom
@@ -283,7 +312,7 @@ object MainForm: TMainForm
         Left = 0
         Top = 24
         Width = 350
-        Height = 417
+        Height = 349
         Anchors = [akLeft, akTop, akRight, akBottom]
         TabOrder = 0
         OnMouseWheel = WoWBashHtmlViewerMouseWheel
@@ -293,7 +322,7 @@ object MainForm: TMainForm
       object WoWBashPageSelectComboBox: TComboBox
         Left = 0
         Top = 0
-        Width = 329
+        Width = 328
         Height = 21
         Style = csDropDownList
         Anchors = [akLeft, akTop, akRight]
@@ -306,24 +335,13 @@ object MainForm: TMainForm
         Items.Strings = (
           #1043#1083#1072#1074#1085#1072#1103)
       end
-      object WoWBashRefreshButton: TBitBtn
-        Left = 328
-        Top = 0
-        Width = 21
-        Height = 21
-        Anchors = [akTop, akRight]
-        Caption = '&'
-        TabOrder = 2
-        OnClick = WoWBashRefreshButtonClick
-        Kind = bkRetry
-      end
       object WoWBashPagesRichView: TRichView
         Left = 75
-        Top = 442
+        Top = 375
         Width = 240
         Height = 20
-        Anchors = [akLeft]
-        TabOrder = 3
+        Anchors = [akLeft, akBottom]
+        TabOrder = 2
         OnClick = PagesRichViewClick
         BorderStyle = bsNone
         BottomMargin = 0
@@ -337,17 +355,17 @@ object MainForm: TMainForm
     end
     object OptionsTabSheet: TTabSheet
       Caption = #1053#1072#1089#1090#1088#1086#1081#1082#1080
-      ImageIndex = 2
+      ImageIndex = 3
       object lbl2: TLabel
         Left = 0
-        Top = 32
+        Top = 40
         Width = 98
         Height = 13
         Caption = 'HttpConnectTimeout'
       end
       object lbl3: TLabel
         Left = 0
-        Top = 56
+        Top = 64
         Width = 84
         Height = 13
         Caption = 'HttpReadTimeout'
@@ -361,9 +379,73 @@ object MainForm: TMainForm
         TabOrder = 0
         OnClick = FontSelectButtonClick
       end
+      object ColorSelectButton: TButton
+        Left = 96
+        Top = 0
+        Width = 75
+        Height = 25
+        Caption = #1042#1099#1073#1086#1088' '#1092#1086#1085#1072
+        TabOrder = 1
+        OnClick = ColorSelectButtonClick
+      end
+      object edt1: TEdit
+        Left = 104
+        Top = 32
+        Width = 41
+        Height = 21
+        TabOrder = 2
+        Text = '2000'
+        OnChange = edt1Change
+      end
+      object edt2: TEdit
+        Left = 104
+        Top = 56
+        Width = 41
+        Height = 21
+        TabOrder = 3
+        Text = '15000'
+        OnChange = edt2Change
+      end
+      object TestModeCheckBox: TCheckBox
+        Left = 0
+        Top = 88
+        Width = 97
+        Height = 17
+        Caption = 'Test Mode'
+        TabOrder = 4
+        OnClick = TestModeCheckBoxClick
+      end
+      object isLogCheckBox: TCheckBox
+        Left = 0
+        Top = 104
+        Width = 97
+        Height = 17
+        Caption = #1042#1077#1089#1090#1080' '#1083#1086#1075
+        TabOrder = 5
+        OnClick = isLogCheckBoxClick
+      end
+      object Button1: TButton
+        Left = 0
+        Top = 120
+        Width = 107
+        Height = 25
+        Caption = #1054#1089#1074#1086#1073#1086#1076#1080#1090#1100' '#1087#1072#1084#1103#1090#1100
+        TabOrder = 6
+        OnClick = Button1Click
+      end
+      object SaveSettingsButton: TButton
+        Left = 0
+        Top = 152
+        Width = 65
+        Height = 33
+        Caption = #1057#1086#1093#1088#1072#1085#1080#1090#1100' '#1085#1072#1089#1090#1088#1086#1081#1082#1080
+        TabOrder = 7
+        WordWrap = True
+        OnClick = SaveSettingsButtonClick
+      end
       object chklst1: TCheckListBox
-        Left = 200
-        Top = 248
+        Left = 152
+        Top = 160
         Width = 105
         Height = 57
         OnClickCheck = chklst1ClickCheck
@@ -373,44 +455,53 @@ object MainForm: TMainForm
           #1051#1091#1095#1096#1077#1077' '#1041#1077#1079#1076#1085#1099
           #1058#1086#1087' '#1041#1077#1079#1076#1085#1099
           #1041#1077#1079#1076#1085#1072)
-        TabOrder = 1
+        TabOrder = 8
         Visible = False
       end
-      object TestModeCheckBox: TCheckBox
-        Left = 0
-        Top = 80
-        Width = 97
-        Height = 17
-        Caption = 'Test Mode'
-        TabOrder = 2
-        OnClick = TestModeCheckBoxClick
+      object Button2: TButton
+        Left = 232
+        Top = 0
+        Width = 49
+        Height = 25
+        Caption = #1060#1086#1085'2'
+        TabOrder = 9
+        OnClick = Button2Click
       end
-      object edt1: TEdit
-        Left = 104
+      object Button3: TButton
+        Left = 232
         Top = 24
-        Width = 41
-        Height = 21
-        TabOrder = 3
-        Text = '2000'
-        OnChange = edt1Change
+        Width = 57
+        Height = 25
+        Caption = #1064#1088#1080#1092#1090'2'
+        TabOrder = 10
+        OnClick = Button3Click
       end
-      object edt2: TEdit
-        Left = 104
+      object Button4: TButton
+        Left = 232
         Top = 48
-        Width = 41
-        Height = 21
-        TabOrder = 4
-        Text = '15000'
-        OnChange = edt2Change
+        Width = 75
+        Height = 25
+        Caption = #1064#1088#1080#1092#1090'3'
+        TabOrder = 11
+        OnClick = Button4Click
       end
-      object isLogCheckBox: TCheckBox
-        Left = 0
+      object Button5: TButton
+        Left = 232
+        Top = 72
+        Width = 75
+        Height = 25
+        Caption = #1064#1088#1080#1092#1090'4'
+        TabOrder = 12
+        OnClick = Button5Click
+      end
+      object Button6: TButton
+        Left = 232
         Top = 96
-        Width = 97
-        Height = 17
-        Caption = #1042#1077#1089#1090#1080' '#1083#1086#1075
-        TabOrder = 5
-        OnClick = isLogCheckBoxClick
+        Width = 75
+        Height = 25
+        Caption = #1064#1088#1080#1092#1090#8470
+        TabOrder = 13
+        OnClick = Button6Click
       end
     end
     object TestTabSheet: TTabSheet
@@ -432,7 +523,7 @@ object MainForm: TMainForm
         Left = 0
         Top = 26
         Width = 350
-        Height = 436
+        Height = 368
         ActivePage = LogTabSheet
         Align = alClient
         TabOrder = 0
@@ -440,19 +531,19 @@ object MainForm: TMainForm
           Caption = 'Log'
           DesignSize = (
             342
-            408)
+            340)
           object LogListBox: TListBox
             Left = 0
             Top = 0
             Width = 342
-            Height = 382
+            Height = 314
             Anchors = [akLeft, akTop, akRight, akBottom]
             ItemHeight = 13
             TabOrder = 0
           end
           object ConsoleInputEdit: TEdit
             Left = 0
-            Top = 385
+            Top = 317
             Width = 342
             Height = 21
             Anchors = [akLeft, akRight, akBottom]
@@ -466,7 +557,7 @@ object MainForm: TMainForm
             Left = 0
             Top = 0
             Width = 342
-            Height = 408
+            Height = 340
             Align = alClient
             Lines.Strings = (
               '<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 '
@@ -1874,7 +1965,7 @@ object MainForm: TMainForm
             Left = 0
             Top = 0
             Width = 342
-            Height = 408
+            Height = 340
             Align = alClient
             Lines.Strings = (
               '<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 '
@@ -2864,7 +2955,7 @@ object MainForm: TMainForm
             Left = 0
             Top = 0
             Width = 342
-            Height = 408
+            Height = 340
             Align = alClient
             Lines.Strings = (
               '<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 '
@@ -3458,7 +3549,7 @@ object MainForm: TMainForm
             Left = 0
             Top = 0
             Width = 342
-            Height = 408
+            Height = 340
             Align = alClient
             Lines.Strings = (
               '<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 '
@@ -4278,7 +4369,7 @@ object MainForm: TMainForm
             Left = 0
             Top = 0
             Width = 342
-            Height = 408
+            Height = 340
             Align = alClient
             Lines.Strings = (
               '<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 '
@@ -5169,7 +5260,7 @@ object MainForm: TMainForm
             Left = 0
             Top = 0
             Width = 342
-            Height = 408
+            Height = 340
             Align = alClient
             Lines.Strings = (
               '<html>'
@@ -5575,6 +5666,31 @@ object MainForm: TMainForm
       end
     end
   end
+  object JvTabBar1: TJvTabBar
+    Left = 0
+    Top = 0
+    Width = 358
+    CloseButton = False
+    Painter = TabBarPainter
+    Tabs = <
+      item
+        Caption = 'Bash'
+        Selected = True
+      end
+      item
+        Caption = 'IT happens'
+      end
+      item
+        Caption = 'WoW Bash'
+      end
+      item
+        Caption = #1053#1072#1089#1090#1088#1086#1081#1082#1080
+      end
+      item
+        Caption = 'TestTab'
+      end>
+    OnTabSelected = JvTabBar1TabSelected
+  end
   object AntiFreeze: TIdAntiFreeze
     IdleTimeOut = 64
     OnlyWhenIdle = False
@@ -5776,16 +5892,15 @@ object MainForm: TMainForm
       8000808080008080800080808000808080008080800080808000808080008080
       8000}
     StyleTemplates = <>
-    Left = 248
-    Top = 424
+    Left = 84
+    Top = 398
   end
   object HtmlImporter: TRvHtmlImporter
     ClearDocument = False
-    RichView = BashOrgRuHtmlViewer
     DefaultFontName = 'Times New Roman'
     DefaultCFontName = 'Courier New'
-    Left = 216
-    Top = 424
+    Left = 288
+    Top = 355
   end
   object ScrollDelayTimer: TTimer
     Enabled = False
@@ -5800,8 +5915,8 @@ object MainForm: TMainForm
     Font.Height = -11
     Font.Name = 'MS Sans Serif'
     Font.Style = []
-    Left = 184
-    Top = 424
+    Left = 84
+    Top = 355
   end
   object rvstyl1: TRVStyle
     TextStyles = <
@@ -5989,14 +6104,99 @@ object MainForm: TMainForm
       8000808080008080800080808000808080008080800080808000808080008080
       8000}
     StyleTemplates = <>
-    Left = 280
-    Top = 424
+    Left = 16
+    Top = 398
   end
   object TabChangeDelayTimer: TTimer
     Enabled = False
-    Interval = 10
+    Interval = 1
     OnTimer = TabChangeDelayTimerTimer
-    Left = 312
-    Top = 424
+    Left = 152
+    Top = 398
+  end
+  object ColorDialog1: TColorDialog
+    Color = clWhite
+    Left = 84
+    Top = 312
+  end
+  object IdHTTP1: TIdHTTP
+    MaxLineAction = maException
+    OnWork = IdHTTP1Work
+    AllowCookies = True
+    ProxyParams.BasicAuthentication = False
+    ProxyParams.ProxyPort = 0
+    Request.ContentLength = -1
+    Request.ContentRangeEnd = 0
+    Request.ContentRangeStart = 0
+    Request.Accept = 'text/html, */*'
+    Request.BasicAuthentication = False
+    Request.UserAgent = 'Mozilla/3.0 (compatible; Indy Library)'
+    HTTPOptions = [hoForceEncodeParams]
+    Left = 152
+    Top = 355
+  end
+  object TabBarPainter: TJvModernTabBarPainter
+    TabColor = clSkyBlue
+    Color = clHotLight
+    ControlDivideColor = clWhite
+    DividerColor = clWhite
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clWindowText
+    Font.Height = -11
+    Font.Name = 'MS Sans Serif'
+    Font.Style = []
+    DisabledFont.Charset = DEFAULT_CHARSET
+    DisabledFont.Color = clGrayText
+    DisabledFont.Height = -11
+    DisabledFont.Name = 'MS Sans Serif'
+    DisabledFont.Style = []
+    SelectedFont.Charset = DEFAULT_CHARSET
+    SelectedFont.Color = clWindowText
+    SelectedFont.Height = -11
+    SelectedFont.Name = 'MS Sans Serif'
+    SelectedFont.Style = []
+    Left = 220
+    Top = 355
+  end
+  object ColorDialog2: TColorDialog
+    Color = clHotLight
+    Left = 16
+    Top = 312
+  end
+  object FontDialog2: TFontDialog
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clWhite
+    Font.Height = -11
+    Font.Name = 'MS Sans Serif'
+    Font.Style = [fsBold]
+    Left = 288
+    Top = 312
+  end
+  object FontDialog4: TFontDialog
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clWhite
+    Font.Height = -11
+    Font.Name = 'MS Sans Serif'
+    Font.Style = [fsBold]
+    Left = 152
+    Top = 312
+  end
+  object FontDialog3: TFontDialog
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clWhite
+    Font.Height = -11
+    Font.Name = 'MS Sans Serif'
+    Font.Style = [fsBold]
+    Left = 220
+    Top = 312
+  end
+  object FontDialog5: TFontDialog
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clWhite
+    Font.Height = -11
+    Font.Name = 'MS Sans Serif'
+    Font.Style = [fsBold]
+    Left = 16
+    Top = 355
   end
 end
