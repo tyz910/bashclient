@@ -8,7 +8,8 @@ uses
   IdBaseComponent, IdAntiFreezeBase, IdHTTP, IdAntiFreeze, StdCtrls, Controls,
   CheckLst, RVScroll, RichView, ComCtrls, Classes, Buttons, Types, inifiles,
   IdComponent, IdTCPConnection, IdTCPClient, JvExControls, JvSpeedButton,
-  JvExComCtrls, JvComCtrls, JvComponentBase, JvTabBar;
+  JvExComCtrls, JvComCtrls, JvComponentBase, JvTabBar, JvTrayIcon,
+  JvGradientCaption, JvgCaption, JvCaptionButton;
 
 type
   TMainForm = class(TForm)
@@ -92,6 +93,18 @@ type
     FontDialog3: TFontDialog;
     Button6: TButton;
     FontDialog5: TFontDialog;
+    JvTrayIcon1: TJvTrayIcon;
+    FontDialog7: TFontDialog;
+    FontDialog6: TFontDialog;
+    Button7: TButton;
+    Button8: TButton;
+    ColorDialog3: TColorDialog;
+    Button9: TButton;
+    ColorSchemeNameEdit: TEdit;
+    Button10: TButton;
+    ColorSchemeSelectComboBox: TComboBox;
+    Button11: TButton;
+    JvCaptionButton1: TJvCaptionButton;
     procedure wmGetMinMaxInfo(var Msg : TMessage); message wm_GetMinMaxInfo; // Ограничение размеров формы
     procedure FormCreate(Sender: TObject);
     procedure FormShow(Sender: TObject);
@@ -138,6 +151,12 @@ type
     procedure Button4Click(Sender: TObject);
     procedure Button5Click(Sender: TObject);
     procedure Button6Click(Sender: TObject);
+    procedure Button7Click(Sender: TObject);
+    procedure Button8Click(Sender: TObject);
+    procedure Button9Click(Sender: TObject);
+    procedure Button10Click(Sender: TObject);
+    procedure Button11Click(Sender: TObject);
+    procedure JvCaptionButton1Click(Sender: TObject);
 
   private
     { Private declarations }
@@ -168,6 +187,8 @@ type QuoteArray = array [0..50] of array [0..3] of string; // Массив цитат
 type PageArray = array [1..13] of array [1..2] of string; // Массив сраниц
 type ITHQuoteArray = array [0..10] of array [0..4] of string; // Массив цитат
 type WoWBashQuoteArray = array [0..50] of array [0..3] of string;
+
+const deltah = 8;
 
 var
   MainForm: TMainForm;
@@ -215,8 +236,11 @@ var
   LastWoWBashOtherPageNum: string;
 
   SettingsIni: TIniFile;
+  SchemeIni: TIniFile;
   TrafficCount: Integer;
   PrevWorkCount: Integer; // ой не нравится мне это...
+
+  ColorSchemesList: TStrings;
 
 implementation
 
@@ -570,119 +594,160 @@ begin
    ClearText:=S;
 end;
 
+procedure SaveFont(Ini: TIniFile;FD: TFontDialog; S1,S2:string);
+begin
+  with Ini do
+  begin
+    WriteString(S1,S2 + 'FontName',FD.Font.Name);
+    WriteInteger(S1,S2 + 'FontSize',FD.Font.Size);
+    WriteInteger(S1,S2 + 'FontColor',FD.Font.Color);
+    WriteInteger(S1,S2 + 'FontCharset',FD.Font.Charset);
+    WriteBool(S1,S2 + 'FontBold',(fsBold in FD.Font.Style));
+    WriteBool(S1,S2 + 'FontItalic',(fsItalic in FD.Font.Style));
+    WriteBool(S1,S2 + 'FontUnderline',(fsUnderline in FD.Font.Style));
+    WriteBool(S1,S2 + 'FontStrikeOut',(fsStrikeOut in FD.Font.Style));
+  end;
+end;
+
 procedure SaveSettingsToIni;
 begin
   SettingsIni := TIniFile.Create(ChangeFileExt(Application.ExeName,'.ini'));
-  with SettingsIni do
+  SettingsIni.WriteString('Common','ColorScheme',MainForm.ColorSchemeSelectComboBox.Text);
+  SettingsIni.Free;
+end;
+
+procedure SaveColorScheme(Name:string);
+begin
+  SchemeIni := TIniFile.Create(ChangeFileExt('Data/colorschemes/'+Name,'.ini'));
+  with MainForm do
   begin
-    WriteString('Fonts','MainFontName',MainForm.FontSelectDialog.Font.Name);
-    WriteInteger('Fonts','MainFontSize',MainForm.FontSelectDialog.Font.Size);
-    WriteInteger('Fonts','MainFontColor',MainForm.FontSelectDialog.Font.Color);
-    WriteInteger('Fonts','MainFontCharset',MainForm.FontSelectDialog.Font.Charset);
-    WriteBool('Fonts','MainFontBold',(fsBold in MainForm.FontSelectDialog.Font.Style));
-    WriteBool('Fonts','MainFontItalic',(fsItalic in MainForm.FontSelectDialog.Font.Style));
-    WriteBool('Fonts','MainFontUnderline',(fsUnderline in MainForm.FontSelectDialog.Font.Style));
-    WriteBool('Fonts','MainFontStrikeOut',(fsStrikeOut in MainForm.FontSelectDialog.Font.Style));
-
-    WriteString('Fonts','InfoLabelFontName',MainForm.FontDialog2.Font.Name);
-    WriteInteger('Fonts','InfoLabelFontSize',MainForm.FontDialog2.Font.Size);
-    WriteInteger('Fonts','InfoLabelFontColor',MainForm.FontDialog2.Font.Color);
-    WriteInteger('Fonts','InfoLabelFontCharset',MainForm.FontDialog2.Font.Charset);
-    WriteBool('Fonts','InfoLabelFontBold',(fsBold in MainForm.FontDialog2.Font.Style));
-    WriteBool('Fonts','InfoLabelFontItalic',(fsItalic in MainForm.FontDialog2.Font.Style));
-    WriteBool('Fonts','InfoLabelFontUnderline',(fsUnderline in MainForm.FontDialog2.Font.Style));
-    WriteBool('Fonts','InfoLabelFontStrikeOut',(fsStrikeOut in MainForm.FontDialog2.Font.Style));
-
-    WriteString('Fonts','PagesLincFontName',MainForm.FontDialog3.Font.Name);
-    WriteInteger('Fonts','PagesLincFontSize',MainForm.FontDialog3.Font.Size);
-    WriteInteger('Fonts','PagesLincFontColor',MainForm.FontDialog3.Font.Color);
-    WriteInteger('Fonts','PagesLincFontCharset',MainForm.FontDialog3.Font.Charset);
-    WriteBool('Fonts','PagesLincFontBold',(fsBold in MainForm.FontDialog3.Font.Style));
-    WriteBool('Fonts','PagesLincFontItalic',(fsItalic in MainForm.FontDialog3.Font.Style));
-    WriteBool('Fonts','PagesLincFontUnderline',(fsUnderline in MainForm.FontDialog3.Font.Style));
-    WriteBool('Fonts','PagesLincFontStrikeOut',(fsStrikeOut in MainForm.FontDialog3.Font.Style));
-
-    WriteString('Fonts','PagesCurFontName',MainForm.FontDialog4.Font.Name);
-    WriteInteger('Fonts','PagesCurFontSize',MainForm.FontDialog4.Font.Size);
-    WriteInteger('Fonts','PagesCurFontColor',MainForm.FontDialog4.Font.Color);
-    WriteInteger('Fonts','PagesCurFontCharset',MainForm.FontDialog4.Font.Charset);
-    WriteBool('Fonts','PagesCurFontBold',(fsBold in MainForm.FontDialog4.Font.Style));
-    WriteBool('Fonts','PagesCurFontItalic',(fsItalic in MainForm.FontDialog4.Font.Style));
-    WriteBool('Fonts','PagesCurFontUnderline',(fsUnderline in MainForm.FontDialog4.Font.Style));
-    WriteBool('Fonts','PagesCurFontStrikeOut',(fsStrikeOut in MainForm.FontDialog4.Font.Style));
-
-    WriteString('Fonts','NumberLabelFontName',MainForm.FontDialog5.Font.Name);
-    WriteInteger('Fonts','NumberLabelFontSize',MainForm.FontDialog5.Font.Size);
-    WriteInteger('Fonts','NumberLabelFontColor',MainForm.FontDialog5.Font.Color);
-    WriteInteger('Fonts','NumberLabelFontCharset',MainForm.FontDialog5.Font.Charset);
-    WriteBool('Fonts','NumberLabelFontBold',(fsBold in MainForm.FontDialog5.Font.Style));
-    WriteBool('Fonts','NumberLabelFontItalic',(fsItalic in MainForm.FontDialog5.Font.Style));
-    WriteBool('Fonts','NumberLabelFontUnderline',(fsUnderline in MainForm.FontDialog5.Font.Style));
-    WriteBool('Fonts','NumberLabelFontStrikeOut',(fsStrikeOut in MainForm.FontDialog5.Font.Style));
-
+    SaveFont(SchemeIni,FontSelectDialog,'Fonts','Main');
+    SaveFont(SchemeIni,FontDialog2,'Fonts','InfoLabel');
+    SaveFont(SchemeIni,FontDialog3,'Fonts','PagesLinc');
+    SaveFont(SchemeIni,FontDialog4,'Fonts','PagesCur');
+    SaveFont(SchemeIni,FontDialog5,'Fonts','NumberLabel');
+    SaveFont(SchemeIni,FontDialog6,'Fonts','Select');
+    SaveFont(SchemeIni,FontDialog7,'Fonts','Tab');
+  end;
+  with SchemeIni do
+  begin
     WriteInteger('Colors','MainBGColor',MainForm.ColorDialog1.Color);
     WriteInteger('Colors','Color2',MainForm.ColorDialog2.Color);
+    WriteInteger('Colors','ColorTabSeparate',MainForm.ColorDialog3.Color);
   end;
-  SettingsIni.Free;
+  SchemeIni.Free;
+end;
+
+procedure LoadFont(Ini: TIniFile;FD: TFontDialog; S1,S2:string);
+begin
+  FD.Font.Name := Ini.ReadString(S1,S2 + 'FontName',FD.Font.Name);
+  FD.Font.Size := Ini.ReadInteger(S1,S2 + 'FontSize',FD.Font.Size);
+  FD.Font.Color := Ini.ReadInteger(S1,S2 + 'FontColor',FD.Font.Color);
+  FD.Font.Charset := Ini.ReadInteger(S1,S2 + 'FontCharset',FD.Font.Charset);
+  FD.Font.Style := [];
+  if Ini.ReadBool(S1,S2 + 'FontBold',(fsBold in FD.Font.Style)) then FD.Font.Style := FD.Font.Style + [fsBold];
+  if Ini.ReadBool(S1,S2 + 'FontItalic',(fsItalic in FD.Font.Style)) then FD.Font.Style := FD.Font.Style + [fsItalic];
+  if Ini.ReadBool(S1,S2 + 'FontUnderline',(fsUnderline in FD.Font.Style)) then FD.Font.Style := FD.Font.Style + [fsUnderline];
+  if Ini.ReadBool(S1,S2 + 'FontStrikeOut',(fsStrikeOut in FD.Font.Style)) then FD.Font.Style := FD.Font.Style + [fsStrikeOut];
+end;
+
+procedure LoadColorScheme(Name:string);
+begin
+  SchemeIni := TIniFile.Create(ChangeFileExt('Data/colorschemes/'+Name,'.ini'));
+  with MainForm do
+  begin
+    LoadFont(SchemeIni,FontSelectDialog,'Fonts','Main');
+    LoadFont(SchemeIni,FontDialog2,'Fonts','InfoLabel');
+    LoadFont(SchemeIni,FontDialog3,'Fonts','PagesLinc');
+    LoadFont(SchemeIni,FontDialog4,'Fonts','PagesCur');
+    LoadFont(SchemeIni,FontDialog5,'Fonts','NumberLabel');
+    LoadFont(SchemeIni,FontDialog6,'Fonts','Select');
+    LoadFont(SchemeIni,FontDialog7,'Fonts','Tab');
+  end;
+  MainForm.ColorDialog1.Color := SchemeIni.ReadInteger('Colors','MainBGColor',MainForm.ColorDialog1.Color);
+  MainForm.ColorDialog2.Color := SchemeIni.ReadInteger('Colors','Color2',MainForm.ColorDialog2.Color);
+  MainForm.ColorDialog3.Color := SchemeIni.ReadInteger('Colors','ColorTabSeparate',MainForm.ColorDialog3.Color);
+  SchemeIni.Free;
+end;
+
+function NumberOfCS(Name:string;List:TStrings):Integer;
+var i:Integer;
+begin
+  NumberOfCS := -1;
+  for i:= 0 to List.Count do
+  begin
+  if Name = List[i] then NumberOfCS:=i;
+  end;
 end;
 
 procedure LoadSettingsFromIni;
 begin
   SettingsIni := TIniFile.Create(ChangeFileExt(Application.ExeName,'.ini'));
 
-  MainForm.FontSelectDialog.Font.Name := SettingsIni.ReadString('Fonts','MainFontName',MainForm.FontSelectDialog.Font.Name);
-  MainForm.FontSelectDialog.Font.Size := SettingsIni.ReadInteger('Fonts','MainFontSize',MainForm.FontSelectDialog.Font.Size);
-  MainForm.FontSelectDialog.Font.Color := SettingsIni.ReadInteger('Fonts','MainFontColor',MainForm.FontSelectDialog.Font.Color);
-  MainForm.FontSelectDialog.Font.Charset := SettingsIni.ReadInteger('Fonts','MainFontCharset',MainForm.FontSelectDialog.Font.Charset);
-  MainForm.FontSelectDialog.Font.Style := [];
-  if SettingsIni.ReadBool('Fonts','MainFontBold',(fsBold in MainForm.FontSelectDialog.Font.Style)) then MainForm.FontSelectDialog.Font.Style := MainForm.FontSelectDialog.Font.Style + [fsBold];
-  if SettingsIni.ReadBool('Fonts','MainFontItalic',(fsItalic in MainForm.FontSelectDialog.Font.Style)) then MainForm.FontSelectDialog.Font.Style := MainForm.FontSelectDialog.Font.Style + [fsItalic];
-  if SettingsIni.ReadBool('Fonts','MainFontUnderline',(fsUnderline in MainForm.FontSelectDialog.Font.Style)) then MainForm.FontSelectDialog.Font.Style := MainForm.FontSelectDialog.Font.Style + [fsUnderline];
-  if SettingsIni.ReadBool('Fonts','MainFontStrikeOut',(fsStrikeOut in MainForm.FontSelectDialog.Font.Style)) then MainForm.FontSelectDialog.Font.Style := MainForm.FontSelectDialog.Font.Style + [fsStrikeOut];
-
-  MainForm.FontDialog2.Font.Name := SettingsIni.ReadString('Fonts','InfoLabelFontName',MainForm.FontDialog2.Font.Name);
-  MainForm.FontDialog2.Font.Size := SettingsIni.ReadInteger('Fonts','InfoLabelFontSize',MainForm.FontDialog2.Font.Size);
-  MainForm.FontDialog2.Font.Color := SettingsIni.ReadInteger('Fonts','InfoLabelFontColor',MainForm.FontDialog2.Font.Color);
-  MainForm.FontDialog2.Font.Charset := SettingsIni.ReadInteger('Fonts','InfoLabelFontCharset',MainForm.FontDialog2.Font.Charset);
-  MainForm.FontDialog2.Font.Style := [];
-  if SettingsIni.ReadBool('Fonts','InfoLabelFontBold',(fsBold in MainForm.FontDialog2.Font.Style)) then MainForm.FontDialog2.Font.Style := MainForm.FontDialog2.Font.Style + [fsBold];
-  if SettingsIni.ReadBool('Fonts','InfoLabelFontItalic',(fsItalic in MainForm.FontDialog2.Font.Style)) then MainForm.FontDialog2.Font.Style := MainForm.FontDialog2.Font.Style + [fsItalic];
-  if SettingsIni.ReadBool('Fonts','InfoLabelFontUnderline',(fsUnderline in MainForm.FontDialog2.Font.Style)) then MainForm.FontDialog2.Font.Style := MainForm.FontDialog2.Font.Style + [fsUnderline];
-  if SettingsIni.ReadBool('Fonts','InfoLabelFontStrikeOut',(fsStrikeOut in MainForm.FontDialog2.Font.Style)) then MainForm.FontDialog2.Font.Style := MainForm.FontDialog2.Font.Style + [fsStrikeOut];
-
-  MainForm.FontDialog3.Font.Name := SettingsIni.ReadString('Fonts','PagesLincFontName',MainForm.FontDialog3.Font.Name);
-  MainForm.FontDialog3.Font.Size := SettingsIni.ReadInteger('Fonts','PagesLincFontSize',MainForm.FontDialog3.Font.Size);
-  MainForm.FontDialog3.Font.Color := SettingsIni.ReadInteger('Fonts','PagesLincFontColor',MainForm.FontDialog3.Font.Color);
-  MainForm.FontDialog3.Font.Charset := SettingsIni.ReadInteger('Fonts','PagesLincFontCharset',MainForm.FontDialog3.Font.Charset);
-  MainForm.FontDialog3.Font.Style := [];
-  if SettingsIni.ReadBool('Fonts','PagesLincFontBold',(fsBold in MainForm.FontDialog3.Font.Style)) then MainForm.FontDialog3.Font.Style := MainForm.FontDialog3.Font.Style + [fsBold];
-  if SettingsIni.ReadBool('Fonts','PagesLincFontItalic',(fsItalic in MainForm.FontDialog3.Font.Style)) then MainForm.FontDialog3.Font.Style := MainForm.FontDialog3.Font.Style + [fsItalic];
-  if SettingsIni.ReadBool('Fonts','PagesLincFontUnderline',(fsUnderline in MainForm.FontDialog3.Font.Style)) then MainForm.FontDialog3.Font.Style := MainForm.FontDialog3.Font.Style + [fsUnderline];
-  if SettingsIni.ReadBool('Fonts','PagesLincFontStrikeOut',(fsStrikeOut in MainForm.FontDialog3.Font.Style)) then MainForm.FontDialog3.Font.Style := MainForm.FontDialog3.Font.Style + [fsStrikeOut];
-
-  MainForm.FontDialog4.Font.Name := SettingsIni.ReadString('Fonts','PagesCurFontName',MainForm.FontDialog4.Font.Name);
-  MainForm.FontDialog4.Font.Size := SettingsIni.ReadInteger('Fonts','PagesCurFontSize',MainForm.FontDialog4.Font.Size);
-  MainForm.FontDialog4.Font.Color := SettingsIni.ReadInteger('Fonts','PagesCurFontColor',MainForm.FontDialog4.Font.Color);
-  MainForm.FontDialog4.Font.Charset := SettingsIni.ReadInteger('Fonts','PagesCurFontCharset',MainForm.FontDialog4.Font.Charset);
-  MainForm.FontDialog4.Font.Style := [];
-  if SettingsIni.ReadBool('Fonts','PagesCurFontBold',(fsBold in MainForm.FontDialog4.Font.Style)) then MainForm.FontDialog4.Font.Style := MainForm.FontDialog4.Font.Style + [fsBold];
-  if SettingsIni.ReadBool('Fonts','PagesCurFontItalic',(fsItalic in MainForm.FontDialog4.Font.Style)) then MainForm.FontDialog4.Font.Style := MainForm.FontDialog4.Font.Style + [fsItalic];
-  if SettingsIni.ReadBool('Fonts','PagesCurFontUnderline',(fsUnderline in MainForm.FontDialog4.Font.Style)) then MainForm.FontDialog4.Font.Style := MainForm.FontDialog4.Font.Style + [fsUnderline];
-  if SettingsIni.ReadBool('Fonts','PagesCurFontStrikeOut',(fsStrikeOut in MainForm.FontDialog4.Font.Style)) then MainForm.FontDialog4.Font.Style := MainForm.FontDialog4.Font.Style + [fsStrikeOut];
-
-  MainForm.FontDialog5.Font.Name := SettingsIni.ReadString('Fonts','NumberLabelFontName',MainForm.FontDialog5.Font.Name);
-  MainForm.FontDialog5.Font.Size := SettingsIni.ReadInteger('Fonts','NumberLabelFontSize',MainForm.FontDialog5.Font.Size);
-  MainForm.FontDialog5.Font.Color := SettingsIni.ReadInteger('Fonts','NumberLabelFontColor',MainForm.FontDialog5.Font.Color);
-  MainForm.FontDialog5.Font.Charset := SettingsIni.ReadInteger('Fonts','NumberLabelFontCharset',MainForm.FontDialog5.Font.Charset);
-  MainForm.FontDialog5.Font.Style := [];
-  if SettingsIni.ReadBool('Fonts','NumberLabelFontBold',(fsBold in MainForm.FontDialog5.Font.Style)) then MainForm.FontDialog5.Font.Style := MainForm.FontDialog5.Font.Style + [fsBold];
-  if SettingsIni.ReadBool('Fonts','NumberLabelFontItalic',(fsItalic in MainForm.FontDialog5.Font.Style)) then MainForm.FontDialog5.Font.Style := MainForm.FontDialog5.Font.Style + [fsItalic];
-  if SettingsIni.ReadBool('Fonts','NumberLabelFontUnderline',(fsUnderline in MainForm.FontDialog5.Font.Style)) then MainForm.FontDialog5.Font.Style := MainForm.FontDialog5.Font.Style + [fsUnderline];
-  if SettingsIni.ReadBool('Fonts','NumberLabelFontStrikeOut',(fsStrikeOut in MainForm.FontDialog5.Font.Style)) then MainForm.FontDialog5.Font.Style := MainForm.FontDialog5.Font.Style + [fsStrikeOut];
-
-  MainForm.ColorDialog1.Color := SettingsIni.ReadInteger('Colors','MainBGColor',MainForm.ColorDialog1.Color);
-  MainForm.ColorDialog2.Color := SettingsIni.ReadInteger('Colors','Color2',MainForm.ColorDialog2.Color);
+  LoadColorScheme(SettingsIni.ReadString('Common','ColorScheme','Default'));
+  MainForm.ColorSchemeSelectComboBox.ItemIndex := NumberOfCS(SettingsIni.ReadString('Common','ColorScheme','Default'),MainForm.ColorSchemeSelectComboBox.Items);
   SettingsIni.Free;
+end;
+
+procedure ScanDir(StartDir: string; Mask: string; List: TStrings);
+var
+SearchRec: TSearchRec;
+Name:string;
+begin
+StartDir := StartDir + '\';
+If FindFirst(StartDir + Mask, faAnyFile, SearchRec)=0 then
+repeat
+Name := Copy(SearchRec.Name,0,Pos('.ini',SearchRec.Name)-1);
+List.Add(Name);
+until FindNext(SearchRec) <> 0;
+FindClose(SearchRec);
+end;
+
+
+
+procedure ApplyColorScheme;
+begin
+  MainForm.HtmlImporter.DefaultBGColor := MainForm.ColorDialog1.Color;
+  MainForm.BashPageSelectComboBox.Color := MainForm.ColorDialog1.Color;
+  MainForm.ITHPageSelectComboBox.Color := MainForm.ColorDialog1.Color;
+  MainForm.WoWBashPageSelectComboBox.Color := MainForm.ColorDialog1.Color;
+  MainForm.TabBarPainter.TabColor := MainForm.ColorDialog1.Color;
+  MainForm.BashRefreshButton.Glyph.LoadFromFile('Data/img/Refresh.bmp');
+  MainForm.ITHRefreshButton.Glyph.LoadFromFile('Data/img/Refresh.bmp');
+  MainForm.WoWBashRefreshButton.Glyph.LoadFromFile('Data/img/Refresh.bmp');
+  MainForm.MainPageControl.Color := MainForm.ColorDialog2.Color;
+  MainForm.PagesRichView.Color := MainForm.MainPageControl.Color;
+  MainForm.ITHPagesRichView.Color := MainForm.MainPageControl.Color;
+  MainForm.WoWBashPagesRichView.Color := MainForm.MainPageControl.Color;
+  MainForm.TabBarPainter.Color := MainForm.MainPageControl.Color;
+  MainForm.TabBarPainter.ControlDivideColor := MainForm.ColorDialog3.Color;
+  MainForm.TabBarPainter.DividerColor := MainForm.ColorDialog3.Color;
+  with MainForm do
+  begin
+     QuoteNumberLabel.Font := FontDialog2.Font;
+     QuoteBashRatingLabel.Font := FontDialog2.Font;
+     BashQuoteDateLabel.Font := FontDialog2.Font;
+
+     ITHQuoteNumberLabel.Font := FontDialog2.Font;
+     QuoteITHRatingLabel.Font := FontDialog2.Font;
+     ITHQuoteNameLabel.Font := FontDialog2.Font;
+
+     WoWBashQuoteNumberLabel.Font := FontDialog2.Font;
+     QuoteWoWBashRatingLabel.Font := FontDialog2.Font;
+
+     QuoteBashNumberLabel.Font := FontDialog5.Font;
+     QuoteITHNumberLabel.Font := FontDialog5.Font;
+     QuoteWoWBashNumberLabel.Font := FontDialog5.Font;
+
+     BashPageSelectComboBox.Font := FontDialog6.Font;
+     ITHPageSelectComboBox.Font := FontDialog6.Font;
+     WoWBashPageSelectComboBox.Font := FontDialog6.Font;
+
+     TabBarPainter.Font := FontDialog7.Font;
+     TabBarPainter.SelectedFont := FontDialog7.Font;
+  end;
+  MainForm.rvstyl1.TextStyles[4].Assign(MainForm.FontDialog3.Font);
+  MainForm.rvstyl1.TextStyles[5].Assign(MainForm.FontDialog4.Font);
 end;
 
 // Присваем переменным начальные значения
@@ -695,6 +760,9 @@ begin
     Close(LogFile);
   end;
   WriteLog('Загрузка переменных');
+  ScanDir('Data/colorschemes','*.ini',MainForm.ColorSchemeSelectComboBox.Items);
+
+
   LoadSettingsFromIni;
   CurrentMainQuoteNumber := 0;
   CurrentAbyssQuoteNumber := 0;
@@ -716,39 +784,8 @@ begin
   WoWBashOtherNeedLoad := False;
   LastWoWBashMainPageNum := 'none';
   LastWoWBashOtherPageNum := 'none';
-  MainForm.HtmlImporter.DefaultBGColor := MainForm.ColorDialog1.Color;
-  MainForm.BashPageSelectComboBox.Color := MainForm.ColorDialog1.Color;
-  MainForm.ITHPageSelectComboBox.Color := MainForm.ColorDialog1.Color;
-  MainForm.WoWBashPageSelectComboBox.Color := MainForm.ColorDialog1.Color;
-  MainForm.TabBarPainter.TabColor := MainForm.ColorDialog1.Color;
   TrafficCount := 0;
-  MainForm.BashRefreshButton.Glyph.LoadFromFile('Data/img/Refresh.bmp');
-  MainForm.ITHRefreshButton.Glyph.LoadFromFile('Data/img/Refresh.bmp');
-  MainForm.WoWBashRefreshButton.Glyph.LoadFromFile('Data/img/Refresh.bmp');
-  MainForm.MainPageControl.Color := MainForm.ColorDialog2.Color;
-  MainForm.PagesRichView.Color := MainForm.MainPageControl.Color;
-  MainForm.ITHPagesRichView.Color := MainForm.MainPageControl.Color;
-  MainForm.WoWBashPagesRichView.Color := MainForm.MainPageControl.Color;
-  MainForm.TabBarPainter.Color := MainForm.MainPageControl.Color;
-  with MainForm do
-  begin
-     QuoteNumberLabel.Font := FontDialog2.Font;
-     QuoteBashRatingLabel.Font := FontDialog2.Font;
-     BashQuoteDateLabel.Font := FontDialog2.Font;
-
-     ITHQuoteNumberLabel.Font := FontDialog2.Font;
-     QuoteITHRatingLabel.Font := FontDialog2.Font;
-     ITHQuoteNameLabel.Font := FontDialog2.Font;
-
-     WoWBashQuoteNumberLabel.Font := FontDialog2.Font;
-     QuoteWoWBashRatingLabel.Font := FontDialog2.Font;
-
-     QuoteBashNumberLabel.Font := FontDialog5.Font;
-     QuoteITHNumberLabel.Font := FontDialog5.Font;
-     QuoteWoWBashNumberLabel.Font := FontDialog5.Font;
-  end;
-  MainForm.rvstyl1.TextStyles[4].Assign(MainForm.FontDialog3.Font);
-  MainForm.rvstyl1.TextStyles[5].Assign(MainForm.FontDialog4.Font);
+  ApplyColorScheme;
 end;
 
 // Получаем текущий HtmlViewer
@@ -1834,12 +1871,31 @@ end;
 ///////////////////////////////////////////////////////
 procedure TMainForm.FormCreate(Sender: TObject);
 begin
+
   isLog := isLogCheckBox.Checked;
   SetVariables;
   WriteLog('Создание формы.');
   // Меняем размер формы на более компактный.
+
   MainForm.Width := 366;
   MainForm.Height := 450;
+
+  QuoteNumberLabel.Top :=QuoteNumberLabel.Top + deltah;
+  PagesRichView.Top := PagesRichView.Top + deltah;
+  QuoteBashRatingLabel.Top := QuoteBashRatingLabel.Top + deltah;
+  BashOrgRuHtmlViewer.Height := BashOrgRuHtmlViewer.Height + deltah;
+
+  ITHQuoteNumberLabel.Top :=ITHQuoteNumberLabel.Top + deltah;
+  ITHPagesRichView.Top := ITHPagesRichView.Top + deltah;
+  QuoteITHRatingLabel.Top := QuoteITHRatingLabel.Top + deltah;
+  ITHHtmlViewer.Height := ITHHtmlViewer.Height + deltah;
+
+  WoWBashQuoteNumberLabel.Top :=WoWBashQuoteNumberLabel.Top + deltah;
+  WoWBashPagesRichView.Top := WoWBashPagesRichView.Top + deltah;
+  QuoteWoWBashRatingLabel.Top := QuoteWoWBashRatingLabel.Top + deltah;
+  WoWBashHtmlViewer.Height := WoWBashHtmlViewer.Height + deltah;
+  QuoteWoWBashNumberLabel.Top := QuoteWoWBashNumberLabel.Top + deltah;
+
   WriteLog('Меняем размер формы на ' + IntToStr(MainForm.Width) + 'x' + IntToStr(MainForm.Height));
   // Переводим PageControl'ы на начало.
 
@@ -2231,6 +2287,52 @@ begin
       QuoteITHNumberLabel.Font := FontDialog5.Font;
       QuoteWoWBashNumberLabel.Font := FontDialog5.Font;
     end;
+end;
+
+procedure TMainForm.Button7Click(Sender: TObject);
+begin
+if FontDialog6.Execute then
+    begin
+      BashPageSelectComboBox.Font := FontDialog6.Font;
+      ITHPageSelectComboBox.Font := FontDialog6.Font;
+      WoWBashPageSelectComboBox.Font := FontDialog6.Font;
+    end;
+end;
+
+procedure TMainForm.Button8Click(Sender: TObject);
+begin
+if FontDialog7.Execute then
+    begin
+      TabBarPainter.Font := FontDialog7.Font;
+      TabBarPainter.SelectedFont := FontDialog7.Font;
+    end;
+end;
+
+procedure TMainForm.Button9Click(Sender: TObject);
+begin
+if ColorDialog3.Execute then
+    begin
+       MainForm.TabBarPainter.ControlDivideColor := MainForm.ColorDialog3.Color;
+       MainForm.TabBarPainter.DividerColor := MainForm.ColorDialog3.Color;
+    end;
+end;
+
+procedure TMainForm.Button10Click(Sender: TObject);
+begin
+  SaveColorScheme(ColorSchemeNameEdit.Text);
+end;
+
+procedure TMainForm.Button11Click(Sender: TObject);
+begin
+  LoadColorScheme(ColorSchemeSelectComboBox.Text);
+  ApplyColorScheme;
+  MainForm.Width := MainForm.Width+1;
+  MainForm.Width := MainForm.Width-1; 
+end;
+
+procedure TMainForm.JvCaptionButton1Click(Sender: TObject);
+begin
+  Application.Minimize;
 end;
 
 end.
