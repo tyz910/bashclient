@@ -1,6 +1,6 @@
 object MainForm: TMainForm
-  Left = 288
-  Top = 241
+  Left = 558
+  Top = 240
   Width = 377
   Height = 450
   BorderStyle = bsSizeToolWin
@@ -15,7 +15,6 @@ object MainForm: TMainForm
   FormStyle = fsStayOnTop
   KeyPreview = True
   OldCreateOrder = False
-  Position = poDesktopCenter
   OnClose = FormClose
   OnCreate = FormCreate
   OnKeyPress = FormKeyPress
@@ -100,6 +99,31 @@ object MainForm: TMainForm
         BiDiMode = bdLeftToRight
         Caption = '[9999]'
         ParentBiDiMode = False
+      end
+      object BashBayanLabel: TJvLabel
+        Left = 320
+        Top = 25
+        Width = 22
+        Height = 13
+        Alignment = taRightJustify
+        Caption = '[:||||:]'
+        Anchors = [akTop, akRight]
+        Transparent = True
+        OnClick = BashBayanLabelClick
+        HotTrackFont.Charset = DEFAULT_CHARSET
+        HotTrackFont.Color = clWindowText
+        HotTrackFont.Height = -11
+        HotTrackFont.Name = 'MS Sans Serif'
+        HotTrackFont.Style = []
+      end
+      object BashRatingButton: TJvSpinButton
+        Left = 344
+        Top = 24
+        Width = 16
+        Height = 16
+        Anchors = [akTop, akRight]
+        OnBottomClick = BashRatingButtonBottomClick
+        OnTopClick = BashRatingButtonTopClick
       end
       object BashPageSelectComboBox: TComboBox
         Left = 0
@@ -186,6 +210,7 @@ object MainForm: TMainForm
         Width = 30
         Height = 13
         Align = alCustom
+        Alignment = taRightJustify
         Anchors = [akRight, akBottom]
         Caption = '[9999]'
       end
@@ -377,18 +402,18 @@ object MainForm: TMainForm
       object FontSelectButton: TButton
         Left = 0
         Top = 0
-        Width = 89
+        Width = 105
         Height = 25
-        Caption = #1042#1099#1073#1086#1088' '#1096#1088#1080#1092#1090#1072
+        Caption = #1054#1089#1085#1086#1074#1085#1086#1081' '#1096#1088#1080#1092#1090
         TabOrder = 0
         OnClick = FontSelectButtonClick
       end
       object ColorSelectButton: TButton
-        Left = 96
+        Left = 112
         Top = 0
-        Width = 75
+        Width = 113
         Height = 25
-        Caption = #1042#1099#1073#1086#1088' '#1092#1086#1085#1072
+        Caption = #1054#1089#1085#1086#1074#1085#1086#1081' '#1092#1086#1085
         TabOrder = 1
         OnClick = ColorSelectButtonClick
       end
@@ -590,7 +615,7 @@ object MainForm: TMainForm
         Top = 26
         Width = 361
         Height = 336
-        ActivePage = LogTabSheet
+        ActivePage = OtherTabSheet
         Align = alClient
         TabOrder = 0
         object LogTabSheet: TTabSheet
@@ -6263,7 +6288,7 @@ object MainForm: TMainForm
     Font.Name = 'MS Sans Serif'
     Font.Style = [fsBold]
     Left = 358
-    Top = 63
+    Top = 231
   end
   object JvTrayIcon1: TJvTrayIcon
     Active = True
@@ -6307,5 +6332,12 @@ object MainForm: TMainForm
     OnClick = JvCaptionButton1Click
     Left = 84
     Top = 250
+  end
+  object BashRatingButoonDelayTimer: TTimer
+    Enabled = False
+    Interval = 10
+    OnTimer = BashRatingButoonDelayTimerTimer
+    Left = 196
+    Top = 130
   end
 end

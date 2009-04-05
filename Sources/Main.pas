@@ -9,7 +9,8 @@ uses
   CheckLst, RVScroll, RichView, ComCtrls, Classes, Buttons, Types, inifiles,
   IdComponent, IdTCPConnection, IdTCPClient, JvExControls, JvSpeedButton,
   JvExComCtrls, JvComCtrls, JvComponentBase, JvTabBar, JvTrayIcon,
-  JvGradientCaption, JvgCaption, JvCaptionButton;
+  JvGradientCaption, JvgCaption, JvCaptionButton, JvLinkLabel, JvLabel,
+  JvSpin;
 
 type
   TMainForm = class(TForm)
@@ -105,6 +106,9 @@ type
     ColorSchemeSelectComboBox: TComboBox;
     Button11: TButton;
     JvCaptionButton1: TJvCaptionButton;
+    BashBayanLabel: TJvLabel;
+    BashRatingButton: TJvSpinButton;
+    BashRatingButoonDelayTimer: TTimer;
     procedure wmGetMinMaxInfo(var Msg : TMessage); message wm_GetMinMaxInfo; // Ограничение размеров формы
     procedure FormCreate(Sender: TObject);
     procedure FormShow(Sender: TObject);
@@ -157,6 +161,12 @@ type
     procedure Button10Click(Sender: TObject);
     procedure Button11Click(Sender: TObject);
     procedure JvCaptionButton1Click(Sender: TObject);
+    procedure BashPlusLabelClick(Sender: TObject);
+    procedure BashMinusLabelClick(Sender: TObject);
+    procedure BashBayanLabelClick(Sender: TObject);
+    procedure BashRatingButtonTopClick(Sender: TObject);
+    procedure BashRatingButtonBottomClick(Sender: TObject);
+    procedure BashRatingButoonDelayTimerTimer(Sender: TObject);
 
   private
     { Private declarations }
@@ -686,6 +696,12 @@ begin
 
   LoadColorScheme(SettingsIni.ReadString('Common','ColorScheme','Default'));
   MainForm.ColorSchemeSelectComboBox.ItemIndex := NumberOfCS(SettingsIni.ReadString('Common','ColorScheme','Default'),MainForm.ColorSchemeSelectComboBox.Items);
+
+  MainForm.Width := SettingsIni.ReadInteger('Common','Width',366);
+  MainForm.Height := SettingsIni.ReadInteger('Common','Height',450);
+  MainForm.Left := SettingsIni.ReadInteger('Common','Left',0);
+  MainForm.Top := SettingsIni.ReadInteger('Common','Top',0);
+
   SettingsIni.Free;
 end;
 
@@ -727,6 +743,13 @@ begin
      QuoteNumberLabel.Font := FontDialog2.Font;
      QuoteBashRatingLabel.Font := FontDialog2.Font;
      BashQuoteDateLabel.Font := FontDialog2.Font;
+     //BashMinusLabel.Font := FontDialog2.Font;
+     //BashMinusLabel.Font.Size := BashMinusLabel.Font.Size * 2;
+     //BashMinusLabel.Top := BashMinusLabel.Top;
+     //BashPlusLabel.Font := FontDialog2.Font;
+     BashBayanLabel.Font := FontDialog2.Font;
+     //BashBayanLabel.Top := BashMinusLabel.Top;
+     //BashBayanLabel.Left := BashMinusLabel.Left - 5 - BashBayanLabel.Width;
 
      ITHQuoteNumberLabel.Font := FontDialog2.Font;
      QuoteITHRatingLabel.Font := FontDialog2.Font;
@@ -834,6 +857,7 @@ function GetStringFromUrl(GetUrl: string): string;
 begin
       ChangeHtmlViewerText(CurrentHtmlViewer, 'Загрузка...');
       WriteLog('Получаем html код со страницы ' + GetUrl);
+      TrafficCount := 0;
       with TIdHTTP.Create(nil) do
         begin
           RecvBufferSize := 512;
@@ -1814,6 +1838,8 @@ begin
   end;
   ChangeHtmlViewerText(MainForm.BashOrgRuHtmlViewer, CurrentMainQuotesArray[CurrentMainQuoteNumber,0]);
   ChangePages;
+  MainForm.BashBayanLabel.Visible := True;
+  MainForm.BashRatingButton.Visible := True;
 end;
 
 // Открытие Бездны
@@ -1830,6 +1856,8 @@ begin
   end;
   ChangeHtmlViewerText(MainForm.BashOrgRuHtmlViewer, CurrentAbyssQuotesArray[CurrentAbyssQuoteNumber,0]);
   MainForm.PagesRichView.Visible:= False;
+  MainForm.BashBayanLabel.Visible := True;
+  MainForm.BashRatingButton.Visible := True;
 end;
 
 // Открытие Лучшего Бездны
@@ -1846,6 +1874,8 @@ begin
   end;
   ChangeHtmlViewerText(MainForm.BashOrgRuHtmlViewer, CurrentAbyssBestQuotesArray[CurrentAbyssBestQuoteNumber,0]);
   ChangePages;
+  MainForm.BashBayanLabel.Visible := False;
+  MainForm.BashRatingButton.Visible := False;
 end;
 
 // Открытие Топа Бездны
@@ -1862,6 +1892,9 @@ begin
   end;
   ChangeHtmlViewerText(MainForm.BashOrgRuHtmlViewer, CurrentAbyssTopQuotesArray[CurrentAbyssTopQuoteNumber,0]);
   MainForm.PagesRichView.Visible:= False;
+  MainForm.BashBayanLabel.Visible := False;
+  MainForm.BashRatingButton.Visible := False;
+
 end;
 
 
@@ -1877,8 +1910,8 @@ begin
   WriteLog('Создание формы.');
   // Меняем размер формы на более компактный.
 
-  MainForm.Width := 366;
-  MainForm.Height := 450;
+  //MainForm.Width := 366;
+  //MainForm.Height := 450;
 
   QuoteNumberLabel.Top :=QuoteNumberLabel.Top + deltah;
   PagesRichView.Top := PagesRichView.Top + deltah;
@@ -2058,6 +2091,15 @@ end;
 
 procedure TMainForm.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
+  JvTrayIcon1.Destroy;
+
+  SettingsIni := TIniFile.Create(ChangeFileExt(Application.ExeName,'.ini'));
+  SettingsIni.WriteInteger('Common','Width',MainForm.Width);
+  SettingsIni.WriteInteger('Common','Height',MainForm.Height);
+  SettingsIni.WriteInteger('Common','Left',MainForm.Left);
+  SettingsIni.WriteInteger('Common','Top',MainForm.Top);
+  SettingsIni.Free;
+
   ExitProcess(0);
 end;
 
@@ -2141,12 +2183,14 @@ begin
     end;
 end;
 
-procedure ChangeMFCaption(T:integer);
+procedure ChangeLoadStatus(T:integer);
 var caption: string;
     traf: string;
     kb,mb,mb2: Integer;
+    hv: TRichView;
 begin
    caption := 'bClient Alpha';
+   hv := CurrentHtmlViewer;
    kb := T div 1024;
    mb := kb div 1024;
    if not(mb=0) then
@@ -2159,7 +2203,8 @@ begin
    traf := IntToStr(kb)+'KB';
    //WriteLog(IntToStr(T));
    //WriteLog(traf);
-   MainForm.Caption := caption + ' '+'('+traf+')';
+   //MainForm.Caption := caption + ' '+'('+traf+')';
+   ChangeHtmlViewerText(hv,'Загрузка('+traf+')');
 end;
 
 procedure TMainForm.IdHTTP1Work(Sender: TObject; AWorkMode: TWorkMode;
@@ -2171,7 +2216,7 @@ begin
   if delta > 0 then
   TrafficCount := TrafficCount + delta
   else TrafficCount := TrafficCount + AWorkCount;
-  ChangeMFCaption(TrafficCount);
+  ChangeLoadStatus(TrafficCount);
   WriteLog('AC = '+IntToStr(AWorkCount));
 end;
 
@@ -2333,6 +2378,69 @@ end;
 procedure TMainForm.JvCaptionButton1Click(Sender: TObject);
 begin
   Application.Minimize;
+  JvTrayIcon1.HideApplication;
+end;
+
+procedure BashVote(act:string);
+var List: TStringList;
+    qnumber: string;
+    place:string;
+begin
+  MainForm.BashRatingButton.Refresh;
+  MainForm.QuoteBashRatingLabel.Caption := '[]';
+  with TIdHTTP.Create(nil) do
+          begin
+            try
+              qnumber := CurrentBashQuotesArray[CurrentBashQuoteNumber,1];
+              List := TStringList.Create;
+              List.Add('quote='+qnumber+'&act='+act);
+              case MainForm.BashPageSelectComboBox.ItemIndex of
+              0:place:='quote';
+              3:place:='abyss';
+              end;
+
+              if Post('http://bash.org.ru/'+place+'/'+qnumber+'/'+act,List) = '<em>(голос принят!)</em>'
+              then
+              MainForm.QuoteBashRatingLabel.Caption := '[OK]'
+              else
+              MainForm.QuoteBashRatingLabel.Caption := '[ERROR]';
+            except
+              MainForm.QuoteBashRatingLabel.Caption := '[ERROR]';
+            end;
+          end;
+
+  MainForm.BashRatingButoonDelayTimer.Enabled := True;
+end;
+
+procedure TMainForm.BashPlusLabelClick(Sender: TObject);
+begin
+   BashVote('rulez');
+end;
+
+procedure TMainForm.BashMinusLabelClick(Sender: TObject);
+begin
+   BashVote('sux');
+end;
+
+procedure TMainForm.BashBayanLabelClick(Sender: TObject);
+begin
+   BashVote('bayan');
+end;
+
+procedure TMainForm.BashRatingButtonTopClick(Sender: TObject);
+begin
+   BashVote('rulez');
+end;
+
+procedure TMainForm.BashRatingButtonBottomClick(Sender: TObject);
+begin
+   BashVote('sux');
+end;
+
+procedure TMainForm.BashRatingButoonDelayTimerTimer(Sender: TObject);
+begin
+  BashRatingButoonDelayTimer.Enabled := False;
+  MainForm.BashRatingButton.Refresh;
 end;
 
 end.
