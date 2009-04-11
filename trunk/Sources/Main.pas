@@ -10,7 +10,8 @@ uses
   IdComponent, IdTCPConnection, IdTCPClient, JvExControls, JvSpeedButton,
   JvExComCtrls, JvComCtrls, JvComponentBase, JvTabBar, JvTrayIcon,
   JvGradientCaption, JvgCaption, JvCaptionButton, JvLinkLabel, JvLabel,
-  JvSpin;
+  JvSpin, ColorSchemeSettings, JvXPCore, JvXPButtons, JvExButtons,
+  JvButtons, JvArrowButton;
 
 type
   TMainForm = class(TForm)
@@ -63,7 +64,6 @@ type
     TestModeCheckBox: TCheckBox;
     isLogCheckBox: TCheckBox;
     Button1: TButton;
-    SaveSettingsButton: TButton;
     chklst1: TCheckListBox;
     lbl1: TLabel;
     TestPageControl: TPageControl;
@@ -109,6 +109,9 @@ type
     BashBayanLabel: TJvLabel;
     BashRatingButton: TJvSpinButton;
     BashRatingButoonDelayTimer: TTimer;
+    JvXPButton1: TJvXPButton;
+    JvXPButton2: TJvXPButton;
+    JvXPButton3: TJvXPButton;
     procedure wmGetMinMaxInfo(var Msg : TMessage); message wm_GetMinMaxInfo; // Ограничение размеров формы
     procedure FormCreate(Sender: TObject);
     procedure FormShow(Sender: TObject);
@@ -167,6 +170,8 @@ type
     procedure BashRatingButtonTopClick(Sender: TObject);
     procedure BashRatingButtonBottomClick(Sender: TObject);
     procedure BashRatingButoonDelayTimerTimer(Sender: TObject);
+    procedure JvXPButton1Click(Sender: TObject);
+    procedure JvXPButton2Click(Sender: TObject);
 
   private
     { Private declarations }
@@ -728,6 +733,8 @@ begin
   MainForm.ITHPageSelectComboBox.Color := MainForm.ColorDialog1.Color;
   MainForm.WoWBashPageSelectComboBox.Color := MainForm.ColorDialog1.Color;
   MainForm.TabBarPainter.TabColor := MainForm.ColorDialog1.Color;
+  MainForm.edt1.Color := MainForm.ColorDialog1.Color;
+  MainForm.edt2.Color := MainForm.ColorDialog1.Color;
   MainForm.BashRefreshButton.Glyph.LoadFromFile('Data/img/Refresh.bmp');
   MainForm.ITHRefreshButton.Glyph.LoadFromFile('Data/img/Refresh.bmp');
   MainForm.WoWBashRefreshButton.Glyph.LoadFromFile('Data/img/Refresh.bmp');
@@ -758,6 +765,11 @@ begin
      WoWBashQuoteNumberLabel.Font := FontDialog2.Font;
      QuoteWoWBashRatingLabel.Font := FontDialog2.Font;
 
+     lbl2.Font := FontDialog2.Font;
+     lbl3.Font := FontDialog2.Font;
+     edt1.Left := lbl2.Left + lbl2.Width + 10;
+     edt2.Left := edt1.Left;
+     
      QuoteBashNumberLabel.Font := FontDialog5.Font;
      QuoteITHNumberLabel.Font := FontDialog5.Font;
      QuoteWoWBashNumberLabel.Font := FontDialog5.Font;
@@ -765,6 +777,8 @@ begin
      BashPageSelectComboBox.Font := FontDialog6.Font;
      ITHPageSelectComboBox.Font := FontDialog6.Font;
      WoWBashPageSelectComboBox.Font := FontDialog6.Font;
+     edt1.Font := FontDialog6.Font;
+     edt2.Font := FontDialog6.Font;
 
      TabBarPainter.Font := FontDialog7.Font;
      TabBarPainter.SelectedFont := FontDialog7.Font;
@@ -773,9 +787,26 @@ begin
   MainForm.rvstyl1.TextStyles[5].Assign(MainForm.FontDialog4.Font);
 end;
 
+procedure ApplyColorSchemeToSettings;
+begin
+  ColorSchemeForm.JvLabel1.Font := MainForm.FontSelectDialog.Font;
+  ColorSchemeForm.JvLabel2.Font := MainForm.FontDialog2.Font;
+  ColorSchemeForm.JvLabel3.Font := MainForm.FontDialog3.Font;
+  ColorSchemeForm.JvLabel4.Font := MainForm.FontDialog4.Font;
+  ColorSchemeForm.jvlbl1.Font := MainForm.FontDialog5.Font;
+  ColorSchemeForm.jvlbl2.Font := MainForm.FontDialog6.Font;
+  ColorSchemeForm.jvlbl3.Font := MainForm.FontDialog7.Font;
+
+
+  ColorSchemeForm.JvPanel1.Color := MainForm.ColorDialog1.Color;
+  ColorSchemeForm.JvPanel2.Color := MainForm.ColorDialog2.Color;
+  ColorSchemeForm.JvPanel3.Color := MainForm.ColorDialog3.Color;
+end;
+
 // Присваем переменным начальные значения
 procedure SetVariables;
 begin
+
   if isLog then
   begin
     Assign(LogFile,'Log.txt');
@@ -1904,7 +1935,6 @@ end;
 ///////////////////////////////////////////////////////
 procedure TMainForm.FormCreate(Sender: TObject);
 begin
-
   isLog := isLogCheckBox.Checked;
   SetVariables;
   WriteLog('Создание формы.');
@@ -1928,6 +1958,9 @@ begin
   QuoteWoWBashRatingLabel.Top := QuoteWoWBashRatingLabel.Top + deltah;
   WoWBashHtmlViewer.Height := WoWBashHtmlViewer.Height + deltah;
   QuoteWoWBashNumberLabel.Top := QuoteWoWBashNumberLabel.Top + deltah;
+
+  JvXPButton3.Top := JvXPButton3.Top + deltah;
+  //ITHVoteButton.Top := ITHVoteButton.Top + deltah;
 
   WriteLog('Меняем размер формы на ' + IntToStr(MainForm.Width) + 'x' + IntToStr(MainForm.Height));
   // Переводим PageControl'ы на начало.
@@ -2028,6 +2061,7 @@ begin
   if FontSelectDialog.Execute then
     begin
        HtmlViewerStyle.TextStyles[0].Assign(FontSelectDialog.Font);
+       ApplyColorSchemeToSettings;
     end;
 end;
 
@@ -2180,6 +2214,9 @@ begin
        MainForm.ITHPageSelectComboBox.Color := MainForm.ColorDialog1.Color;
        MainForm.WoWBashPageSelectComboBox.Color := MainForm.ColorDialog1.Color;
        MainForm.TabBarPainter.TabColor := MainForm.ColorDialog1.Color;
+       MainForm.edt1.Color := MainForm.ColorDialog1.Color;
+       MainForm.edt2.Color := MainForm.ColorDialog1.Color;
+       ApplyColorSchemeToSettings;
     end;
 end;
 
@@ -2288,6 +2325,7 @@ begin
        MainForm.ITHPagesRichView.Color := MainForm.MainPageControl.Color;
        MainForm.WoWBashPagesRichView.Color := MainForm.MainPageControl.Color;
        MainForm.TabBarPainter.Color := MainForm.MainPageControl.Color;
+       ApplyColorSchemeToSettings;
     end;
 end;
 
@@ -2305,6 +2343,13 @@ if FontDialog2.Execute then
 
      WoWBashQuoteNumberLabel.Font := FontDialog2.Font;
      QuoteWoWBashRatingLabel.Font := FontDialog2.Font;
+
+     lbl2.Font := FontDialog2.Font;
+     lbl3.Font := FontDialog2.Font;
+     edt1.Left := lbl2.Left + lbl2.Width + 10;
+     edt2.Left := edt1.Left;
+
+     ApplyColorSchemeToSettings;
     end;
 end;
 
@@ -2313,6 +2358,7 @@ begin
 if FontDialog3.Execute then
     begin
       rvstyl1.TextStyles[4].Assign(FontDialog3.Font);
+      ApplyColorSchemeToSettings;
     end;
 end;
 
@@ -2321,6 +2367,7 @@ begin
   if FontDialog4.Execute then
     begin
       rvstyl1.TextStyles[5].Assign(FontDialog4.Font);
+      ApplyColorSchemeToSettings;
     end;
 end;
 
@@ -2331,6 +2378,7 @@ begin
       QuoteBashNumberLabel.Font := FontDialog5.Font;
       QuoteITHNumberLabel.Font := FontDialog5.Font;
       QuoteWoWBashNumberLabel.Font := FontDialog5.Font;
+      ApplyColorSchemeToSettings;
     end;
 end;
 
@@ -2341,6 +2389,9 @@ if FontDialog6.Execute then
       BashPageSelectComboBox.Font := FontDialog6.Font;
       ITHPageSelectComboBox.Font := FontDialog6.Font;
       WoWBashPageSelectComboBox.Font := FontDialog6.Font;
+      edt1.Font := FontDialog6.Font;
+      edt2.Font := FontDialog6.Font;
+      ApplyColorSchemeToSettings;
     end;
 end;
 
@@ -2350,6 +2401,7 @@ if FontDialog7.Execute then
     begin
       TabBarPainter.Font := FontDialog7.Font;
       TabBarPainter.SelectedFont := FontDialog7.Font;
+      ApplyColorSchemeToSettings;
     end;
 end;
 
@@ -2359,18 +2411,21 @@ if ColorDialog3.Execute then
     begin
        MainForm.TabBarPainter.ControlDivideColor := MainForm.ColorDialog3.Color;
        MainForm.TabBarPainter.DividerColor := MainForm.ColorDialog3.Color;
+       ApplyColorSchemeToSettings;
     end;
 end;
 
 procedure TMainForm.Button10Click(Sender: TObject);
 begin
-  SaveColorScheme(ColorSchemeNameEdit.Text);
+  SaveColorScheme(ColorSchemeForm.JvEdit1.Text);
 end;
 
 procedure TMainForm.Button11Click(Sender: TObject);
 begin
+  ColorSchemeSelectComboBox.ItemIndex := ColorSchemeForm.JvComboBox1.ItemIndex;
   LoadColorScheme(ColorSchemeSelectComboBox.Text);
   ApplyColorScheme;
+  ApplyColorSchemeToSettings;
   MainForm.Width := MainForm.Width+1;
   MainForm.Width := MainForm.Width-1; 
 end;
@@ -2441,6 +2496,32 @@ procedure TMainForm.BashRatingButoonDelayTimerTimer(Sender: TObject);
 begin
   BashRatingButoonDelayTimer.Enabled := False;
   MainForm.BashRatingButton.Refresh;
+end;
+
+procedure TMainForm.JvXPButton1Click(Sender: TObject);
+begin
+  ApplyColorSchemeToSettings;
+
+  ColorSchemeForm.JvXPButton1.OnClick := ColorSelectButton.OnClick;
+  ColorSchemeForm.JvXPButton2.OnClick := ColorSelectButton.OnClick;
+  ColorSchemeForm.JvXPButton3.OnClick := Button2.OnClick;
+  ColorSchemeForm.JvXPButton4.OnClick := Button9.OnClick;
+  ColorSchemeForm.JvXPButton5.OnClick := Button3.OnClick;
+  ColorSchemeForm.JvXPButton6.OnClick := Button4.OnClick;
+  ColorSchemeForm.JvXPButton7.OnClick := Button5.OnClick;
+  ColorSchemeForm.JvXPButton8.OnClick := Button6.OnClick;
+  ColorSchemeForm.JvXPButton9.OnClick := Button7.OnClick;
+  ColorSchemeForm.JvXPButton10.OnClick := Button8.OnClick;
+  ColorSchemeForm.JvXPButton11.OnClick := Button10.OnClick;
+  ColorSchemeForm.JvComboBox1.OnChange := ColorSchemeSelectComboBox.OnChange;
+  ColorSchemeForm.JvComboBox1.Items := ColorSchemeSelectComboBox.Items;
+  ColorSchemeForm.JvComboBox1.ItemIndex := ColorSchemeSelectComboBox.ItemIndex;
+  ColorSchemeForm.Show;
+end;
+
+procedure TMainForm.JvXPButton2Click(Sender: TObject);
+begin
+  SaveSettingsToIni;
 end;
 
 end.
