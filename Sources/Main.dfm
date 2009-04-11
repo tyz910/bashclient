@@ -1,7 +1,7 @@
 object MainForm: TMainForm
-  Left = 558
-  Top = 240
-  Width = 377
+  Left = 297
+  Top = 130
+  Width = 366
   Height = 450
   BorderStyle = bsSizeToolWin
   Caption = 'bClient Alpha'
@@ -24,7 +24,7 @@ object MainForm: TMainForm
   object MainPageControl: TJvPageControl
     Left = 0
     Top = 23
-    Width = 369
+    Width = 358
     Height = 393
     ActivePage = BashTabSheet
     Align = alClient
@@ -38,7 +38,7 @@ object MainForm: TMainForm
     object BashTabSheet: TTabSheet
       Caption = 'Bash'
       DesignSize = (
-        361
+        350
         362)
       object QuoteBashNumberLabel: TLabel
         Left = 0
@@ -57,7 +57,7 @@ object MainForm: TMainForm
         ShowHint = True
       end
       object BashRefreshButton: TJvSpeedButton
-        Left = 340
+        Left = 329
         Top = 0
         Width = 21
         Height = 21
@@ -89,7 +89,7 @@ object MainForm: TMainForm
         Caption = '50/50'
       end
       object QuoteBashRatingLabel: TLabel
-        Left = 331
+        Left = 320
         Top = 349
         Width = 30
         Height = 13
@@ -101,7 +101,7 @@ object MainForm: TMainForm
         ParentBiDiMode = False
       end
       object BashBayanLabel: TJvLabel
-        Left = 320
+        Left = 309
         Top = 25
         Width = 22
         Height = 13
@@ -117,7 +117,7 @@ object MainForm: TMainForm
         HotTrackFont.Style = []
       end
       object BashRatingButton: TJvSpinButton
-        Left = 344
+        Left = 333
         Top = 24
         Width = 16
         Height = 16
@@ -128,7 +128,7 @@ object MainForm: TMainForm
       object BashPageSelectComboBox: TComboBox
         Left = 0
         Top = 0
-        Width = 339
+        Width = 328
         Height = 21
         Style = csDropDownList
         Anchors = [akLeft, akTop, akRight]
@@ -147,7 +147,7 @@ object MainForm: TMainForm
       object BashOrgRuHtmlViewer: TRichView
         Left = 0
         Top = 40
-        Width = 361
+        Width = 350
         Height = 301
         Anchors = [akLeft, akTop, akRight, akBottom]
         TabOrder = 1
@@ -179,7 +179,7 @@ object MainForm: TMainForm
       ImageIndex = 1
       OnEnter = IThappensTabSheetEnter
       DesignSize = (
-        361
+        350
         362)
       object QuoteITHNumberLabel: TLabel
         Left = 0
@@ -205,7 +205,7 @@ object MainForm: TMainForm
         Caption = '50/50'
       end
       object QuoteITHRatingLabel: TLabel
-        Left = 331
+        Left = 320
         Top = 349
         Width = 30
         Height = 13
@@ -221,7 +221,7 @@ object MainForm: TMainForm
         Height = 13
       end
       object ITHRefreshButton: TJvSpeedButton
-        Left = 340
+        Left = 329
         Top = 0
         Width = 21
         Height = 21
@@ -238,11 +238,11 @@ object MainForm: TMainForm
       object ITHPageSelectComboBox: TComboBox
         Left = 0
         Top = 0
-        Width = 339
+        Width = 328
         Height = 21
         Style = csDropDownList
         Anchors = [akLeft, akTop, akRight]
-        ItemHeight = 13
+        ItemHeight = 0
         ItemIndex = 0
         TabOrder = 0
         Text = #1043#1083#1072#1074#1085#1072#1103
@@ -254,7 +254,7 @@ object MainForm: TMainForm
       object ITHHtmlViewer: TRichView
         Left = 0
         Top = 40
-        Width = 361
+        Width = 350
         Height = 301
         Anchors = [akLeft, akTop, akRight, akBottom]
         TabOrder = 1
@@ -284,10 +284,10 @@ object MainForm: TMainForm
       Caption = 'WoW Bash'
       ImageIndex = 2
       DesignSize = (
-        361
+        350
         362)
       object WoWBashRefreshButton: TJvSpeedButton
-        Left = 340
+        Left = 329
         Top = 0
         Width = 21
         Height = 21
@@ -326,7 +326,7 @@ object MainForm: TMainForm
         ParentFont = False
       end
       object QuoteWoWBashRatingLabel: TLabel
-        Left = 331
+        Left = 320
         Top = 349
         Width = 30
         Height = 13
@@ -340,7 +340,7 @@ object MainForm: TMainForm
       object WoWBashHtmlViewer: TRichView
         Left = 0
         Top = 24
-        Width = 361
+        Width = 350
         Height = 317
         Anchors = [akLeft, akTop, akRight, akBottom]
         TabOrder = 0
@@ -351,7 +351,7 @@ object MainForm: TMainForm
       object WoWBashPageSelectComboBox: TComboBox
         Left = 0
         Top = 0
-        Width = 339
+        Width = 328
         Height = 21
         Style = csDropDownList
         Anchors = [akLeft, akTop, akRight]
@@ -385,6 +385,9 @@ object MainForm: TMainForm
     object OptionsTabSheet: TTabSheet
       Caption = #1053#1072#1089#1090#1088#1086#1081#1082#1080
       ImageIndex = 3
+      DesignSize = (
+        350
+        362)
       object lbl2: TLabel
         Left = 0
         Top = 40
@@ -400,25 +403,27 @@ object MainForm: TMainForm
         Caption = 'HttpReadTimeout'
       end
       object FontSelectButton: TButton
-        Left = 0
-        Top = 0
+        Left = 8
+        Top = 312
         Width = 105
         Height = 25
         Caption = #1054#1089#1085#1086#1074#1085#1086#1081' '#1096#1088#1080#1092#1090
         TabOrder = 0
+        Visible = False
         OnClick = FontSelectButtonClick
       end
       object ColorSelectButton: TButton
-        Left = 112
-        Top = 0
+        Left = 8
+        Top = 288
         Width = 113
         Height = 25
         Caption = #1054#1089#1085#1086#1074#1085#1086#1081' '#1092#1086#1085
         TabOrder = 1
+        Visible = False
         OnClick = ColorSelectButtonClick
       end
       object edt1: TEdit
-        Left = 104
+        Left = 112
         Top = 32
         Width = 41
         Height = 19
@@ -427,7 +432,7 @@ object MainForm: TMainForm
         OnChange = edt1Change
       end
       object edt2: TEdit
-        Left = 104
+        Left = 112
         Top = 56
         Width = 41
         Height = 19
@@ -436,41 +441,34 @@ object MainForm: TMainForm
         OnChange = edt2Change
       end
       object TestModeCheckBox: TCheckBox
-        Left = 0
-        Top = 88
+        Left = 120
+        Top = 280
         Width = 97
         Height = 17
         Caption = 'Test Mode'
         TabOrder = 4
+        Visible = False
         OnClick = TestModeCheckBoxClick
       end
       object isLogCheckBox: TCheckBox
-        Left = 0
-        Top = 104
+        Left = 120
+        Top = 296
         Width = 97
         Height = 17
         Caption = #1042#1077#1089#1090#1080' '#1083#1086#1075
         TabOrder = 5
+        Visible = False
         OnClick = isLogCheckBoxClick
       end
       object Button1: TButton
-        Left = 0
-        Top = 120
+        Left = 128
+        Top = 328
         Width = 107
         Height = 25
         Caption = #1054#1089#1074#1086#1073#1086#1076#1080#1090#1100' '#1087#1072#1084#1103#1090#1100
         TabOrder = 6
+        Visible = False
         OnClick = Button1Click
-      end
-      object SaveSettingsButton: TButton
-        Left = 0
-        Top = 152
-        Width = 65
-        Height = 33
-        Caption = #1057#1086#1093#1088#1072#1085#1080#1090#1100' '#1085#1072#1089#1090#1088#1086#1081#1082#1080
-        TabOrder = 7
-        WordWrap = True
-        OnClick = SaveSettingsButtonClick
       end
       object chklst1: TCheckListBox
         Left = 392
@@ -484,7 +482,7 @@ object MainForm: TMainForm
           #1051#1091#1095#1096#1077#1077' '#1041#1077#1079#1076#1085#1099
           #1058#1086#1087' '#1041#1077#1079#1076#1085#1099
           #1041#1077#1079#1076#1085#1072)
-        TabOrder = 8
+        TabOrder = 7
         Visible = False
       end
       object Button2: TButton
@@ -493,7 +491,8 @@ object MainForm: TMainForm
         Width = 113
         Height = 25
         Caption = #1060#1086#1085'2'
-        TabOrder = 9
+        TabOrder = 8
+        Visible = False
         OnClick = Button2Click
       end
       object Button3: TButton
@@ -502,7 +501,8 @@ object MainForm: TMainForm
         Width = 113
         Height = 25
         Caption = #1064#1088#1080#1092#1090' InfoLabel'
-        TabOrder = 10
+        TabOrder = 9
+        Visible = False
         OnClick = Button3Click
       end
       object Button4: TButton
@@ -511,7 +511,8 @@ object MainForm: TMainForm
         Width = 113
         Height = 25
         Caption = #1064#1088#1080#1092#1090' PagesLinc'
-        TabOrder = 11
+        TabOrder = 10
+        Visible = False
         OnClick = Button4Click
       end
       object Button5: TButton
@@ -520,7 +521,8 @@ object MainForm: TMainForm
         Width = 113
         Height = 25
         Caption = #1064#1088#1080#1092#1090' PagesCur'
-        TabOrder = 12
+        TabOrder = 11
+        Visible = False
         OnClick = Button5Click
       end
       object Button6: TButton
@@ -529,7 +531,8 @@ object MainForm: TMainForm
         Width = 113
         Height = 25
         Caption = #1064#1088#1080#1092#1090' NumberLabel'
-        TabOrder = 13
+        TabOrder = 12
+        Visible = False
         OnClick = Button6Click
       end
       object Button7: TButton
@@ -538,7 +541,8 @@ object MainForm: TMainForm
         Width = 113
         Height = 25
         Caption = #1064#1088#1080#1092#1090' Select'
-        TabOrder = 14
+        TabOrder = 13
+        Visible = False
         OnClick = Button7Click
       end
       object Button8: TButton
@@ -547,7 +551,8 @@ object MainForm: TMainForm
         Width = 113
         Height = 25
         Caption = #1064#1088#1080#1092#1090' Tab'
-        TabOrder = 15
+        TabOrder = 14
+        Visible = False
         OnClick = Button8Click
       end
       object Button9: TButton
@@ -556,7 +561,8 @@ object MainForm: TMainForm
         Width = 113
         Height = 25
         Caption = #1060#1086#1085' TabSep'
-        TabOrder = 16
+        TabOrder = 15
+        Visible = False
         OnClick = Button9Click
       end
       object ColorSchemeNameEdit: TEdit
@@ -564,8 +570,9 @@ object MainForm: TMainForm
         Top = 200
         Width = 113
         Height = 19
-        TabOrder = 17
+        TabOrder = 16
         Text = 'MyScheme'
+        Visible = False
       end
       object Button10: TButton
         Left = 272
@@ -573,7 +580,8 @@ object MainForm: TMainForm
         Width = 75
         Height = 25
         Caption = #1057#1086#1093#1088#1072#1085#1080#1090#1100
-        TabOrder = 18
+        TabOrder = 17
+        Visible = False
         OnClick = Button10Click
       end
       object ColorSchemeSelectComboBox: TComboBox
@@ -582,7 +590,8 @@ object MainForm: TMainForm
         Width = 121
         Height = 21
         ItemHeight = 0
-        TabOrder = 19
+        TabOrder = 18
+        Visible = False
         OnChange = Button11Click
       end
       object Button11: TButton
@@ -591,8 +600,45 @@ object MainForm: TMainForm
         Width = 75
         Height = 25
         Caption = #1047#1072#1075#1088#1091#1079#1080#1090#1100
-        TabOrder = 20
+        TabOrder = 19
+        Visible = False
         OnClick = Button11Click
+      end
+      object JvXPButton1: TJvXPButton
+        Left = 0
+        Top = 0
+        Width = 153
+        Height = 25
+        Caption = #1053#1072#1089#1090#1088#1086#1081#1082#1072' '#1094#1074#1077#1090#1086#1074#1086#1081' '#1089#1093#1077#1084#1099
+        TabOrder = 20
+        AutoGray = False
+        OnClick = JvXPButton1Click
+      end
+      object JvXPButton2: TJvXPButton
+        Left = 0
+        Top = 88
+        Width = 89
+        Height = 41
+        Caption = #1057#1086#1093#1088#1072#1085#1080#1090#1100' '#1085#1072#1089#1090#1088#1086#1081#1082#1080
+        TabOrder = 21
+        AutoGray = False
+        OnClick = JvXPButton2Click
+      end
+      object JvXPButton3: TJvXPButton
+        Left = 324
+        Top = 337
+        Width = 25
+        Height = 25
+        Caption = '?'
+        TabOrder = 22
+        AutoGray = False
+        Anchors = [akRight, akBottom]
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clWindowText
+        Font.Height = -16
+        Font.Name = 'MS Sans Serif'
+        Font.Style = [fsBold]
+        ParentFont = False
       end
     end
     object TestTabSheet: TTabSheet
@@ -601,7 +647,7 @@ object MainForm: TMainForm
       object lbl1: TLabel
         Left = 0
         Top = 0
-        Width = 361
+        Width = 350
         Height = 26
         Align = alTop
         AutoSize = False
@@ -613,7 +659,7 @@ object MainForm: TMainForm
       object TestPageControl: TPageControl
         Left = 0
         Top = 26
-        Width = 361
+        Width = 350
         Height = 336
         ActivePage = OtherTabSheet
         Align = alClient
@@ -621,12 +667,12 @@ object MainForm: TMainForm
         object LogTabSheet: TTabSheet
           Caption = 'Log'
           DesignSize = (
-            353
+            342
             308)
           object LogListBox: TListBox
             Left = 0
             Top = 0
-            Width = 353
+            Width = 342
             Height = 282
             Anchors = [akLeft, akTop, akRight, akBottom]
             ItemHeight = 13
@@ -635,7 +681,7 @@ object MainForm: TMainForm
           object ConsoleInputEdit: TEdit
             Left = 0
             Top = 285
-            Width = 353
+            Width = 342
             Height = 19
             Anchors = [akLeft, akRight, akBottom]
             TabOrder = 1
@@ -647,7 +693,7 @@ object MainForm: TMainForm
           object TestMainMemo: TMemo
             Left = 0
             Top = 0
-            Width = 353
+            Width = 342
             Height = 308
             Align = alClient
             Lines.Strings = (
@@ -2055,7 +2101,7 @@ object MainForm: TMainForm
           object TestAbyssBestMemo: TMemo
             Left = 0
             Top = 0
-            Width = 353
+            Width = 342
             Height = 308
             Align = alClient
             Lines.Strings = (
@@ -3045,7 +3091,7 @@ object MainForm: TMainForm
           object TestAbyssTopMemo: TMemo
             Left = 0
             Top = 0
-            Width = 353
+            Width = 342
             Height = 308
             Align = alClient
             Lines.Strings = (
@@ -3639,7 +3685,7 @@ object MainForm: TMainForm
           object TestAbyssMemo: TMemo
             Left = 0
             Top = 0
-            Width = 353
+            Width = 342
             Height = 308
             Align = alClient
             Lines.Strings = (
@@ -4459,7 +4505,7 @@ object MainForm: TMainForm
           object TestITHappensMemo: TMemo
             Left = 0
             Top = 0
-            Width = 353
+            Width = 342
             Height = 308
             Align = alClient
             Lines.Strings = (
@@ -5350,7 +5396,7 @@ object MainForm: TMainForm
           object TestWoWBashMemo: TMemo
             Left = 0
             Top = 0
-            Width = 353
+            Width = 342
             Height = 308
             Align = alClient
             Lines.Strings = (
@@ -5760,7 +5806,7 @@ object MainForm: TMainForm
   object JvTabBar1: TJvTabBar
     Left = 0
     Top = 0
-    Width = 369
+    Width = 358
     CloseButton = False
     Painter = TabBarPainter
     Tabs = <
